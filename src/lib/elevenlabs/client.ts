@@ -1,10 +1,10 @@
 'use client';
 
 const VOICE_IDS: Record<string, string> = {
-  pt: 'pNInz6obpgDQGcFmaJgB',
-  en: 'EXAVITQu4vr4xnSDxMaL',
-  es: 'ErXwobaYiN019PkySvjV',
-  fr: 'MF3mGyEYCl7XYWbV9V6O',
+  pt: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_PT ?? 'ZqE9vIHPcrC35dZv0Svu',
+  en: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_EN ?? 'EXAVITQu4vr4xnSDxMaL',
+  es: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_ES ?? 'ErXwobaYiN019PkySvjV',
+  fr: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_FR ?? 'MF3mGyEYCl7XYWbV9V6O',
 };
 
 const API_URL = 'https://api.elevenlabs.io/v1/text-to-speech';
