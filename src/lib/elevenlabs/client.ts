@@ -1,8 +1,10 @@
 'use client';
 
+// Fallbacks: vozes gratuitas do plano Free do ElevenLabs
+// pt → Adam (pNInz6obpgDQGcFmaJgB) | en → Rachel (21m00Tio1uZbQDoS6fo7)
 const VOICE_IDS: Record<string, string> = {
-  pt: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_PT ?? 'ZqE9vIHPcrC35dZv0Svu',
-  en: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_EN ?? 'EXAVITQu4vr4xnSDxMaL',
+  pt: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_PT ?? 'pNInz6obpgDQGcFmaJgB',
+  en: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_EN ?? '21m00Tio1uZbQDoS6fo7',
   es: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_ES ?? 'ErXwobaYiN019PkySvjV',
   fr: process.env.NEXT_PUBLIC_ELEVENLABS_VOICE_ID_FR ?? 'MF3mGyEYCl7XYWbV9V6O',
 };

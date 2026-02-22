@@ -13,13 +13,19 @@ interface UsePoseDetectionReturn {
 }
 
 export function usePoseDetection(): UsePoseDetectionReturn {
-  const detectorRef = useRef<PoseDetector | null>(null);
+  const detectorRef  = useRef<PoseDetector | null>(null);
   const [landmarks, setLandmarks] = useState<PoseLandmarks | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady]     = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+
+  // Ref estável — evita re-criação do PoseDetector a cada render
+  const onResultRef = useRef<(lm: PoseLandmarks | null) => void>(
+    (lm) => setLandmarks(lm)
+  );
 
   useEffect(() => {
-    const detector = new PoseDetector(lm => setLandmarks(lm));
+    // Passa wrapper estável; o ref interno aponta sempre para setLandmarks atual
+    const detector = new PoseDetector((lm) => onResultRef.current(lm));
     detectorRef.current = detector;
 
     detector
@@ -30,7 +36,7 @@ export function usePoseDetection(): UsePoseDetectionReturn {
     return () => {
       detector.destroy();
     };
-  }, []);
+  }, []); // deps vazio — executa só uma vez, sem loop
 
   const startDetection = useCallback((video: HTMLVideoElement) => {
     detectorRef.current?.start(video);
