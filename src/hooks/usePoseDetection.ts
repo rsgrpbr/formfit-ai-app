@@ -13,30 +13,39 @@ interface UsePoseDetectionReturn {
 }
 
 export function usePoseDetection(): UsePoseDetectionReturn {
-  const detectorRef  = useRef<PoseDetector | null>(null);
+  const detectorRef = useRef<PoseDetector | null>(null);
+  const latestLmRef = useRef<PoseLandmarks | null>(null); // buffer — escrito pelo detector, SEM setState
+  const rafRef      = useRef<number | null>(null);
+
   const [landmarks, setLandmarks] = useState<PoseLandmarks | null>(null);
   const [isReady, setIsReady]     = useState(false);
   const [error, setError]         = useState<string | null>(null);
 
-  // Ref estável — evita re-criação do PoseDetector a cada render
-  const onResultRef = useRef<(lm: PoseLandmarks | null) => void>(
-    (lm) => setLandmarks(lm)
-  );
-
   useEffect(() => {
-    // Passa wrapper estável; o ref interno aponta sempre para setLandmarks atual
-    const detector = new PoseDetector((lm) => onResultRef.current(lm));
+    // O callback do detector apenas grava no ref — zero setState, zero re-render
+    const detector = new PoseDetector((lm) => {
+      latestLmRef.current = lm;
+    });
     detectorRef.current = detector;
+
+    // Loop rAF independente: sincroniza ref → state uma vez por frame
+    // React 18 agrupa este setState com outros do mesmo frame (batching automático)
+    const syncLoop = () => {
+      setLandmarks(latestLmRef.current);
+      rafRef.current = requestAnimationFrame(syncLoop);
+    };
+    rafRef.current = requestAnimationFrame(syncLoop);
 
     detector
       .init()
       .then(() => setIsReady(true))
-      .catch(err => setError(String(err)));
+      .catch((err) => setError(String(err)));
 
     return () => {
       detector.destroy();
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, []); // deps vazio — executa só uma vez, sem loop
+  }, []); // deps vazio — executa uma única vez
 
   const startDetection = useCallback((video: HTMLVideoElement) => {
     detectorRef.current?.start(video);
