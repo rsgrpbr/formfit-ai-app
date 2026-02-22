@@ -1,0 +1,36 @@
+{
+  "app": { "name": "FormFit AI", "tagline": "Tu entrenador personal con IA" },
+  "nav": { "home": "Inicio", "analyze": "Analizar", "history": "Historial", "profile": "Perfil", "pricing": "Planes" },
+  "exercises": { "squat": "Sentadilla", "pushup": "Flexión", "plank": "Plancha", "lunge": "Zancada" },
+  "feedback": {
+    "squat": {
+      "knees_over_toes": "Rodillas pasando los pies. Retrocede un poco.",
+      "go_deeper": "¡Baja más! Intenta llegar por debajo de 90 grados.",
+      "keep_back_straight": "Mantén la espalda recta durante el movimiento."
+    },
+    "pushup": {
+      "keep_body_straight": "Mantén el cuerpo alineado. No subas ni bajes las caderas.",
+      "go_lower": "¡Baja más! Codos a 90 grados.",
+      "align_elbows": "Alinea los codos. Ambos en el mismo ángulo."
+    },
+    "plank": {
+      "lower_hips": "Baja las caderas. Mantén el cuerpo en línea recta.",
+      "raise_hips": "Sube las caderas. No dejes caer la barriga.",
+      "level_shoulders": "Nivela los hombros. No tuerzas el cuerpo."
+    },
+    "lunge": {
+      "knee_over_toe": "Rodilla demasiado adelantada. Retrocede el paso.",
+      "keep_torso_upright": "Mantén el torso erguido durante la zancada.",
+      "go_deeper": "¡Baja más! La rodilla trasera casi en el suelo."
+    },
+    "general": {
+      "great": "¡Genial! ¡Sigue así!",
+      "rep_complete": "¡Repetición completa!",
+      "session_start": "¡Vamos! Colócate frente a la cámara.",
+      "perfect_form": "¡Forma perfecta! Excelente trabajo.",
+      "rest": "Descansa un momento."
+    }
+  },
+  "session": { "reps": "Repeticiones", "score": "Puntuación", "time": "Tiempo", "start": "Iniciar", "stop": "Detener", "pause": "Pausar", "resume": "Reanudar" },
+  "auth": { "sign_in": "Iniciar sesión", "sign_up": "Crear cuenta", "sign_out": "Cerrar sesión", "email": "Correo", "password": "Contraseña", "forgot_password": "¿Olvidaste tu contraseña?" }
+}

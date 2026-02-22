@@ -1,0 +1,72 @@
+{
+  "app": {
+    "name": "FormFit AI",
+    "tagline": "Your AI-powered personal trainer"
+  },
+  "nav": {
+    "home": "Home",
+    "analyze": "Analyze",
+    "history": "History",
+    "profile": "Profile",
+    "pricing": "Pricing"
+  },
+  "exercises": {
+    "squat": "Squat",
+    "pushup": "Push-up",
+    "plank": "Plank",
+    "lunge": "Lunge"
+  },
+  "feedback": {
+    "squat": {
+      "knees_over_toes": "Knees past your toes. Push them back.",
+      "go_deeper": "Go deeper! Try to get below 90 degrees.",
+      "keep_back_straight": "Keep your back straight throughout the movement."
+    },
+    "pushup": {
+      "keep_body_straight": "Keep your body aligned. Don't raise or drop your hips.",
+      "go_lower": "Go lower! Elbows at 90 degrees.",
+      "align_elbows": "Align your elbows. Both at the same angle."
+    },
+    "plank": {
+      "lower_hips": "Lower your hips. Keep your body in a straight line.",
+      "raise_hips": "Raise your hips. Don't let your belly sag.",
+      "level_shoulders": "Level your shoulders. Don't twist your body."
+    },
+    "lunge": {
+      "knee_over_toe": "Knee too far forward. Step back.",
+      "keep_torso_upright": "Keep your torso upright during the lunge.",
+      "go_deeper": "Go deeper! Back knee almost to the floor."
+    },
+    "general": {
+      "great": "Great! Keep it up!",
+      "rep_complete": "Rep complete!",
+      "session_start": "Let's go! Position yourself in front of the camera.",
+      "perfect_form": "Perfect form! Excellent work.",
+      "rest": "Take a rest."
+    }
+  },
+  "session": {
+    "reps": "Reps",
+    "score": "Score",
+    "time": "Time",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume"
+  },
+  "subscription": {
+    "free": "Free",
+    "pro": "Pro",
+    "annual": "Annual",
+    "upgrade": "Upgrade now",
+    "limit_reached": "Session limit reached. Upgrade to continue."
+  },
+  "auth": {
+    "sign_in": "Sign in",
+    "sign_up": "Sign up",
+    "sign_out": "Sign out",
+    "email": "Email",
+    "password": "Password",
+    "forgot_password": "Forgot password?"
+  }
+}

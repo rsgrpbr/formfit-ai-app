@@ -1,0 +1,36 @@
+{
+  "app": { "name": "FormFit AI", "tagline": "Votre coach personnel IA" },
+  "nav": { "home": "Accueil", "analyze": "Analyser", "history": "Historique", "profile": "Profil", "pricing": "Tarifs" },
+  "exercises": { "squat": "Squat", "pushup": "Pompe", "plank": "Planche", "lunge": "Fente" },
+  "feedback": {
+    "squat": {
+      "knees_over_toes": "Genoux au-delà des pieds. Reculez légèrement.",
+      "go_deeper": "Descendez plus ! Essayez d'aller en dessous de 90 degrés.",
+      "keep_back_straight": "Gardez le dos droit pendant le mouvement."
+    },
+    "pushup": {
+      "keep_body_straight": "Gardez le corps aligné. Ne montez pas ni ne baissez les hanches.",
+      "go_lower": "Descendez plus ! Coudes à 90 degrés.",
+      "align_elbows": "Alignez les coudes. Les deux au même angle."
+    },
+    "plank": {
+      "lower_hips": "Abaissez les hanches. Gardez le corps en ligne droite.",
+      "raise_hips": "Levez les hanches. Ne laissez pas le ventre tomber.",
+      "level_shoulders": "Nivélez les épaules. Ne tordez pas le corps."
+    },
+    "lunge": {
+      "knee_over_toe": "Genou trop en avant. Reculez le pas.",
+      "keep_torso_upright": "Gardez le torse droit pendant la fente.",
+      "go_deeper": "Descendez plus ! Le genou arrière presque au sol."
+    },
+    "general": {
+      "great": "Super ! Continuez !",
+      "rep_complete": "Répétition complète !",
+      "session_start": "C'est parti ! Positionnez-vous devant la caméra.",
+      "perfect_form": "Forme parfaite ! Excellent travail.",
+      "rest": "Reposez-vous un moment."
+    }
+  },
+  "session": { "reps": "Répétitions", "score": "Score", "time": "Temps", "start": "Démarrer", "stop": "Arrêter", "pause": "Pause", "resume": "Reprendre" },
+  "auth": { "sign_in": "Se connecter", "sign_up": "S'inscrire", "sign_out": "Se déconnecter", "email": "E-mail", "password": "Mot de passe", "forgot_password": "Mot de passe oublié ?" }
+}

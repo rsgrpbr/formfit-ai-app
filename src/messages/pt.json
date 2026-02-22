@@ -1,0 +1,72 @@
+{
+  "app": {
+    "name": "FormFit AI",
+    "tagline": "Seu personal trainer com IA"
+  },
+  "nav": {
+    "home": "Início",
+    "analyze": "Analisar",
+    "history": "Histórico",
+    "profile": "Perfil",
+    "pricing": "Planos"
+  },
+  "exercises": {
+    "squat": "Agachamento",
+    "pushup": "Flexão",
+    "plank": "Prancha",
+    "lunge": "Afundo"
+  },
+  "feedback": {
+    "squat": {
+      "knees_over_toes": "Joelhos ultrapassando os pés. Recue um pouco.",
+      "go_deeper": "Desça mais! Tente chegar abaixo dos 90 graus.",
+      "keep_back_straight": "Mantenha as costas retas durante o movimento."
+    },
+    "pushup": {
+      "keep_body_straight": "Mantenha o corpo alinhado. Nem suba nem desça o quadril.",
+      "go_lower": "Desça mais! Cotovelos a 90 graus.",
+      "align_elbows": "Alinhe os cotovelos. Ambos no mesmo ângulo."
+    },
+    "plank": {
+      "lower_hips": "Abaixe o quadril. Mantenha o corpo em linha reta.",
+      "raise_hips": "Suba o quadril. Não deixe a barriga cair.",
+      "level_shoulders": "Nivele os ombros. Não torça o corpo."
+    },
+    "lunge": {
+      "knee_over_toe": "Joelho avançado demais. Recue o passo.",
+      "keep_torso_upright": "Mantenha o tronco ereto durante o afundo.",
+      "go_deeper": "Desça mais! O joelho traseiro quase no chão."
+    },
+    "general": {
+      "great": "Ótimo! Continue assim!",
+      "rep_complete": "Repetição completa!",
+      "session_start": "Vamos começar! Posicione-se na câmera.",
+      "perfect_form": "Forma perfeita! Excelente trabalho.",
+      "rest": "Descanse um momento."
+    }
+  },
+  "session": {
+    "reps": "Repetições",
+    "score": "Pontuação",
+    "time": "Tempo",
+    "start": "Iniciar",
+    "stop": "Parar",
+    "pause": "Pausar",
+    "resume": "Continuar"
+  },
+  "subscription": {
+    "free": "Grátis",
+    "pro": "Pro",
+    "annual": "Anual",
+    "upgrade": "Fazer upgrade",
+    "limit_reached": "Limite de sessões atingido. Faça upgrade para continuar."
+  },
+  "auth": {
+    "sign_in": "Entrar",
+    "sign_up": "Criar conta",
+    "sign_out": "Sair",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgot_password": "Esqueceu a senha?"
+  }
+}
