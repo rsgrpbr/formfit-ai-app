@@ -83,16 +83,21 @@ export default function PoseOverlay({
         height={height}
         className="absolute inset-0"
       />
+      {/* fixed escapa o overflow-hidden do container da câmera — visível no mobile */}
       <button
         onClick={() => setShowSkeleton(v => !v)}
         title={showSkeleton ? 'Ocultar esqueleto' : 'Mostrar esqueleto'}
-        className={`absolute bottom-4 right-4 pointer-events-auto px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition-all
+        className={`fixed bottom-6 right-4 z-50 pointer-events-auto
+          min-w-[48px] min-h-[48px] px-4 py-3
+          rounded-xl text-sm font-semibold
+          shadow-lg backdrop-blur-sm transition-all
+          flex items-center justify-center gap-1
           ${showSkeleton
-            ? 'bg-green-600/80 text-white'
-            : 'bg-gray-800/70 text-gray-400 hover:text-white hover:bg-gray-700/80'
+            ? 'bg-green-600/90 text-white'
+            : 'bg-gray-900/90 text-gray-300 hover:text-white hover:bg-gray-700/90'
           }`}
       >
-        {showSkeleton ? '🦴 ON' : '🦴 OFF'}
+        🦴 {showSkeleton ? 'ON' : 'OFF'}
       </button>
     </div>
   );

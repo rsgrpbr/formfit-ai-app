@@ -243,7 +243,8 @@ export default function AnalyzePage() {
         </div>
       </header>
 
-      <div className="flex flex-col lg:flex-row flex-1 gap-4 p-4">
+      {/* pb-20 no mobile reserva espaço para o botão fixed do esqueleto (bottom-6) */}
+      <div className="flex flex-col lg:flex-row flex-1 gap-4 p-4 pb-20 lg:pb-4">
         {/* Câmera + Overlay */}
         <div className="flex-1 relative rounded-2xl overflow-hidden bg-gray-900 flex items-center justify-center min-h-[360px]">
           <CameraFeed
