@@ -1,22 +1,55 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
 import { LANDMARKS } from '../mediapipe/landmarks';
-import type { ExerciseResult } from './squat';
+import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type LungePhase = 'up' | 'down' | 'transition';
 
-const FRONT_KNEE_DOWN_MAX = 105;
-const FRONT_KNEE_UP_MIN   = 160;
+// ── Limiares +15% de tolerância ──────────────────────────────────────────────
+const FRONT_KNEE_DOWN_MAX = 105;           // detecção de fase (inalterado)
+const FRONT_KNEE_UP_MIN   = 160;           // detecção de fase (inalterado)
+const KNEE_TOE_THR        = 0.115;         // era 0.10  → × 1.15
+const SPINE_MIN           = 134;           // era 140°  → tilt +15%: 40° → 46°, spine < 134
+const DEPTH_KNEE_THR      = 132;           // era 115   → × 1.15
+
+// Deduções de pontuação (imediatas, independente do debounce)
+const PEN_KNEE   = 18;
+const PEN_TORSO  = 18;
+const PEN_DEPTH  = 12;
+
+const ERROR_PERSIST_MS = 3000;
+
+function quality(score: number): ExerciseResult['quality'] {
+  if (score >= 80) return 'optimal';
+  if (score >= 60) return 'good';
+  return 'corrective';
+}
+
+function trackError(
+  key: string,
+  active: boolean,
+  tracker: ErrorTracker,
+  feedback: string[]
+): void {
+  if (active) {
+    if (!(key in tracker)) tracker[key] = Date.now();
+    if (Date.now() - tracker[key] >= ERROR_PERSIST_MS) feedback.push(key);
+  } else {
+    delete tracker[key];
+  }
+}
 
 export function analyzeLunge(
   angles: JointAngles,
   landmarks: PoseLandmarks,
-  prevPhase: LungePhase
+  prevPhase: LungePhase,
+  errorTracker: ErrorTracker = {}
 ): ExerciseResult {
   const frontKnee = Math.min(angles.leftKnee, angles.rightKnee);
   const feedback: string[] = [];
   let score = 100;
 
+  // Fase
   let phase: LungePhase = prevPhase;
   if (frontKnee < FRONT_KNEE_DOWN_MAX)    phase = 'down';
   else if (frontKnee > FRONT_KNEE_UP_MIN) phase = 'up';
@@ -24,27 +57,29 @@ export function analyzeLunge(
 
   const repComplete = prevPhase === 'down' && phase === 'up';
 
-  // Joelho da frente alinhado com o dedo do pé
+  // ── Joelho da frente alinhado com o dedo do pé ────────────────────────────
   const frontIsLeft = angles.leftKnee < angles.rightKnee;
   const kneeX = frontIsLeft ? landmarks[LANDMARKS.LEFT_KNEE].x       : landmarks[LANDMARKS.RIGHT_KNEE].x;
   const toeX  = frontIsLeft ? landmarks[LANDMARKS.LEFT_FOOT_INDEX].x : landmarks[LANDMARKS.RIGHT_FOOT_INDEX].x;
+  const kneeOverToe = Math.abs(kneeX - toeX) > KNEE_TOE_THR;
+  if (kneeOverToe) score -= PEN_KNEE;
+  trackError('lunge.knee_over_toe', kneeOverToe, errorTracker, feedback);
 
-  if (Math.abs(kneeX - toeX) > 0.1) {
-    feedback.push('lunge.knee_over_toe');
-    score -= 20;
-  }
+  // ── Tronco ereto ─────────────────────────────────────────────────────────
+  const torsoLeaning = angles.spine < SPINE_MIN;
+  if (torsoLeaning) score -= PEN_TORSO;
+  trackError('lunge.keep_torso_upright', torsoLeaning, errorTracker, feedback);
 
-  // Tronco ereto
-  if (angles.spine < 140) {
-    feedback.push('lunge.keep_torso_upright');
-    score -= 20;
-  }
+  // ── Profundidade insuficiente (só na fase baixa) ──────────────────────────
+  const tooShallow = phase === 'down' && frontKnee > DEPTH_KNEE_THR;
+  if (tooShallow) score -= PEN_DEPTH;
+  trackError('lunge.go_deeper', tooShallow, errorTracker, feedback);
 
-  // Profundidade
-  if (phase === 'down' && frontKnee > 115) {
-    feedback.push('lunge.go_deeper');
-    score -= 15;
-  }
+  const finalScore = Math.max(0, score);
 
-  return { repComplete, score: Math.max(0, score), feedback, phase };
+  // ── Feedback positivo: apenas ao completar rep com boa forma ──────────────
+  if (repComplete && finalScore >= 80) feedback.unshift('general.perfect_form');
+  else if (repComplete && finalScore >= 60) feedback.unshift('general.rep_complete');
+
+  return { repComplete, score: finalScore, quality: quality(finalScore), feedback, phase };
 }
