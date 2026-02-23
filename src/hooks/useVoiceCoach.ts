@@ -9,27 +9,52 @@ interface UseVoiceCoachOptions {
   enabled?: boolean;
 }
 
+interface QueueItem {
+  text: string;
+  priority: 'low' | 'high';
+}
+
 export function useVoiceCoach({
   locale     = 'pt',
   cooldownMs = 3000,
   enabled    = true,
 }: UseVoiceCoachOptions = {}) {
   const lastSpokenRef = useRef<Map<string, number>>(new Map());
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const isSpeakingRef = useRef(false);           // controle interno — sem re-render
+  const queueRef      = useRef<QueueItem[]>([]); // fila de falas pendentes
+  const [isSpeaking, setIsSpeaking] = useState(false); // exposto para a UI
 
-  // Opções em refs — atualizadas a cada render sem causar re-render,
-  // e sem precisar entrar nas deps do useCallback
-  const localeRef    = useRef(locale);
-  const cooldownRef  = useRef(cooldownMs);
-  const enabledRef   = useRef(enabled);
+  // Opções em refs — lidas dentro do callback sem entrar nas deps do useCallback
+  const localeRef   = useRef(locale);
+  const cooldownRef = useRef(cooldownMs);
+  const enabledRef  = useRef(enabled);
 
-  localeRef.current    = locale;
-  cooldownRef.current  = cooldownMs;
-  enabledRef.current   = enabled;
+  localeRef.current   = locale;
+  cooldownRef.current = cooldownMs;
+  enabledRef.current  = enabled;
 
-  // deps: [] — função nunca é recriada; lê valores sempre atuais via refs
+  // Processa o próximo item da fila sequencialmente
+  const processQueue = useCallback(async () => {
+    if (isSpeakingRef.current || queueRef.current.length === 0) return;
+
+    const item = queueRef.current.shift()!;
+    isSpeakingRef.current = true;
+    setIsSpeaking(true);
+
+    try {
+      await playFromCache(item.text, { locale: localeRef.current });
+    } catch (err) {
+      console.error('[VoiceCoach]', err);
+    } finally {
+      isSpeakingRef.current = false;
+      setIsSpeaking(false);
+      // Processa o próximo da fila após terminar
+      processQueue();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const speak = useCallback(
-    async (text: string, priority: 'low' | 'high' = 'low') => {
+    (text: string, priority: 'low' | 'high' = 'low') => {
       if (!enabledRef.current) return;
 
       const now      = Date.now();
@@ -39,20 +64,24 @@ export function useVoiceCoach({
       if (now - lastTime < cooldown) return;
 
       lastSpokenRef.current.set(text, now);
-      setIsSpeaking(true);
 
-      try {
-        await playFromCache(text, { locale: localeRef.current });
-      } catch (err) {
-        console.error('[VoiceCoach]', err);
-      } finally {
-        setIsSpeaking(false);
+      // Itens de alta prioridade entram na frente da fila
+      if (priority === 'high') {
+        queueRef.current.unshift({ text, priority });
+      } else {
+        queueRef.current.push({ text, priority });
       }
+
+      // Limita fila a 3 itens para não acumular falas velhas
+      if (queueRef.current.length > 3) {
+        queueRef.current = queueRef.current.slice(0, 3);
+      }
+
+      processQueue();
     },
-    [] // estável — não recria em nenhum render
+    [processQueue]
   );
 
-  // estável porque speak é estável
   const speakFeedback = useCallback(
     (feedbackKeys: string[], messages: Record<string, string>) => {
       const key = feedbackKeys[0];
