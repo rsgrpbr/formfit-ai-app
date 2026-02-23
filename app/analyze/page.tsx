@@ -6,6 +6,8 @@ import PoseOverlay from '@/components/camera/PoseOverlay';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
 import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
+import { usePlan, FREE_MONTHLY_LIMIT } from '@/hooks/usePlan';
+import { redirectToCheckout } from '@/lib/perfectpay';
 import { computeJointAngles } from '@/lib/angles/joints';
 import { analyzeSquat, analyzePushup, analyzePlank, analyzeLunge } from '@/lib/rules';
 import type { ErrorTracker } from '@/lib/rules';
@@ -47,6 +49,7 @@ export default function AnalyzePage() {
   const { user, profile } = useSession();
   const { landmarks, isReady, error: poseError, startDetection, stopDetection } = usePoseDetection();
   const { speak, isSpeaking } = useVoiceCoach({ locale: profile?.locale ?? 'pt', enabled: true });
+  const { plan, canAnalyze, monthlyCount, loading: planLoading } = usePlan();
 
   // Estado da sessão
   const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>('squat');
@@ -173,6 +176,7 @@ export default function AnalyzePage() {
   );
 
   const handleStart = useCallback(async () => {
+    if (!canAnalyze) return;
     phaseRef.current        = 'up';
     statsRef.current        = { totalReps: 0, goodReps: 0, badReps: 0, scores: [] };
     errorTrackerRef.current = {};
@@ -236,10 +240,15 @@ export default function AnalyzePage() {
         <h1 className="text-xl font-bold tracking-tight">FormFit AI</h1>
         <div className="flex items-center gap-2 text-sm text-gray-400">
           {isSpeaking && <span className="animate-pulse">🔊</span>}
-          {profile?.plan && (
+          {plan !== 'free' && (
             <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-xs font-medium uppercase">
-              {profile.plan}
+              {plan}
             </span>
+          )}
+          {!planLoading && plan === 'free' && (
+            <a href="/pricing" className="text-xs text-gray-500 hover:text-indigo-400 transition-colors">
+              {monthlyCount}/{FREE_MONTHLY_LIMIT} análises
+            </a>
           )}
         </div>
       </header>
@@ -281,6 +290,35 @@ export default function AnalyzePage() {
           {poseError && (
             <div className="absolute bottom-4 left-4 right-4 bg-red-900/80 rounded-lg px-3 py-2 text-sm text-red-200">
               {poseError}
+            </div>
+          )}
+
+          {/* Modal de upgrade — plano free esgotou análises do mês */}
+          {!planLoading && !canAnalyze && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-950/90 backdrop-blur-sm">
+              <div className="bg-gray-900 rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
+                <p className="text-3xl mb-3">🔒</p>
+                <h3 className="text-lg font-bold mb-2">Limite atingido</h3>
+                <p className="text-gray-400 text-sm mb-5">
+                  Você usou <span className="text-white font-semibold">{monthlyCount}/{FREE_MONTHLY_LIMIT}</span> análises
+                  gratuitas este mês. Faça upgrade para continuar.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => user && redirectToCheckout('pro_mensal', user.id)}
+                    disabled={!user}
+                    className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold text-sm transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    Pro — R$ 29,90/mês
+                  </button>
+                  <a
+                    href="/pricing"
+                    className="text-sm text-gray-400 hover:text-white transition-colors py-2"
+                  >
+                    Ver todos os planos →
+                  </a>
+                </div>
+              </div>
             </div>
           )}
 
@@ -337,19 +375,28 @@ export default function AnalyzePage() {
             </div>
           </div>
 
-          {/* Botão start/stop */}
-          <button
-            onClick={isRunning ? handleStop : handleStart}
-            disabled={!isReady}
-            className={`w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-95
-              ${isRunning
-                ? 'bg-red-600 hover:bg-red-500 text-white'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-              }
-              disabled:opacity-40 disabled:cursor-not-allowed`}
-          >
-            {isRunning ? '⏹ Parar sessão' : '▶ Iniciar sessão'}
-          </button>
+          {/* Botão start/stop ou upgrade */}
+          {!planLoading && !canAnalyze ? (
+            <a
+              href="/pricing"
+              className="w-full py-4 rounded-2xl font-bold text-lg text-center transition-all active:scale-95 bg-yellow-500 hover:bg-yellow-400 text-gray-900 block"
+            >
+              🔒 Ver planos
+            </a>
+          ) : (
+            <button
+              onClick={isRunning ? handleStop : handleStart}
+              disabled={!isReady || planLoading}
+              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-95
+                ${isRunning
+                  ? 'bg-red-600 hover:bg-red-500 text-white'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                }
+                disabled:opacity-40 disabled:cursor-not-allowed`}
+            >
+              {isRunning ? '⏹ Parar sessão' : '▶ Iniciar sessão'}
+            </button>
+          )}
 
           {!user && (
             <p className="text-center text-xs text-gray-500">

@@ -6,7 +6,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   locale: string;
-  plan: 'free' | 'pro' | 'annual';
+  plan: 'free' | 'pro' | 'personal' | 'annual';
   streak_days: number;
   total_reps: number;
 }
