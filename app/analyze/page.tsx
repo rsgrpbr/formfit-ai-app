@@ -8,6 +8,7 @@ import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
 import { computeJointAngles } from '@/lib/angles/joints';
 import { analyzeSquat, analyzePushup, analyzePlank, analyzeLunge } from '@/lib/rules';
+import type { ErrorTracker } from '@/lib/rules';
 import type { SquatPhase } from '@/lib/rules/squat';
 import type { PushupPhase } from '@/lib/rules/pushup';
 import type { LungePhase } from '@/lib/rules/lunge';
@@ -56,21 +57,36 @@ export default function AnalyzePage() {
   const [feedback, setFeedback]                 = useState<string[]>([]);
   const [sessionId, setSessionId]               = useState<string | null>(null);
 
-  // Refs para fases do movimento (evita closures desatualizadas)
-  const phaseRef     = useRef<SquatPhase | PushupPhase | LungePhase>('up');
-  const statsRef     = useRef<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
-  const timerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
-  const plankStart   = useRef<number>(0);
+  // Refs para fases e rastreadores de erro (estáveis entre renders)
+  const phaseRef        = useRef<SquatPhase | PushupPhase | LungePhase>('up');
+  const statsRef        = useRef<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
+  const errorTrackerRef = useRef<ErrorTracker>({});
+  const timerRef        = useRef<ReturnType<typeof setInterval> | null>(null);
+  const plankStart      = useRef<number>(0);
+
+  // Limpa o errorTracker ao trocar de exercício
+  useEffect(() => {
+    errorTrackerRef.current = {};
+  }, [selectedExercise]);
 
   // ── Análise frame a frame ─────────────────────────────────────────────────
 
   useEffect(() => {
     if (!isRunning || !landmarks) return;
 
-    const angles = computeJointAngles(landmarks);
+    const angles  = computeJointAngles(landmarks);
+    const locale  = profile?.locale ?? 'pt';
+    const tracker = errorTrackerRef.current;
+
+    const speakFeedback = (keys: string[]) => {
+      const key = keys[0];
+      if (!key) return;
+      const text = getFeedbackText(key, locale);
+      if (text) speak(text, key.startsWith('general.') ? 'high' : 'low');
+    };
 
     if (selectedExercise === 'squat') {
-      const result = analyzeSquat(angles, landmarks, phaseRef.current as SquatPhase);
+      const result = analyzeSquat(angles, landmarks, phaseRef.current as SquatPhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
       setFeedback(result.feedback);
@@ -84,16 +100,12 @@ export default function AnalyzePage() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
-        speak('Repetição completa!', 'high');
       }
-
-      if (result.feedback.length > 0 && result.feedback[0]) {
-        speak(getFeedbackText(result.feedback[0], profile?.locale ?? 'pt'));
-      }
+      speakFeedback(result.feedback);
     }
 
     if (selectedExercise === 'pushup') {
-      const result = analyzePushup(angles, landmarks, phaseRef.current as PushupPhase);
+      const result = analyzePushup(angles, landmarks, phaseRef.current as PushupPhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
       setFeedback(result.feedback);
@@ -107,19 +119,20 @@ export default function AnalyzePage() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
-        speak('Repetição completa!', 'high');
       }
+      speakFeedback(result.feedback);
     }
 
     if (selectedExercise === 'plank') {
-      const held = (Date.now() - plankStart.current) / 1000;
-      const result = analyzePlank(angles, landmarks, held);
+      const held   = (Date.now() - plankStart.current) / 1000;
+      const result = analyzePlank(angles, landmarks, held, tracker);
       setScore(result.score);
       setFeedback(result.feedback);
+      speakFeedback(result.feedback);
     }
 
     if (selectedExercise === 'lunge') {
-      const result = analyzeLunge(angles, landmarks, phaseRef.current as LungePhase);
+      const result = analyzeLunge(angles, landmarks, phaseRef.current as LungePhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
       setFeedback(result.feedback);
@@ -134,6 +147,7 @@ export default function AnalyzePage() {
         };
         setStats({ ...statsRef.current });
       }
+      speakFeedback(result.feedback);
     }
   }, [landmarks, isRunning, selectedExercise, speak, profile?.locale]);
 
@@ -158,8 +172,9 @@ export default function AnalyzePage() {
   );
 
   const handleStart = useCallback(async () => {
-    phaseRef.current = 'up';
-    statsRef.current = { totalReps: 0, goodReps: 0, badReps: 0, scores: [] };
+    phaseRef.current        = 'up';
+    statsRef.current        = { totalReps: 0, goodReps: 0, badReps: 0, scores: [] };
+    errorTrackerRef.current = {};
     setStats({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
     setElapsed(0);
     setScore(100);
@@ -201,12 +216,15 @@ export default function AnalyzePage() {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   const scoreColor = score >= 80 ? 'text-green-400' : score >= 50 ? 'text-yellow-400' : 'text-red-400';
-  const avgScore = stats.scores.length > 0
+  const avgScore   = stats.scores.length > 0
     ? Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length)
     : 0;
 
   const formatTime = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+  // Apenas chaves de erro (não positivas) aparecem na sobreposição visual
+  const errorFeedback = feedback.filter(k => !k.startsWith('general.'));
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -263,10 +281,10 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* Feedback em tempo real */}
-          {isRunning && feedback.length > 0 && (
-            <div className="absolute bottom-4 left-4 right-4 space-y-1">
-              {feedback.slice(0, 2).map(key => (
+          {/* Feedback de erros em tempo real (não cobre o botão do esqueleto) */}
+          {isRunning && errorFeedback.length > 0 && (
+            <div className="absolute bottom-4 left-4 right-16 space-y-1">
+              {errorFeedback.slice(0, 2).map(key => (
                 <div key={key} className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-yellow-300">
                   ⚠ {getFeedbackText(key, profile?.locale ?? 'pt')}
                 </div>
@@ -366,32 +384,36 @@ function Stat({
 
 const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
   pt: {
-    'squat.knees_over_toes':    'Joelhos ultrapassando os pés.',
-    'squat.go_deeper':          'Desça mais! Abaixo de 90 graus.',
-    'squat.keep_back_straight': 'Mantenha as costas retas.',
-    'pushup.keep_body_straight':'Corpo alinhado! Nem suba nem desça o quadril.',
-    'pushup.go_lower':          'Desça mais! Cotovelos a 90 graus.',
-    'pushup.align_elbows':      'Alinhe os cotovelos.',
-    'plank.lower_hips':         'Abaixe o quadril.',
-    'plank.raise_hips':         'Suba o quadril.',
-    'plank.level_shoulders':    'Nivele os ombros.',
-    'lunge.knee_over_toe':      'Joelho avançado demais.',
-    'lunge.keep_torso_upright': 'Mantenha o tronco ereto.',
-    'lunge.go_deeper':          'Desça mais!',
+    'general.perfect_form':      'Execução perfeita!',
+    'general.rep_complete':      'Repetição completa!',
+    'squat.knees_over_toes':     'Joelhos ultrapassando os pés.',
+    'squat.go_deeper':           'Desça mais! Abaixo de 90 graus.',
+    'squat.keep_back_straight':  'Mantenha as costas retas.',
+    'pushup.keep_body_straight': 'Corpo alinhado! Nem suba nem desça o quadril.',
+    'pushup.go_lower':           'Desça mais! Cotovelos a 90 graus.',
+    'pushup.align_elbows':       'Alinhe os cotovelos.',
+    'plank.lower_hips':          'Abaixe o quadril.',
+    'plank.raise_hips':          'Suba o quadril.',
+    'plank.level_shoulders':     'Nivele os ombros.',
+    'lunge.knee_over_toe':       'Joelho avançado demais.',
+    'lunge.keep_torso_upright':  'Mantenha o tronco ereto.',
+    'lunge.go_deeper':           'Desça mais!',
   },
   en: {
-    'squat.knees_over_toes':    'Knees past your toes.',
-    'squat.go_deeper':          'Go deeper! Below 90 degrees.',
-    'squat.keep_back_straight': 'Keep your back straight.',
-    'pushup.keep_body_straight':'Keep your body aligned.',
-    'pushup.go_lower':          'Go lower! Elbows at 90 degrees.',
-    'pushup.align_elbows':      'Align your elbows.',
-    'plank.lower_hips':         'Lower your hips.',
-    'plank.raise_hips':         'Raise your hips.',
-    'plank.level_shoulders':    'Level your shoulders.',
-    'lunge.knee_over_toe':      'Knee too far forward.',
-    'lunge.keep_torso_upright': 'Keep your torso upright.',
-    'lunge.go_deeper':          'Go deeper!',
+    'general.perfect_form':      'Perfect form!',
+    'general.rep_complete':      'Rep complete!',
+    'squat.knees_over_toes':     'Knees past your toes.',
+    'squat.go_deeper':           'Go deeper! Below 90 degrees.',
+    'squat.keep_back_straight':  'Keep your back straight.',
+    'pushup.keep_body_straight': 'Keep your body aligned.',
+    'pushup.go_lower':           'Go lower! Elbows at 90 degrees.',
+    'pushup.align_elbows':       'Align your elbows.',
+    'plank.lower_hips':          'Lower your hips.',
+    'plank.raise_hips':          'Raise your hips.',
+    'plank.level_shoulders':     'Level your shoulders.',
+    'lunge.knee_over_toe':       'Knee too far forward.',
+    'lunge.keep_torso_upright':  'Keep your torso upright.',
+    'lunge.go_deeper':           'Go deeper!',
   },
 };
 

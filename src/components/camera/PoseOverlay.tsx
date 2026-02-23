@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PoseLandmarks } from '@/lib/mediapipe/landmarks';
 
 const CONNECTIONS: [number, number][] = [
@@ -31,6 +31,7 @@ export default function PoseOverlay({
   mirrored = true,
 }: PoseOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showSkeleton, setShowSkeleton] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -39,7 +40,7 @@ export default function PoseOverlay({
     if (!ctx) return;
 
     ctx.clearRect(0, 0, width, height);
-    if (!landmarks) return;
+    if (!landmarks || !showSkeleton) return;
 
     const color = score >= 80 ? '#22c55e' : score >= 50 ? '#f59e0b' : '#ef4444';
 
@@ -72,14 +73,27 @@ export default function PoseOverlay({
     });
 
     if (mirrored) ctx.restore();
-  }, [landmarks, width, height, score, mirrored]);
+  }, [landmarks, width, height, score, mirrored, showSkeleton]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="absolute inset-0 pointer-events-none"
-    />
+    <div className="absolute inset-0 pointer-events-none">
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        className="absolute inset-0"
+      />
+      <button
+        onClick={() => setShowSkeleton(v => !v)}
+        title={showSkeleton ? 'Ocultar esqueleto' : 'Mostrar esqueleto'}
+        className={`absolute bottom-4 right-4 pointer-events-auto px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition-all
+          ${showSkeleton
+            ? 'bg-green-600/80 text-white'
+            : 'bg-gray-800/70 text-gray-400 hover:text-white hover:bg-gray-700/80'
+          }`}
+      >
+        {showSkeleton ? '🦴 ON' : '🦴 OFF'}
+      </button>
+    </div>
   );
 }
