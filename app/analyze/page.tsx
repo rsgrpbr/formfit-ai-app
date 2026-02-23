@@ -56,6 +56,7 @@ export default function AnalyzePage() {
   const [elapsed, setElapsed]                   = useState(0);
   const [feedback, setFeedback]                 = useState<string[]>([]);
   const [sessionId, setSessionId]               = useState<string | null>(null);
+  const [showSkeleton, setShowSkeleton]         = useState(false);
 
   // Refs para fases e rastreadores de erro (estáveis entre renders)
   const phaseRef        = useRef<SquatPhase | PushupPhase | LungePhase>('up');
@@ -256,6 +257,7 @@ export default function AnalyzePage() {
             width={VIDEO_W}
             height={VIDEO_H}
             score={score}
+            showSkeleton={showSkeleton}
           />
 
           {/* Score badge */}
@@ -356,6 +358,23 @@ export default function AnalyzePage() {
           )}
         </aside>
       </div>
+
+      {/* Botão esqueleto — fixed no viewport, z-[9999], independente de qualquer filho */}
+      <button
+        onClick={() => setShowSkeleton(v => !v)}
+        title={showSkeleton ? 'Ocultar esqueleto' : 'Mostrar esqueleto'}
+        className={`fixed bottom-6 right-4 z-[9999]
+          min-w-[48px] min-h-[48px] px-4 py-3
+          rounded-xl text-sm font-semibold
+          shadow-lg backdrop-blur-sm transition-all
+          flex items-center justify-center gap-1
+          ${showSkeleton
+            ? 'bg-green-600/90 text-white'
+            : 'bg-gray-900/90 text-gray-300 hover:text-white hover:bg-gray-700/90'
+          }`}
+      >
+        🦴 {showSkeleton ? 'ON' : 'OFF'}
+      </button>
     </div>
   );
 }

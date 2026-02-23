@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { PoseLandmarks } from '@/lib/mediapipe/landmarks';
 
 const CONNECTIONS: [number, number][] = [
@@ -21,6 +21,7 @@ interface PoseOverlayProps {
   height: number;
   score?: number;
   mirrored?: boolean;
+  showSkeleton?: boolean;
 }
 
 export default function PoseOverlay({
@@ -29,9 +30,9 @@ export default function PoseOverlay({
   height,
   score = 100,
   mirrored = true,
+  showSkeleton = false,
 }: PoseOverlayProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [showSkeleton, setShowSkeleton] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -76,29 +77,11 @@ export default function PoseOverlay({
   }, [landmarks, width, height, score, mirrored, showSkeleton]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none">
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        className="absolute inset-0"
-      />
-      {/* fixed escapa o overflow-hidden do container da câmera — visível no mobile */}
-      <button
-        onClick={() => setShowSkeleton(v => !v)}
-        title={showSkeleton ? 'Ocultar esqueleto' : 'Mostrar esqueleto'}
-        className={`fixed bottom-6 right-4 z-50 pointer-events-auto
-          min-w-[48px] min-h-[48px] px-4 py-3
-          rounded-xl text-sm font-semibold
-          shadow-lg backdrop-blur-sm transition-all
-          flex items-center justify-center gap-1
-          ${showSkeleton
-            ? 'bg-green-600/90 text-white'
-            : 'bg-gray-900/90 text-gray-300 hover:text-white hover:bg-gray-700/90'
-          }`}
-      >
-        🦴 {showSkeleton ? 'ON' : 'OFF'}
-      </button>
-    </div>
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      className="absolute inset-0 pointer-events-none"
+    />
   );
 }
