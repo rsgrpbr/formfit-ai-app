@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '@/lib/supabase/queries';
-import { getProfile } from '@/lib/supabase/queries';
+import { getProfile, updateProfile } from '@/lib/supabase/queries';
 
 interface UseSessionReturn {
   user: User | null;
@@ -13,8 +13,21 @@ interface UseSessionReturn {
   signOut: () => Promise<void>;
 }
 
+// Se o profile não tiver full_name mas o user_metadata tiver, sincroniza.
+async function loadProfile(user: User): Promise<Profile | null> {
+  const profile = await getProfile(user.id);
+  if (profile && !profile.full_name) {
+    const metaName = (user.user_metadata as Record<string, string | undefined>)?.full_name?.trim();
+    if (metaName) {
+      await updateProfile(user.id, { full_name: metaName });
+      return { ...profile, full_name: metaName };
+    }
+  }
+  return profile;
+}
+
 export function useSession(): UseSessionReturn {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user,    setUser]    = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,13 +36,13 @@ export function useSession(): UseSessionReturn {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) getProfile(session.user.id).then(setProfile);
+      if (session?.user) loadProfile(session.user).then(setProfile);
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) getProfile(session.user.id).then(setProfile);
+      if (session?.user) loadProfile(session.user).then(setProfile);
       else setProfile(null);
     });
 

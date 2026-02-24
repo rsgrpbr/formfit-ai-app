@@ -96,7 +96,12 @@ export default function DashboardPage() {
     : Math.min(100, Math.round(((totalXp - levelStart) / (levelEnd - levelStart)) * 100));
 
   // ── Avatar com iniciais ─────────────────────────────────────────────────────
-  const displayName = profile?.full_name || user.email || 'Usuário';
+  const emailPrefix = (user.email ?? '').split('@')[0];
+  const metaName    = (user.user_metadata as Record<string, string | undefined>)?.full_name?.trim();
+  const rawName     = profile?.full_name || metaName || emailPrefix;
+  const displayName = rawName
+    ? rawName.charAt(0).toUpperCase() + rawName.slice(1)
+    : 'Usuário';
   const initials    = displayName
     .split(' ')
     .slice(0, 2)

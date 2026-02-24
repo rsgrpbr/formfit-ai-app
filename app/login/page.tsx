@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [mode,     setMode]     = useState<Mode>('login');
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
+  const [name,     setName]     = useState('');
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
   const [message,  setMessage]  = useState<string | null>(null);
@@ -40,7 +41,10 @@ export default function LoginPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/analyze` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/analyze`,
+            data: { full_name: name.trim() || null },
+          },
         });
         if (error) { setError(error.message); return; }
         setMessage('Verifique seu e-mail para confirmar o cadastro.');
@@ -98,6 +102,25 @@ export default function LoginPage() {
                   focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
             </div>
+
+            {/* Nome (apenas no cadastro) */}
+            {mode === 'signup' && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="name" className="text-xs text-gray-400 uppercase tracking-wider">
+                  Seu nome
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Como você quer ser chamado"
+                  className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600
+                    focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+                />
+              </div>
+            )}
 
             {/* Senha */}
             {mode !== 'reset' && (
