@@ -49,7 +49,7 @@ const VIDEO_H = 480;
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export default function AnalyzePage() {
-  const { user, profile } = useSession();
+  const { user, profile, signOut } = useSession();
   const { landmarks, isReady, error: poseError, startDetection, stopDetection } = usePoseDetection();
   const { speak, isSpeaking } = useVoiceCoach({ locale: profile?.locale ?? 'pt', enabled: true });
   const { plan, canAnalyze, monthlyCount, loading: planLoading } = usePlan();
@@ -276,6 +276,21 @@ export default function AnalyzePage() {
             <a href="/pricing" className="text-xs text-gray-500 hover:text-indigo-400 transition-colors">
               {monthlyCount}/{FREE_MONTHLY_LIMIT} análises
             </a>
+          )}
+          {!user ? (
+            <a
+              href="/login"
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all"
+            >
+              Entrar
+            </a>
+          ) : (
+            <button
+              onClick={signOut}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Sair
+            </button>
           )}
         </div>
       </header>
