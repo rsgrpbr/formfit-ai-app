@@ -46,16 +46,16 @@ interface SessionStats {
 
 // ── Constantes ───────────────────────────────────────────────────────────────
 
-const EXERCISES: { slug: ExerciseSlug; label: string; icon: string }[] = [
-  { slug: 'squat',           label: 'Agachamento',    icon: '🦵' },
-  { slug: 'pushup',          label: 'Flexão',         icon: '💪' },
-  { slug: 'plank',           label: 'Prancha',        icon: '🏋️' },
-  { slug: 'lunge',           label: 'Afundo',         icon: '🚶' },
-  { slug: 'glute_bridge',    label: 'Elev. Quadril',  icon: '🍑' },
-  { slug: 'side_plank',      label: 'Prancha Lat.',   icon: '⬛' },
-  { slug: 'superman',        label: 'Superman',       icon: '🦸' },
-  { slug: 'mountain_climber',label: 'Escalada',       icon: '🏔️' },
-  { slug: 'burpee',          label: 'Burpee',         icon: '💥' },
+const EXERCISES: { slug: ExerciseSlug; label: string; icon: string; group: 'gym' | 'home' }[] = [
+  { slug: 'squat',           label: 'Agachamento',    icon: '🦵', group: 'gym'  },
+  { slug: 'pushup',          label: 'Flexão',         icon: '💪', group: 'gym'  },
+  { slug: 'plank',           label: 'Prancha',        icon: '🏋️', group: 'gym'  },
+  { slug: 'lunge',           label: 'Afundo',         icon: '🚶', group: 'gym'  },
+  { slug: 'glute_bridge',    label: 'Elev. Quadril',  icon: '🍑', group: 'home' },
+  { slug: 'side_plank',      label: 'Prancha Lat.',   icon: '⬛', group: 'home' },
+  { slug: 'superman',        label: 'Superman',       icon: '🦸', group: 'home' },
+  { slug: 'mountain_climber',label: 'Escalada',       icon: '🏔️', group: 'home' },
+  { slug: 'burpee',          label: 'Burpee',         icon: '💥', group: 'home' },
 ];
 
 const VIDEO_W = 640;
@@ -481,22 +481,32 @@ export default function AnalyzePage() {
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
               Exercício
             </h2>
-            <div className="grid grid-cols-2 gap-2">
-              {EXERCISES.map(ex => (
-                <button
+
+            {/* Academia */}
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏋️ Academia</p>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {EXERCISES.filter(e => e.group === 'gym').map(ex => (
+                <ExerciseButton
                   key={ex.slug}
+                  ex={ex}
+                  selected={selectedExercise === ex.slug}
                   disabled={isRunning}
                   onClick={() => setSelectedExercise(ex.slug)}
-                  className={`flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all
-                    ${selectedExercise === ex.slug
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    }
-                    disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  <span className="text-xl">{ex.icon}</span>
-                  {ex.label}
-                </button>
+                />
+              ))}
+            </div>
+
+            {/* Casa */}
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏠 Em casa</p>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+              {EXERCISES.filter(e => e.group === 'home').map(ex => (
+                <ExerciseButton
+                  key={ex.slug}
+                  ex={ex}
+                  selected={selectedExercise === ex.slug}
+                  disabled={isRunning}
+                  onClick={() => setSelectedExercise(ex.slug)}
+                />
               ))}
             </div>
           </div>
@@ -567,6 +577,34 @@ export default function AnalyzePage() {
 }
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
+
+function ExerciseButton({
+  ex,
+  selected,
+  disabled,
+  onClick,
+}: {
+  ex: { slug: string; label: string; icon: string };
+  selected: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all
+        ${selected
+          ? 'bg-indigo-600 text-white'
+          : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+        }
+        disabled:opacity-50 disabled:cursor-not-allowed`}
+    >
+      <span className="text-xl">{ex.icon}</span>
+      <span className="text-xs leading-tight text-center">{ex.label}</span>
+    </button>
+  );
+}
 
 function Stat({
   label,
