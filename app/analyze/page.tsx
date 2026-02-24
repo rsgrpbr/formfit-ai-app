@@ -12,11 +12,18 @@ import { useGamification } from '@/hooks/useGamification';
 import { redirectToCheckout } from '@/lib/perfectpay';
 import type { GamificationResult } from '@/types/gamification';
 import { computeJointAngles } from '@/lib/angles/joints';
-import { analyzeSquat, analyzePushup, analyzePlank, analyzeLunge } from '@/lib/rules';
+import {
+  analyzeSquat, analyzePushup, analyzePlank, analyzeLunge,
+  analyzeGluteBridge, analyzeSidePlank, analyzeSuperman,
+  analyzeMountainClimber, analyzeBurpee,
+} from '@/lib/rules';
 import type { ErrorTracker } from '@/lib/rules';
 import type { SquatPhase } from '@/lib/rules/squat';
 import type { PushupPhase } from '@/lib/rules/pushup';
 import type { LungePhase } from '@/lib/rules/lunge';
+import type { GluteBridgePhase } from '@/lib/rules/glute_bridge';
+import type { MountainClimberPhase } from '@/lib/rules/mountain_climber';
+import type { BurpeePhase } from '@/lib/rules/burpee';
 import {
   createSession,
   finishSession,
@@ -25,7 +32,10 @@ import {
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
-type ExerciseSlug = 'squat' | 'pushup' | 'plank' | 'lunge';
+type ExerciseSlug =
+  | 'squat' | 'pushup' | 'plank' | 'lunge'
+  | 'glute_bridge' | 'side_plank' | 'superman'
+  | 'mountain_climber' | 'burpee';
 
 interface SessionStats {
   totalReps: number;
@@ -37,10 +47,15 @@ interface SessionStats {
 // ── Constantes ───────────────────────────────────────────────────────────────
 
 const EXERCISES: { slug: ExerciseSlug; label: string; icon: string }[] = [
-  { slug: 'squat',  label: 'Agachamento', icon: '🦵' },
-  { slug: 'pushup', label: 'Flexão',      icon: '💪' },
-  { slug: 'plank',  label: 'Prancha',     icon: '🏋️' },
-  { slug: 'lunge',  label: 'Afundo',      icon: '🚶' },
+  { slug: 'squat',           label: 'Agachamento',    icon: '🦵' },
+  { slug: 'pushup',          label: 'Flexão',         icon: '💪' },
+  { slug: 'plank',           label: 'Prancha',        icon: '🏋️' },
+  { slug: 'lunge',           label: 'Afundo',         icon: '🚶' },
+  { slug: 'glute_bridge',    label: 'Elev. Quadril',  icon: '🍑' },
+  { slug: 'side_plank',      label: 'Prancha Lat.',   icon: '⬛' },
+  { slug: 'superman',        label: 'Superman',       icon: '🦸' },
+  { slug: 'mountain_climber',label: 'Escalada',       icon: '🏔️' },
+  { slug: 'burpee',          label: 'Burpee',         icon: '💥' },
 ];
 
 const VIDEO_W = 640;
@@ -67,7 +82,7 @@ export default function AnalyzePage() {
   const [gamificationResult, setGamificationResult] = useState<GamificationResult | null>(null);
 
   // Refs para fases e rastreadores de erro (estáveis entre renders)
-  const phaseRef        = useRef<SquatPhase | PushupPhase | LungePhase>('up');
+  const phaseRef        = useRef<SquatPhase | PushupPhase | LungePhase | GluteBridgePhase | MountainClimberPhase | BurpeePhase>('up');
   const statsRef        = useRef<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
   const errorTrackerRef = useRef<ErrorTracker>({});
   const timerRef           = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -143,6 +158,79 @@ export default function AnalyzePage() {
 
     if (selectedExercise === 'lunge') {
       const result = analyzeLunge(angles, landmarks, phaseRef.current as LungePhase, tracker);
+      phaseRef.current = result.phase;
+      setScore(result.score);
+      setFeedback(result.feedback);
+
+      if (result.repComplete) {
+        const isGood = result.score >= 70;
+        statsRef.current = {
+          totalReps: statsRef.current.totalReps + 1,
+          goodReps:  statsRef.current.goodReps  + (isGood ? 1 : 0),
+          badReps:   statsRef.current.badReps   + (isGood ? 0 : 1),
+          scores:    [...statsRef.current.scores, result.score],
+        };
+        setStats({ ...statsRef.current });
+      }
+      speakFeedback(result.feedback);
+    }
+
+    if (selectedExercise === 'glute_bridge') {
+      const result = analyzeGluteBridge(angles, landmarks, phaseRef.current as GluteBridgePhase, tracker);
+      phaseRef.current = result.phase;
+      setScore(result.score);
+      setFeedback(result.feedback);
+
+      if (result.repComplete) {
+        const isGood = result.score >= 70;
+        statsRef.current = {
+          totalReps: statsRef.current.totalReps + 1,
+          goodReps:  statsRef.current.goodReps  + (isGood ? 1 : 0),
+          badReps:   statsRef.current.badReps   + (isGood ? 0 : 1),
+          scores:    [...statsRef.current.scores, result.score],
+        };
+        setStats({ ...statsRef.current });
+      }
+      speakFeedback(result.feedback);
+    }
+
+    if (selectedExercise === 'side_plank') {
+      const held   = (Date.now() - plankStart.current) / 1000;
+      const result = analyzeSidePlank(angles, landmarks, held, tracker);
+      setScore(result.score);
+      setFeedback(result.feedback);
+      speakFeedback(result.feedback);
+    }
+
+    if (selectedExercise === 'superman') {
+      const held   = (Date.now() - plankStart.current) / 1000;
+      const result = analyzeSuperman(angles, landmarks, held, tracker);
+      setScore(result.score);
+      setFeedback(result.feedback);
+      speakFeedback(result.feedback);
+    }
+
+    if (selectedExercise === 'mountain_climber') {
+      const result = analyzeMountainClimber(angles, landmarks, phaseRef.current as MountainClimberPhase, tracker);
+      phaseRef.current = result.phase;
+      setScore(result.score);
+      setFeedback(result.feedback);
+
+      if (result.repComplete) {
+        const isGood = result.score >= 70;
+        statsRef.current = {
+          totalReps: statsRef.current.totalReps + 1,
+          goodReps:  statsRef.current.goodReps  + (isGood ? 1 : 0),
+          badReps:   statsRef.current.badReps   + (isGood ? 0 : 1),
+          scores:    [...statsRef.current.scores, result.score],
+        };
+        setStats({ ...statsRef.current });
+      }
+      speakFeedback(result.feedback);
+    }
+
+    if (selectedExercise === 'burpee') {
+      const result = analyzeBurpee(angles, landmarks, phaseRef.current as BurpeePhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
       setFeedback(result.feedback);
@@ -514,9 +602,21 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'plank.lower_hips':          'Abaixe o quadril.',
     'plank.raise_hips':          'Suba o quadril.',
     'plank.level_shoulders':     'Nivele os ombros.',
-    'lunge.knee_over_toe':       'Joelho avançado demais.',
-    'lunge.keep_torso_upright':  'Mantenha o tronco ereto.',
-    'lunge.go_deeper':           'Desça mais!',
+    'lunge.knee_over_toe':               'Joelho avançado demais.',
+    'lunge.keep_torso_upright':          'Mantenha o tronco ereto.',
+    'lunge.go_deeper':                   'Desça mais!',
+    'glute_bridge.low_hips':             'Suba mais o quadril.',
+    'glute_bridge.hip_asymmetry':        'Quadril desnivelado — alinhe os lados.',
+    'glute_bridge.feet_too_wide':        'Feche os pés — largura do quadril.',
+    'side_plank.hip_too_high':           'Abaixe um pouco o quadril.',
+    'side_plank.hip_dropping':           'Suba o quadril — não deixe cair.',
+    'side_plank.neck_dropped':           'Mantenha o pescoço alinhado.',
+    'superman.hold_position':            'Levante braços e pernas do chão.',
+    'superman.only_arms':                'Levante também as pernas.',
+    'superman.head_too_high':            'Não force o pescoço para cima.',
+    'mountain_climber.hip_too_high':     'Abaixe o quadril — não pike.',
+    'mountain_climber.hip_sagging':      'Suba o quadril — mantenha prancha.',
+    'burpee.arched_back':                'Mantenha o tronco reto na prancha.',
   },
   en: {
     'general.perfect_form':      'Perfect form!',
@@ -530,9 +630,21 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'plank.lower_hips':          'Lower your hips.',
     'plank.raise_hips':          'Raise your hips.',
     'plank.level_shoulders':     'Level your shoulders.',
-    'lunge.knee_over_toe':       'Knee too far forward.',
-    'lunge.keep_torso_upright':  'Keep your torso upright.',
-    'lunge.go_deeper':           'Go deeper!',
+    'lunge.knee_over_toe':               'Knee too far forward.',
+    'lunge.keep_torso_upright':          'Keep your torso upright.',
+    'lunge.go_deeper':                   'Go deeper!',
+    'glute_bridge.low_hips':             'Push your hips higher.',
+    'glute_bridge.hip_asymmetry':        'Uneven hips — align both sides.',
+    'glute_bridge.feet_too_wide':        'Bring feet closer — hip width.',
+    'side_plank.hip_too_high':           'Lower your hips slightly.',
+    'side_plank.hip_dropping':           'Raise your hips — don\'t let them drop.',
+    'side_plank.neck_dropped':           'Keep your neck aligned.',
+    'superman.hold_position':            'Lift both arms and legs off the floor.',
+    'superman.only_arms':                'Lift your legs too.',
+    'superman.head_too_high':            'Don\'t force your neck back.',
+    'mountain_climber.hip_too_high':     'Lower your hips — no piking.',
+    'mountain_climber.hip_sagging':      'Raise your hips — keep plank form.',
+    'burpee.arched_back':                'Keep your core tight in plank.',
   },
 };
 
