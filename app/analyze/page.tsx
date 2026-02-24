@@ -3,11 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import CameraFeed from '@/components/camera/CameraFeed';
 import PoseOverlay from '@/components/camera/PoseOverlay';
+import SessionResultModal from '@/components/gamification/SessionResultModal';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
 import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
 import { usePlan, FREE_MONTHLY_LIMIT } from '@/hooks/usePlan';
+import { useGamification } from '@/hooks/useGamification';
 import { redirectToCheckout } from '@/lib/perfectpay';
+import type { GamificationResult } from '@/types/gamification';
 import { computeJointAngles } from '@/lib/angles/joints';
 import { analyzeSquat, analyzePushup, analyzePlank, analyzeLunge } from '@/lib/rules';
 import type { ErrorTracker } from '@/lib/rules';
@@ -50,6 +53,7 @@ export default function AnalyzePage() {
   const { landmarks, isReady, error: poseError, startDetection, stopDetection } = usePoseDetection();
   const { speak, isSpeaking } = useVoiceCoach({ locale: profile?.locale ?? 'pt', enabled: true });
   const { plan, canAnalyze, monthlyCount, loading: planLoading } = usePlan();
+  const { triggerGamification } = useGamification();
 
   // Estado da sessão
   const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>('squat');
@@ -60,13 +64,15 @@ export default function AnalyzePage() {
   const [feedback, setFeedback]                 = useState<string[]>([]);
   const [sessionId, setSessionId]               = useState<string | null>(null);
   const [showSkeleton, setShowSkeleton]         = useState(false);
+  const [gamificationResult, setGamificationResult] = useState<GamificationResult | null>(null);
 
   // Refs para fases e rastreadores de erro (estáveis entre renders)
   const phaseRef        = useRef<SquatPhase | PushupPhase | LungePhase>('up');
   const statsRef        = useRef<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
   const errorTrackerRef = useRef<ErrorTracker>({});
-  const timerRef        = useRef<ReturnType<typeof setInterval> | null>(null);
-  const plankStart      = useRef<number>(0);
+  const timerRef           = useRef<ReturnType<typeof setInterval> | null>(null);
+  const plankStart         = useRef<number>(0);
+  const sessionStartHourRef = useRef<number>(0);
 
   // Limpa o errorTracker ao trocar de exercício
   useEffect(() => {
@@ -185,6 +191,7 @@ export default function AnalyzePage() {
     setScore(100);
     setFeedback([]);
     plankStart.current = Date.now();
+    sessionStartHourRef.current = new Date().getHours();
 
     if (user) {
       const exercise = await getExerciseBySlug(selectedExercise);
@@ -206,17 +213,37 @@ export default function AnalyzePage() {
       const avg = statsRef.current.scores.length > 0
         ? statsRef.current.scores.reduce((a, b) => a + b, 0) / statsRef.current.scores.length
         : 0;
+      const avgScore = Math.round(avg * 100) / 100;
 
+      // ── Salva sessão (lógica existente, inalterada) ───────────────────────
       await finishSession(sessionId, {
         total_reps:    statsRef.current.totalReps,
         good_reps:     statsRef.current.goodReps,
         bad_reps:      statsRef.current.badReps,
-        avg_score:     Math.round(avg * 100) / 100,
+        avg_score:     avgScore,
         feedback_json: { feedbackKeys: feedback },
       });
+
+      // ── Gamificação (isolada — falha nunca cancela o save) ────────────────
+      if (user) {
+        try {
+          const result = await triggerGamification({
+            userId:      user.id,
+            exerciseSlug: selectedExercise,
+            totalReps:   statsRef.current.totalReps,
+            goodReps:    statsRef.current.goodReps,
+            avgScore,
+            sessionHour: sessionStartHourRef.current,
+          });
+          if (result) setGamificationResult(result);
+        } catch (err) {
+          console.error('[handleStop] Gamification error (non-fatal):', err);
+        }
+      }
     }
+
     setSessionId(null);
-  }, [sessionId, feedback, stopDetection]);
+  }, [sessionId, feedback, stopDetection, user, selectedExercise, triggerGamification]);
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -319,6 +346,16 @@ export default function AnalyzePage() {
                   </a>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Modal de resultado pós-sessão com XP, badges e streak */}
+          {gamificationResult && !isRunning && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-gray-950/90 backdrop-blur-sm overflow-y-auto">
+              <SessionResultModal
+                result={gamificationResult}
+                onClose={() => setGamificationResult(null)}
+              />
             </div>
           )}
 
