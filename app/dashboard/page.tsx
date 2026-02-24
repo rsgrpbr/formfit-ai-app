@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from '@/hooks/useSession';
 import { useGamification } from '@/hooks/useGamification';
+import { useWeeklyChallenge } from '@/hooks/useWeeklyChallenge';
 import { getRecentSessionsWithExercise } from '@/lib/supabase/queries';
 import type { SessionWithExercise } from '@/lib/supabase/queries';
+import { getAllBadges } from '@/lib/supabase/gamification';
+import type { Badge } from '@/types/gamification';
 
 // ── Constantes de nível ───────────────────────────────────────────────────────
 
@@ -50,10 +53,15 @@ const LEVEL_TEXT_COLOR: Record<string, string> = {
 export default function DashboardPage() {
   const router = useRouter();
   const { user, profile, loading: sessionLoading, signOut } = useSession();
-  const { totalXp, level, nextLevel, xpToNext, streak, loading: gamLoading } = useGamification();
+  const {
+    totalXp, level, nextLevel, xpToNext, streak,
+    badges, loading: gamLoading,
+  } = useGamification();
+  const { challenge, progress, timeLeft, isCompleted, loading: chalLoading } = useWeeklyChallenge();
 
   const [sessions,     setSessions]     = useState<SessionWithExercise[]>([]);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [allBadges,    setAllBadges]    = useState<Badge[]>([]);
 
   useEffect(() => {
     if (!sessionLoading && !user) router.push('/login');
@@ -68,6 +76,10 @@ export default function DashboardPage() {
     });
   }, [user]);
 
+  useEffect(() => {
+    getAllBadges().then(setAllBadges);
+  }, []);
+
   if (sessionLoading || gamLoading || !user) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -79,11 +91,9 @@ export default function DashboardPage() {
   // ── Cálculo da barra XP ─────────────────────────────────────────────────────
   const levelStart = LEVEL_START[level] ?? 0;
   const levelEnd   = LEVEL_END[level]   ?? 500;
-  const xpInLevel  = totalXp - levelStart;
-  const xpRange    = levelEnd - levelStart;
   const xpPercent  = level === 'Elite'
     ? 100
-    : Math.min(100, Math.round((xpInLevel / xpRange) * 100));
+    : Math.min(100, Math.round(((totalXp - levelStart) / (levelEnd - levelStart)) * 100));
 
   // ── Avatar com iniciais ─────────────────────────────────────────────────────
   const displayName = profile?.full_name || user.email || 'Usuário';
@@ -113,7 +123,19 @@ export default function DashboardPage() {
     }, 0)
   );
 
-  const recentSessions = sessions.slice(0, 10);
+  // ── Badges: separar ganhos vs bloqueados ────────────────────────────────────
+  const earnedIds  = new Set(badges.map(b => b.badge_id));
+  const earnedFirst = [...allBadges].sort((a, b) => {
+    const aEarned = earnedIds.has(a.id) ? 0 : 1;
+    const bEarned = earnedIds.has(b.id) ? 0 : 1;
+    if (aEarned !== bEarned) return aEarned - bEarned;
+    return a.condition_value - b.condition_value;
+  });
+
+  // ── Desafio semanal ─────────────────────────────────────────────────────────
+  const challengePercent = challenge
+    ? Math.min(100, Math.round((progress / challenge.target_value) * 100))
+    : 0;
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
@@ -136,13 +158,11 @@ export default function DashboardPage() {
 
       <main className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full space-y-4">
 
-        {/* ── Hero card: avatar + nome + nível + streak + XP ── */}
+        {/* ── Hero: avatar + nome + nível + streak + XP bar ── */}
         <div className="bg-gray-900 rounded-2xl p-6">
           <div className="flex items-center gap-4 mb-6">
-            <div
-              className={`w-16 h-16 rounded-2xl ${avatarColor} flex items-center justify-center
-                text-2xl font-black text-white flex-shrink-0 select-none`}
-            >
+            <div className={`w-16 h-16 rounded-2xl ${avatarColor} flex items-center justify-center
+              text-2xl font-black text-white flex-shrink-0 select-none`}>
               {initials}
             </div>
             <div className="flex-1 min-w-0">
@@ -156,55 +176,145 @@ export default function DashboardPage() {
               <p className="text-xs text-gray-500 mt-1">dias seguidos</p>
             </div>
           </div>
-
           <div>
             <div className="flex justify-between text-xs text-gray-400 mb-2">
               <span>{totalXp.toLocaleString('pt-BR')} XP</span>
               {nextLevel ? (
-                <span>
-                  Faltam <strong className="text-white">{xpToNext.toLocaleString('pt-BR')} XP</strong> → {nextLevel}
-                </span>
+                <span>Faltam <strong className="text-white">{xpToNext.toLocaleString('pt-BR')} XP</strong> → {nextLevel}</span>
               ) : (
                 <span className="text-yellow-400 font-semibold">✦ Nível máximo</span>
               )}
             </div>
             <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
-              <div
-                className={`h-3 rounded-full transition-all duration-700 ${barColor}`}
-                style={{ width: `${xpPercent}%` }}
-              />
+              <div className={`h-3 rounded-full transition-all duration-700 ${barColor}`} style={{ width: `${xpPercent}%` }} />
             </div>
             {nextLevel && (
               <div className="flex justify-between text-[10px] text-gray-600 mt-1">
-                <span>{level}</span>
-                <span>{nextLevel}</span>
+                <span>{level}</span><span>{nextLevel}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── Gamificação: XP · streak atual · melhor streak ── */}
+        {/* ── Gamificação: XP · streak · melhor streak ── */}
         <div className="grid grid-cols-3 gap-3">
-          <StatCard value={totalXp.toLocaleString('pt-BR')} label="XP total"         valueClass="text-indigo-400" />
-          <StatCard value={`🔥 ${currentStreak}`}           label="Sequência"        valueClass="text-orange-400" />
-          <StatCard value={String(longestStreak)}            label="Melhor streak"    valueClass="text-purple-400" />
+          <StatCard value={totalXp.toLocaleString('pt-BR')} label="XP total"      valueClass="text-indigo-400" />
+          <StatCard value={`🔥 ${currentStreak}`}           label="Sequência"     valueClass="text-orange-400" />
+          <StatCard value={String(longestStreak)}            label="Melhor streak" valueClass="text-purple-400" />
         </div>
 
         {/* ── Sessões: total · reps · score · minutos ── */}
         {statsLoading ? (
           <div className="grid grid-cols-2 gap-3">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-gray-900 rounded-2xl p-4 h-20 animate-pulse" />
-            ))}
+            {[...Array(4)].map((_, i) => <div key={i} className="bg-gray-900 rounded-2xl p-4 h-20 animate-pulse" />)}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <StatCard value={String(totalSessions)}               label="Sessões completas" valueClass="text-green-400" />
-            <StatCard value={totalReps.toLocaleString('pt-BR')}   label="Total de reps"     valueClass="text-blue-400" />
-            <StatCard value={`${bestScore}`}                       label="Melhor score"      valueClass="text-yellow-400" />
-            <StatCard value={`${totalMinutes} min`}               label="Tempo treinado"    valueClass="text-rose-400" />
+            <StatCard value={String(totalSessions)}             label="Sessões completas" valueClass="text-green-400" />
+            <StatCard value={totalReps.toLocaleString('pt-BR')} label="Total de reps"     valueClass="text-blue-400" />
+            <StatCard value={String(bestScore)}                  label="Melhor score"      valueClass="text-yellow-400" />
+            <StatCard value={`${totalMinutes} min`}             label="Tempo treinado"    valueClass="text-rose-400" />
           </div>
         )}
+
+        {/* ── Desafio semanal ── */}
+        <div className="bg-gray-900 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-300">🏆 Desafio da semana</h2>
+            {challenge && (
+              <span className="text-xs text-gray-500">⏱ {timeLeft}</span>
+            )}
+          </div>
+
+          {chalLoading ? (
+            <div className="p-5">
+              <div className="h-16 bg-gray-800 rounded-xl animate-pulse" />
+            </div>
+          ) : !challenge ? (
+            <p className="px-5 py-6 text-sm text-gray-500 text-center">
+              Sem desafio ativo esta semana.
+            </p>
+          ) : (
+            <div className="px-5 py-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-white">{challenge.title}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{challenge.description}</p>
+                </div>
+                <span className="flex-shrink-0 px-2 py-1 rounded-lg bg-indigo-900/50 text-indigo-400 text-xs font-bold">
+                  +{challenge.xp_reward} XP
+                </span>
+              </div>
+
+              {/* Barra de progresso */}
+              <div>
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className={isCompleted ? 'text-green-400 font-semibold' : 'text-gray-400'}>
+                    {isCompleted ? '✓ Concluído!' : `${progress} / ${challenge.target_value}`}
+                  </span>
+                  <span className="text-gray-500">{challengePercent}%</span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className={`h-2.5 rounded-full transition-all duration-700 ${isCompleted ? 'bg-green-500' : 'bg-indigo-500'}`}
+                    style={{ width: `${challengePercent}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Badges ── */}
+        <div className="bg-gray-900 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-300">🏅 Conquistas</h2>
+            <span className="text-xs text-gray-500">
+              {earnedIds.size} / {allBadges.length}
+            </span>
+          </div>
+
+          {allBadges.length === 0 ? (
+            <div className="p-5">
+              <div className="grid grid-cols-4 gap-2">
+                {[...Array(8)].map((_, i) => <div key={i} className="h-20 bg-gray-800 rounded-xl animate-pulse" />)}
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 grid grid-cols-4 gap-2">
+              {earnedFirst.map(badge => {
+                const isEarned = earnedIds.has(badge.id);
+                return (
+                  <div
+                    key={badge.id}
+                    className={`rounded-xl p-2 flex flex-col items-center gap-1 text-center
+                      ${isEarned
+                        ? 'bg-indigo-900/40 border border-indigo-700/40'
+                        : 'bg-gray-800/60 border border-gray-700/40 opacity-50'
+                      }`}
+                  >
+                    <span className="text-2xl leading-none mt-1">
+                      {isEarned ? badge.icon : '🔒'}
+                    </span>
+                    <span className={`text-[10px] font-medium leading-tight line-clamp-2
+                      ${isEarned ? 'text-gray-200' : 'text-gray-500'}`}>
+                      {badge.name}
+                    </span>
+                    {isEarned ? (
+                      <span className="text-[9px] text-indigo-400 font-semibold">
+                        +{badge.xp_reward} XP
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-gray-600 leading-tight line-clamp-2">
+                        {formatCondition(badge.condition_type, badge.condition_value)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* ── Histórico: últimas 10 sessões ── */}
         <div className="bg-gray-900 rounded-2xl overflow-hidden">
@@ -214,11 +324,9 @@ export default function DashboardPage() {
 
           {statsLoading ? (
             <div className="p-5 space-y-3">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-800 rounded-xl animate-pulse" />
-              ))}
+              {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-gray-800 rounded-xl animate-pulse" />)}
             </div>
-          ) : recentSessions.length === 0 ? (
+          ) : sessions.length === 0 ? (
             <div className="px-5 py-10 text-center text-gray-500 text-sm">
               Nenhuma sessão registrada ainda.
               <br />
@@ -228,9 +336,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <ul className="divide-y divide-gray-800">
-              {recentSessions.map(s => (
-                <SessionRow key={s.id} session={s} />
-              ))}
+              {sessions.slice(0, 10).map(s => <SessionRow key={s.id} session={s} />)}
             </ul>
           )}
         </div>
@@ -251,14 +357,8 @@ export default function DashboardPage() {
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
-function StatCard({
-  value,
-  label,
-  valueClass = 'text-white',
-}: {
-  value: string;
-  label: string;
-  valueClass?: string;
+function StatCard({ value, label, valueClass = 'text-white' }: {
+  value: string; label: string; valueClass?: string;
 }) {
   return (
     <div className="bg-gray-900 rounded-2xl p-4 text-center">
@@ -276,27 +376,18 @@ function SessionRow({ session: s }: { session: SessionWithExercise }) {
 
   return (
     <li className="flex items-center gap-3 px-5 py-3">
-      {/* Data */}
       <span className="text-xs text-gray-500 w-12 flex-shrink-0 text-center">
         {formatDate(s.started_at)}
       </span>
-
-      {/* Exercício */}
       <span className="flex-1 text-sm font-medium truncate">
         {s.exercise?.name_pt ?? s.exercise_id}
       </span>
-
-      {/* Score */}
       <span className={`text-sm font-bold w-10 text-right flex-shrink-0 ${scoreClass}`}>
         {Math.round(s.avg_score)}
       </span>
-
-      {/* Reps */}
       <span className="text-xs text-gray-400 w-14 text-right flex-shrink-0">
         {s.total_reps} reps
       </span>
-
-      {/* Duração */}
       <span className="text-xs text-gray-500 w-12 text-right flex-shrink-0">
         {formatDuration(s.started_at, s.ended_at)}
       </span>
@@ -308,8 +399,7 @@ function SessionRow({ session: s }: { session: SessionWithExercise }) {
 
 function formatDate(iso: string): string {
   const d    = new Date(iso);
-  const now  = new Date();
-  const diff = Math.floor((now.getTime() - d.getTime()) / 86400000);
+  const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
   if (diff === 0) return 'Hoje';
   if (diff === 1) return 'Ontem';
   return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
@@ -322,4 +412,21 @@ function formatDuration(startedAt: string, endedAt: string | null): string {
   const min = Math.floor(sec / 60);
   const s   = sec % 60;
   return s > 0 ? `${min}m${String(s).padStart(2, '0')}s` : `${min}min`;
+}
+
+function formatCondition(type: string, value: number): string {
+  if (type === 'sessions')      return `${value} sessões`;
+  if (type === 'streak')        return `${value} dias seguidos`;
+  if (type === 'score')         return `Score ≥ ${value}`;
+  if (type === 'score_triple')  return `Score ≥ ${value} (3x)`;
+  if (type === 'total_reps')    return `${value} reps total`;
+  if (type === 'early_morning') return 'Antes das 8h';
+  const exerciseNames: Record<string, string> = {
+    exercise_squat:  'Agachamento',
+    exercise_pushup: 'Flexão',
+    exercise_plank:  'Prancha',
+    exercise_lunge:  'Afundo',
+  };
+  if (type in exerciseNames) return `${value}x ${exerciseNames[type]}`;
+  return `${value}`;
 }
