@@ -373,12 +373,20 @@ export default function AnalyzePage() {
               Entrar
             </a>
           ) : (
-            <button
-              onClick={signOut}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              Sair
-            </button>
+            <>
+              <a
+                href="/dashboard"
+                className="text-xs text-gray-400 hover:text-indigo-400 transition-colors"
+              >
+                Dashboard
+              </a>
+              <button
+                onClick={signOut}
+                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Sair
+              </button>
+            </>
           )}
         </div>
       </header>
