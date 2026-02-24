@@ -131,6 +131,36 @@ export async function getUserSessions(
   return data as Session[];
 }
 
+export interface SessionWithExercise {
+  id: string;
+  user_id: string;
+  exercise_id: string;
+  started_at: string;
+  ended_at: string | null;
+  total_reps: number;
+  good_reps: number;
+  bad_reps: number;
+  avg_score: number;
+  feedback_json: unknown;
+  exercise: { slug: string; name_pt: string } | null;
+}
+
+export async function getRecentSessionsWithExercise(
+  userId: string,
+  limit = 50
+): Promise<SessionWithExercise[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('*, exercise:exercises(slug, name_pt)')
+    .eq('user_id', userId)
+    .not('ended_at', 'is', null)
+    .order('started_at', { ascending: false })
+    .limit(limit);
+  if (error) { console.error('[getRecentSessionsWithExercise]', error.message); return []; }
+  return (data ?? []) as SessionWithExercise[];
+}
+
 // ── Subscription ──────────────────────────────────────────
 
 export async function getUserSubscription(userId: string) {
