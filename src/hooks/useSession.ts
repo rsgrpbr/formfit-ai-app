@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { Profile } from '@/lib/supabase/queries';
 import { getProfile, updateProfile } from '@/lib/supabase/queries';
+import { detectLocale } from '@/lib/detectLocale';
 
 interface UseSessionReturn {
   user: User | null;
@@ -13,16 +14,33 @@ interface UseSessionReturn {
   signOut: () => Promise<void>;
 }
 
-// Se o profile não tiver full_name mas o user_metadata tiver, sincroniza.
+// Carrega o profile e aplica sincronizações automáticas:
+//   1. locale vazio → detecta pelo navigator.language e salva
+//   2. full_name vazio mas presente no user_metadata → sincroniza
 async function loadProfile(user: User): Promise<Profile | null> {
   const profile = await getProfile(user.id);
-  if (profile && !profile.full_name) {
-    const metaName = (user.user_metadata as Record<string, string | undefined>)?.full_name?.trim();
-    if (metaName) {
-      await updateProfile(user.id, { full_name: metaName });
-      return { ...profile, full_name: metaName };
-    }
+  if (!profile) return null;
+
+  const updates: Partial<Pick<Profile, 'full_name' | 'locale'>> = {};
+
+  // 1. Auto-detect locale se o profile não tiver idioma definido
+  if (!profile.locale) {
+    updates.locale = detectLocale(
+      typeof navigator !== 'undefined' ? (navigator.language ?? 'en') : 'en'
+    );
   }
+
+  // 2. Sincroniza full_name do user_metadata
+  if (!profile.full_name) {
+    const metaName = (user.user_metadata as Record<string, string | undefined>)?.full_name?.trim();
+    if (metaName) updates.full_name = metaName;
+  }
+
+  if (Object.keys(updates).length > 0) {
+    await updateProfile(user.id, updates);
+    return { ...profile, ...updates };
+  }
+
   return profile;
 }
 
