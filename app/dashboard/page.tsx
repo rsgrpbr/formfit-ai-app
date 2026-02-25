@@ -3,9 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { useGamification } from '@/hooks/useGamification';
 import { useWeeklyChallenge } from '@/hooks/useWeeklyChallenge';
+import { useLocale } from '@/providers/I18nProvider';
+import type { Locale } from '@/providers/I18nProvider';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import { getRecentSessionsWithExercise } from '@/lib/supabase/queries';
 import type { SessionWithExercise } from '@/lib/supabase/queries';
 import { getAllBadges } from '@/lib/supabase/gamification';
@@ -52,7 +56,10 @@ const LEVEL_TEXT_COLOR: Record<string, string> = {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const t = useTranslations('dashboard');
+
   const { user, profile, loading: sessionLoading, signOut } = useSession();
+  const { locale, setLocale } = useLocale();
   const {
     totalXp, level, nextLevel, xpToNext, streak,
     badges, loading: gamLoading,
@@ -62,6 +69,13 @@ export default function DashboardPage() {
   const [sessions,     setSessions]     = useState<SessionWithExercise[]>([]);
   const [statsLoading, setStatsLoading] = useState(false);
   const [allBadges,    setAllBadges]    = useState<Badge[]>([]);
+
+  // Sync locale from profile
+  useEffect(() => {
+    if (profile?.locale && profile.locale !== locale) {
+      setLocale(profile.locale as Locale);
+    }
+  }, [profile?.locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!sessionLoading && !user) router.push('/login');
@@ -150,13 +164,13 @@ export default function DashboardPage() {
         <Link href="/" className="text-xl font-bold tracking-tight">FormFit AI</Link>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/analyze" className="text-gray-400 hover:text-white transition-colors">
-            Treinar
+            {t('train')}
           </Link>
           <button
             onClick={signOut}
             className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
-            Sair
+            {t('sign_out')}
           </button>
         </div>
       </header>
@@ -178,16 +192,18 @@ export default function DashboardPage() {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-3xl font-black leading-none">🔥 {currentStreak}</p>
-              <p className="text-xs text-gray-500 mt-1">dias seguidos</p>
+              <p className="text-xs text-gray-500 mt-1">{t('days_in_a_row')}</p>
             </div>
           </div>
           <div>
             <div className="flex justify-between text-xs text-gray-400 mb-2">
-              <span>{totalXp.toLocaleString('pt-BR')} XP</span>
+              <span>{totalXp.toLocaleString()} XP</span>
               {nextLevel ? (
-                <span>Faltam <strong className="text-white">{xpToNext.toLocaleString('pt-BR')} XP</strong> → {nextLevel}</span>
+                <span>
+                  {t('xp_needed', { xp: xpToNext.toLocaleString(), level: nextLevel })}
+                </span>
               ) : (
-                <span className="text-yellow-400 font-semibold">✦ Nível máximo</span>
+                <span className="text-yellow-400 font-semibold">✦ {t('max_level')}</span>
               )}
             </div>
             <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
@@ -199,13 +215,18 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* Seletor de idioma */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <LanguageSelector userId={user.id} />
+          </div>
         </div>
 
         {/* ── Gamificação: XP · streak · melhor streak ── */}
         <div className="grid grid-cols-3 gap-3">
-          <StatCard value={totalXp.toLocaleString('pt-BR')} label="XP total"      valueClass="text-indigo-400" />
-          <StatCard value={`🔥 ${currentStreak}`}           label="Sequência"     valueClass="text-orange-400" />
-          <StatCard value={String(longestStreak)}            label="Melhor streak" valueClass="text-purple-400" />
+          <StatCard value={totalXp.toLocaleString()} label={t('stat_xp_total')}      valueClass="text-indigo-400" />
+          <StatCard value={`🔥 ${currentStreak}`}    label={t('stat_streak')}         valueClass="text-orange-400" />
+          <StatCard value={String(longestStreak)}     label={t('stat_best_streak')}    valueClass="text-purple-400" />
         </div>
 
         {/* ── Sessões: total · reps · score · minutos ── */}
@@ -215,17 +236,17 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <StatCard value={String(totalSessions)}             label="Sessões completas" valueClass="text-green-400" />
-            <StatCard value={totalReps.toLocaleString('pt-BR')} label="Total de reps"     valueClass="text-blue-400" />
-            <StatCard value={String(bestScore)}                  label="Melhor score"      valueClass="text-yellow-400" />
-            <StatCard value={`${totalMinutes} min`}             label="Tempo treinado"    valueClass="text-rose-400" />
+            <StatCard value={String(totalSessions)}   label={t('stat_sessions')}    valueClass="text-green-400" />
+            <StatCard value={totalReps.toLocaleString()} label={t('stat_total_reps')} valueClass="text-blue-400" />
+            <StatCard value={String(bestScore)}        label={t('stat_best_score')}  valueClass="text-yellow-400" />
+            <StatCard value={`${totalMinutes} ${t('minutes_unit')}`} label={t('stat_time_trained')} valueClass="text-rose-400" />
           </div>
         )}
 
         {/* ── Desafio semanal ── */}
         <div className="bg-gray-900 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-300">🏆 Desafio da semana</h2>
+            <h2 className="text-sm font-semibold text-gray-300">🏆 {t('weekly_challenge')}</h2>
             {challenge && (
               <span className="text-xs text-gray-500">⏱ {timeLeft}</span>
             )}
@@ -237,7 +258,7 @@ export default function DashboardPage() {
             </div>
           ) : !challenge ? (
             <p className="px-5 py-6 text-sm text-gray-500 text-center">
-              Sem desafio ativo esta semana.
+              {t('no_challenge')}
             </p>
           ) : (
             <div className="px-5 py-4 space-y-3">
@@ -255,7 +276,7 @@ export default function DashboardPage() {
               <div>
                 <div className="flex justify-between text-xs mb-1.5">
                   <span className={isCompleted ? 'text-green-400 font-semibold' : 'text-gray-400'}>
-                    {isCompleted ? '✓ Concluído!' : `${progress} / ${challenge.target_value}`}
+                    {isCompleted ? t('completed') : `${progress} / ${challenge.target_value}`}
                   </span>
                   <span className="text-gray-500">{challengePercent}%</span>
                 </div>
@@ -273,7 +294,7 @@ export default function DashboardPage() {
         {/* ── Badges ── */}
         <div className="bg-gray-900 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-800 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-gray-300">🏅 Conquistas</h2>
+            <h2 className="text-sm font-semibold text-gray-300">🏅 {t('achievements')}</h2>
             <span className="text-xs text-gray-500">
               {earnedIds.size} / {allBadges.length}
             </span>
@@ -311,7 +332,7 @@ export default function DashboardPage() {
                       </span>
                     ) : (
                       <span className="text-[9px] text-gray-600 leading-tight line-clamp-2">
-                        {formatCondition(badge.condition_type, badge.condition_value)}
+                        {formatCondition(badge.condition_type, badge.condition_value, t)}
                       </span>
                     )}
                   </div>
@@ -324,7 +345,7 @@ export default function DashboardPage() {
         {/* ── Histórico: últimas 10 sessões ── */}
         <div className="bg-gray-900 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-800">
-            <h2 className="text-sm font-semibold text-gray-300">Últimas sessões</h2>
+            <h2 className="text-sm font-semibold text-gray-300">{t('recent_sessions')}</h2>
           </div>
 
           {statsLoading ? (
@@ -333,15 +354,15 @@ export default function DashboardPage() {
             </div>
           ) : sessions.length === 0 ? (
             <div className="px-5 py-10 text-center text-gray-500 text-sm">
-              Nenhuma sessão registrada ainda.
+              {t('no_sessions')}
               <br />
               <Link href="/analyze" className="text-indigo-400 hover:text-indigo-300 mt-2 inline-block">
-                Começar agora →
+                {t('start_now')}
               </Link>
             </div>
           ) : (
             <ul className="divide-y divide-gray-800">
-              {sessions.slice(0, 10).map(s => <SessionRow key={s.id} session={s} />)}
+              {sessions.slice(0, 10).map(s => <SessionRow key={s.id} session={s} t={t} />)}
             </ul>
           )}
         </div>
@@ -352,7 +373,7 @@ export default function DashboardPage() {
           className="block w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500
             font-bold text-lg text-center transition-all active:scale-95"
         >
-          ▶ Iniciar treino
+          {t('start_workout')}
         </Link>
 
       </main>
@@ -373,7 +394,10 @@ function StatCard({ value, label, valueClass = 'text-white' }: {
   );
 }
 
-function SessionRow({ session: s }: { session: SessionWithExercise }) {
+function SessionRow({ session: s, t }: {
+  session: SessionWithExercise;
+  t: (key: string) => string;
+}) {
   const scoreClass =
     s.avg_score >= 80 ? 'text-green-400' :
     s.avg_score >= 60 ? 'text-yellow-400' :
@@ -382,7 +406,7 @@ function SessionRow({ session: s }: { session: SessionWithExercise }) {
   return (
     <li className="flex items-center gap-3 px-5 py-3">
       <span className="text-xs text-gray-500 w-12 flex-shrink-0 text-center">
-        {formatDate(s.started_at)}
+        {formatDate(s.started_at, t)}
       </span>
       <span className="flex-1 text-sm font-medium truncate">
         {s.exercise?.name_pt ?? s.exercise_id}
@@ -402,11 +426,11 @@ function SessionRow({ session: s }: { session: SessionWithExercise }) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, t: (key: string) => string): string {
   const d    = new Date(iso);
   const diff = Math.floor((Date.now() - d.getTime()) / 86400000);
-  if (diff === 0) return 'Hoje';
-  if (diff === 1) return 'Ontem';
+  if (diff === 0) return t('today');
+  if (diff === 1) return t('yesterday');
   return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
 }
 
@@ -419,19 +443,23 @@ function formatDuration(startedAt: string, endedAt: string | null): string {
   return s > 0 ? `${min}m${String(s).padStart(2, '0')}s` : `${min}min`;
 }
 
-function formatCondition(type: string, value: number): string {
-  if (type === 'sessions')      return `${value} sessões`;
-  if (type === 'streak')        return `${value} dias seguidos`;
-  if (type === 'score')         return `Score ≥ ${value}`;
-  if (type === 'score_triple')  return `Score ≥ ${value} (3x)`;
-  if (type === 'total_reps')    return `${value} reps total`;
-  if (type === 'early_morning') return 'Antes das 8h';
+function formatCondition(
+  type: string,
+  value: number,
+  t: (key: string, values?: Record<string, string | number>) => string
+): string {
+  if (type === 'sessions')      return t('cond_sessions', { value });
+  if (type === 'streak')        return t('cond_streak', { value });
+  if (type === 'score')         return t('cond_score', { value });
+  if (type === 'score_triple')  return t('cond_score_triple', { value });
+  if (type === 'total_reps')    return t('cond_total_reps', { value });
+  if (type === 'early_morning') return t('cond_early_morning');
   const exerciseNames: Record<string, string> = {
     exercise_squat:  'Agachamento',
     exercise_pushup: 'Flexão',
     exercise_plank:  'Prancha',
     exercise_lunge:  'Afundo',
   };
-  if (type in exerciseNames) return `${value}x ${exerciseNames[type]}`;
+  if (type in exerciseNames) return t('cond_exercise_times', { value, name: exerciseNames[type] });
   return `${value}`;
 }

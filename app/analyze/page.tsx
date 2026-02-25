@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import CameraFeed from '@/components/camera/CameraFeed';
 import PoseOverlay from '@/components/camera/PoseOverlay';
 import SessionResultModal from '@/components/gamification/SessionResultModal';
@@ -9,6 +10,8 @@ import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
 import { usePlan, FREE_MONTHLY_LIMIT } from '@/hooks/usePlan';
 import { useGamification } from '@/hooks/useGamification';
+import { useLocale } from '@/providers/I18nProvider';
+import type { Locale } from '@/providers/I18nProvider';
 import { redirectToCheckout } from '@/lib/perfectpay';
 import type { GamificationResult } from '@/types/gamification';
 import { computeJointAngles } from '@/lib/angles/joints';
@@ -46,16 +49,16 @@ interface SessionStats {
 
 // ── Constantes ───────────────────────────────────────────────────────────────
 
-const EXERCISES: { slug: ExerciseSlug; label: string; icon: string; group: 'gym' | 'home' }[] = [
-  { slug: 'squat',           label: 'Agachamento',    icon: '🦵', group: 'gym'  },
-  { slug: 'pushup',          label: 'Flexão',         icon: '💪', group: 'gym'  },
-  { slug: 'plank',           label: 'Prancha',        icon: '🏋️', group: 'gym'  },
-  { slug: 'lunge',           label: 'Afundo',         icon: '🚶', group: 'gym'  },
-  { slug: 'glute_bridge',    label: 'Elev. Quadril',  icon: '🍑', group: 'home' },
-  { slug: 'side_plank',      label: 'Prancha Lat.',   icon: '⬛', group: 'home' },
-  { slug: 'superman',        label: 'Superman',       icon: '🦸', group: 'home' },
-  { slug: 'mountain_climber',label: 'Escalada',       icon: '🏔️', group: 'home' },
-  { slug: 'burpee',          label: 'Burpee',         icon: '💥', group: 'home' },
+const EXERCISES: { slug: ExerciseSlug; icon: string; group: 'gym' | 'home' }[] = [
+  { slug: 'squat',            icon: '🦵', group: 'gym'  },
+  { slug: 'pushup',           icon: '💪', group: 'gym'  },
+  { slug: 'plank',            icon: '🏋️', group: 'gym'  },
+  { slug: 'lunge',            icon: '🚶', group: 'gym'  },
+  { slug: 'glute_bridge',     icon: '🍑', group: 'home' },
+  { slug: 'side_plank',       icon: '⬛', group: 'home' },
+  { slug: 'superman',         icon: '🦸', group: 'home' },
+  { slug: 'mountain_climber', icon: '🏔️', group: 'home' },
+  { slug: 'burpee',           icon: '💥', group: 'home' },
 ];
 
 const VIDEO_W = 640;
@@ -64,11 +67,22 @@ const VIDEO_H = 480;
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export default function AnalyzePage() {
+  const t = useTranslations('analyze');
+  const tEx = useTranslations('exercises');
+
   const { user, profile, signOut } = useSession();
+  const { locale, setLocale } = useLocale();
   const { landmarks, isReady, error: poseError, startDetection, stopDetection } = usePoseDetection();
-  const { speak, isSpeaking } = useVoiceCoach({ locale: profile?.locale ?? 'pt', enabled: true });
+  const { speak, isSpeaking } = useVoiceCoach({ locale, enabled: true });
   const { plan, canAnalyze, monthlyCount, loading: planLoading } = usePlan();
   const { triggerGamification } = useGamification();
+
+  // Sync locale from profile
+  useEffect(() => {
+    if (profile?.locale && profile.locale !== locale) {
+      setLocale(profile.locale as Locale);
+    }
+  }, [profile?.locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Estado da sessão
   const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>('squat');
@@ -88,6 +102,8 @@ export default function AnalyzePage() {
   const timerRef           = useRef<ReturnType<typeof setInterval> | null>(null);
   const plankStart         = useRef<number>(0);
   const sessionStartHourRef = useRef<number>(0);
+  const localeRef          = useRef<string>(locale);
+  localeRef.current = locale;
 
   // Limpa o errorTracker ao trocar de exercício
   useEffect(() => {
@@ -100,13 +116,12 @@ export default function AnalyzePage() {
     if (!isRunning || !landmarks) return;
 
     const angles  = computeJointAngles(landmarks);
-    const locale  = profile?.locale ?? 'pt';
     const tracker = errorTrackerRef.current;
 
     const speakFeedback = (keys: string[]) => {
       const key = keys[0];
       if (!key) return;
-      const text = getFeedbackText(key, locale);
+      const text = getFeedbackText(key, localeRef.current);
       if (text) speak(text, key.startsWith('general.') ? 'high' : 'low');
     };
 
@@ -247,7 +262,7 @@ export default function AnalyzePage() {
       }
       speakFeedback(result.feedback);
     }
-  }, [landmarks, isRunning, selectedExercise, speak, profile?.locale]);
+  }, [landmarks, isRunning, selectedExercise, speak]);
 
   // ── Timer ─────────────────────────────────────────────────────────────────
 
@@ -290,8 +305,9 @@ export default function AnalyzePage() {
     }
 
     setIsRunning(true);
-    speak('Vamos começar! Posicione-se na câmera.', 'high');
-  }, [user, selectedExercise, speak]);
+    const startText = getFeedbackText('general.session_start', localeRef.current);
+    speak(startText, 'high');
+  }, [user, selectedExercise, speak, canAnalyze]);
 
   const handleStop = useCallback(async () => {
     setIsRunning(false);
@@ -362,7 +378,7 @@ export default function AnalyzePage() {
           )}
           {!planLoading && plan === 'free' && (
             <a href="/pricing" className="text-xs text-gray-500 hover:text-indigo-400 transition-colors">
-              {monthlyCount}/{FREE_MONTHLY_LIMIT} análises
+              {t('analyses_count', { count: monthlyCount, limit: FREE_MONTHLY_LIMIT })}
             </a>
           )}
           {!user ? (
@@ -370,7 +386,7 @@ export default function AnalyzePage() {
               href="/login"
               className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all"
             >
-              Entrar
+              {t('enter')}
             </a>
           ) : (
             <>
@@ -378,13 +394,13 @@ export default function AnalyzePage() {
                 href="/dashboard"
                 className="text-xs text-gray-400 hover:text-indigo-400 transition-colors"
               >
-                Dashboard
+                {t('dashboard_link')}
               </a>
               <button
                 onClick={signOut}
                 className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
               >
-                Sair
+                {t('sign_out')}
               </button>
             </>
           )}
@@ -420,7 +436,7 @@ export default function AnalyzePage() {
             <div className="absolute inset-0 flex items-center justify-center bg-gray-950/80">
               <div className="text-center">
                 <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-gray-300 text-sm">Carregando MediaPipe…</p>
+                <p className="text-gray-300 text-sm">{t('loading')}</p>
               </div>
             </div>
           )}
@@ -436,10 +452,9 @@ export default function AnalyzePage() {
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-950/90 backdrop-blur-sm">
               <div className="bg-gray-900 rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
                 <p className="text-3xl mb-3">🔒</p>
-                <h3 className="text-lg font-bold mb-2">Limite atingido</h3>
+                <h3 className="text-lg font-bold mb-2">{t('limit_title')}</h3>
                 <p className="text-gray-400 text-sm mb-5">
-                  Você usou <span className="text-white font-semibold">{monthlyCount}/{FREE_MONTHLY_LIMIT}</span> análises
-                  gratuitas este mês. Faça upgrade para continuar.
+                  {t('limit_desc', { count: monthlyCount, limit: FREE_MONTHLY_LIMIT })}
                 </p>
                 <div className="flex flex-col gap-2">
                   <button
@@ -447,13 +462,13 @@ export default function AnalyzePage() {
                     disabled={!user}
                     className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-semibold text-sm transition-all active:scale-95 disabled:opacity-50"
                   >
-                    Pro — R$ 29,90/mês
+                    {t('upgrade_pro')}
                   </button>
                   <a
                     href="/pricing"
                     className="text-sm text-gray-400 hover:text-white transition-colors py-2"
                   >
-                    Ver todos os planos →
+                    {t('see_all_plans')}
                   </a>
                 </div>
               </div>
@@ -475,7 +490,7 @@ export default function AnalyzePage() {
             <div className="absolute bottom-4 left-4 right-16 space-y-1">
               {errorFeedback.slice(0, 2).map(key => (
                 <div key={key} className="bg-black/70 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-yellow-300">
-                  ⚠ {getFeedbackText(key, profile?.locale ?? 'pt')}
+                  ⚠ {getFeedbackText(key, locale)}
                 </div>
               ))}
             </div>
@@ -487,16 +502,17 @@ export default function AnalyzePage() {
           {/* Seleção de exercício */}
           <div className="bg-gray-900 rounded-2xl p-4">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Exercício
+              {t('exercise_label')}
             </h2>
 
             {/* Academia */}
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏋️ Academia</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏋️ {t('group_gym')}</p>
             <div className="grid grid-cols-2 gap-2 mb-4">
               {EXERCISES.filter(e => e.group === 'gym').map(ex => (
                 <ExerciseButton
                   key={ex.slug}
                   ex={ex}
+                  label={tEx(ex.slug)}
                   selected={selectedExercise === ex.slug}
                   disabled={isRunning}
                   onClick={() => setSelectedExercise(ex.slug)}
@@ -505,12 +521,13 @@ export default function AnalyzePage() {
             </div>
 
             {/* Casa */}
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏠 Em casa</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏠 {t('group_home')}</p>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {EXERCISES.filter(e => e.group === 'home').map(ex => (
                 <ExerciseButton
                   key={ex.slug}
                   ex={ex}
+                  label={tEx(ex.slug)}
                   selected={selectedExercise === ex.slug}
                   disabled={isRunning}
                   onClick={() => setSelectedExercise(ex.slug)}
@@ -522,14 +539,14 @@ export default function AnalyzePage() {
           {/* Estatísticas da sessão */}
           <div className="bg-gray-900 rounded-2xl p-4">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Sessão
+              {t('session_label')}
             </h2>
             <div className="grid grid-cols-2 gap-3">
-              <Stat label="Tempo"       value={formatTime(elapsed)} />
-              <Stat label="Reps"        value={String(stats.totalReps)} />
-              <Stat label="Boas"        value={String(stats.goodReps)}  color="text-green-400" />
-              <Stat label="Corrigir"    value={String(stats.badReps)}   color="text-red-400" />
-              <Stat label="Pontuação"   value={isRunning ? String(score) : String(avgScore)} className="col-span-2" />
+              <Stat label={t('stat_time')}  value={formatTime(elapsed)} />
+              <Stat label={t('stat_reps')}  value={String(stats.totalReps)} />
+              <Stat label={t('stat_good')}  value={String(stats.goodReps)}  color="text-green-400" />
+              <Stat label={t('stat_fix')}   value={String(stats.badReps)}   color="text-red-400" />
+              <Stat label={t('stat_score')} value={isRunning ? String(score) : String(avgScore)} className="col-span-2" />
             </div>
           </div>
 
@@ -539,7 +556,7 @@ export default function AnalyzePage() {
               href="/pricing"
               className="w-full py-4 rounded-2xl font-bold text-lg text-center transition-all active:scale-95 bg-yellow-500 hover:bg-yellow-400 text-gray-900 block"
             >
-              🔒 Ver planos
+              🔒 {t('see_plans')}
             </a>
           ) : (
             <button
@@ -552,13 +569,13 @@ export default function AnalyzePage() {
                 }
                 disabled:opacity-40 disabled:cursor-not-allowed`}
             >
-              {isRunning ? '⏹ Parar sessão' : '▶ Iniciar sessão'}
+              {isRunning ? `⏹ ${t('stop_session')}` : `▶ ${t('start_session')}`}
             </button>
           )}
 
           {!user && (
             <p className="text-center text-xs text-gray-500">
-              Faça login para salvar seu histórico.
+              {t('login_to_save')}
             </p>
           )}
         </aside>
@@ -567,7 +584,7 @@ export default function AnalyzePage() {
       {/* Botão esqueleto — fixed no viewport, z-[9999], independente de qualquer filho */}
       <button
         onClick={() => setShowSkeleton(v => !v)}
-        title={showSkeleton ? 'Ocultar esqueleto' : 'Mostrar esqueleto'}
+        title={showSkeleton ? t('hide_skeleton') : t('show_skeleton')}
         className={`fixed bottom-6 right-4 z-[9999]
           min-w-[48px] min-h-[48px] px-4 py-3
           rounded-xl text-sm font-semibold
@@ -588,11 +605,13 @@ export default function AnalyzePage() {
 
 function ExerciseButton({
   ex,
+  label,
   selected,
   disabled,
   onClick,
 }: {
-  ex: { slug: string; label: string; icon: string };
+  ex: { slug: string; icon: string };
+  label: string;
   selected: boolean;
   disabled: boolean;
   onClick: () => void;
@@ -609,7 +628,7 @@ function ExerciseButton({
         disabled:opacity-50 disabled:cursor-not-allowed`}
     >
       <span className="text-xl">{ex.icon}</span>
-      <span className="text-xs leading-tight text-center">{ex.label}</span>
+      <span className="text-xs leading-tight text-center">{label}</span>
     </button>
   );
 }
@@ -633,12 +652,13 @@ function Stat({
   );
 }
 
-// ── Mapa de feedback → texto ──────────────────────────────────────────────────
+// ── Mapa de feedback → texto (4 idiomas) ──────────────────────────────────────
 
 const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
   pt: {
     'general.perfect_form':      'Execução perfeita!',
     'general.rep_complete':      'Repetição completa!',
+    'general.session_start':     'Vamos começar! Posicione-se na câmera.',
     'squat.knees_over_toes':     'Joelhos ultrapassando os pés.',
     'squat.go_deeper':           'Desça mais! Abaixo de 90 graus.',
     'squat.keep_back_straight':  'Mantenha as costas retas.',
@@ -667,6 +687,7 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
   en: {
     'general.perfect_form':      'Perfect form!',
     'general.rep_complete':      'Rep complete!',
+    'general.session_start':     "Let's go! Position yourself in front of the camera.",
     'squat.knees_over_toes':     'Knees past your toes.',
     'squat.go_deeper':           'Go deeper! Below 90 degrees.',
     'squat.keep_back_straight':  'Keep your back straight.',
@@ -683,14 +704,72 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'glute_bridge.hip_asymmetry':        'Uneven hips — align both sides.',
     'glute_bridge.feet_too_wide':        'Bring feet closer — hip width.',
     'side_plank.hip_too_high':           'Lower your hips slightly.',
-    'side_plank.hip_dropping':           'Raise your hips — don\'t let them drop.',
+    'side_plank.hip_dropping':           "Raise your hips — don't let them drop.",
     'side_plank.neck_dropped':           'Keep your neck aligned.',
     'superman.hold_position':            'Lift both arms and legs off the floor.',
     'superman.only_arms':                'Lift your legs too.',
-    'superman.head_too_high':            'Don\'t force your neck back.',
+    'superman.head_too_high':            "Don't force your neck back.",
     'mountain_climber.hip_too_high':     'Lower your hips — no piking.',
     'mountain_climber.hip_sagging':      'Raise your hips — keep plank form.',
     'burpee.arched_back':                'Keep your core tight in plank.',
+  },
+  es: {
+    'general.perfect_form':      '¡Forma perfecta!',
+    'general.rep_complete':      '¡Repetición completa!',
+    'general.session_start':     '¡Vamos! Colócate frente a la cámara.',
+    'squat.knees_over_toes':     'Rodillas pasando los pies.',
+    'squat.go_deeper':           '¡Baja más! Menos de 90 grados.',
+    'squat.keep_back_straight':  'Mantén la espalda recta.',
+    'pushup.keep_body_straight': 'Mantén el cuerpo alineado.',
+    'pushup.go_lower':           '¡Baja más! Codos a 90 grados.',
+    'pushup.align_elbows':       'Alinea los codos.',
+    'plank.lower_hips':          'Baja las caderas.',
+    'plank.raise_hips':          'Sube las caderas.',
+    'plank.level_shoulders':     'Nivela los hombros.',
+    'lunge.knee_over_toe':               'Rodilla demasiado adelantada.',
+    'lunge.keep_torso_upright':          'Mantén el torso erguido.',
+    'lunge.go_deeper':                   '¡Baja más!',
+    'glute_bridge.low_hips':             'Sube más las caderas.',
+    'glute_bridge.hip_asymmetry':        'Caderas desniveladas — alinea los lados.',
+    'glute_bridge.feet_too_wide':        'Cierra los pies — ancho de caderas.',
+    'side_plank.hip_too_high':           'Baja un poco las caderas.',
+    'side_plank.hip_dropping':           'Sube las caderas — no las dejes caer.',
+    'side_plank.neck_dropped':           'Mantén el cuello alineado.',
+    'superman.hold_position':            'Levanta brazos y piernas del suelo.',
+    'superman.only_arms':                'Levanta también las piernas.',
+    'superman.head_too_high':            'No fuerces el cuello hacia atrás.',
+    'mountain_climber.hip_too_high':     'Baja las caderas — sin pike.',
+    'mountain_climber.hip_sagging':      'Sube las caderas — mantén la plancha.',
+    'burpee.arched_back':                'Mantén el core apretado en la plancha.',
+  },
+  fr: {
+    'general.perfect_form':      'Forme parfaite !',
+    'general.rep_complete':      'Répétition complète !',
+    'general.session_start':     "C'est parti ! Positionnez-vous devant la caméra.",
+    'squat.knees_over_toes':     'Genoux au-delà des pieds.',
+    'squat.go_deeper':           'Descendez plus ! Moins de 90 degrés.',
+    'squat.keep_back_straight':  'Gardez le dos droit.',
+    'pushup.keep_body_straight': 'Gardez le corps aligné.',
+    'pushup.go_lower':           'Descendez plus ! Coudes à 90 degrés.',
+    'pushup.align_elbows':       'Alignez les coudes.',
+    'plank.lower_hips':          'Abaissez les hanches.',
+    'plank.raise_hips':          'Levez les hanches.',
+    'plank.level_shoulders':     'Nivélez les épaules.',
+    'lunge.knee_over_toe':               'Genou trop en avant.',
+    'lunge.keep_torso_upright':          'Gardez le torse droit.',
+    'lunge.go_deeper':                   'Descendez plus !',
+    'glute_bridge.low_hips':             'Poussez les hanches plus haut.',
+    'glute_bridge.hip_asymmetry':        'Hanches inégales — alignez les deux côtés.',
+    'glute_bridge.feet_too_wide':        'Rapprochez les pieds — largeur des hanches.',
+    'side_plank.hip_too_high':           'Abaissez légèrement les hanches.',
+    'side_plank.hip_dropping':           'Levez les hanches — ne les laissez pas tomber.',
+    'side_plank.neck_dropped':           'Gardez le cou aligné.',
+    'superman.hold_position':            'Levez les bras et les jambes du sol.',
+    'superman.only_arms':                'Levez aussi les jambes.',
+    'superman.head_too_high':            'Ne forcez pas le cou en arrière.',
+    'mountain_climber.hip_too_high':     'Abaissez les hanches — pas de pic.',
+    'mountain_climber.hip_sagging':      'Levez les hanches — maintenez la planche.',
+    'burpee.arched_back':                'Gardez le corps droit en planche.',
   },
 };
 

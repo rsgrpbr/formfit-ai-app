@@ -1,7 +1,26 @@
 {
-  "app": { "name": "FormFit AI", "tagline": "Votre coach personnel IA" },
-  "nav": { "home": "Accueil", "analyze": "Analyser", "history": "Historique", "profile": "Profil", "pricing": "Tarifs" },
-  "exercises": { "squat": "Squat", "pushup": "Pompe", "plank": "Planche", "lunge": "Fente" },
+  "app": {
+    "name": "FormFit AI",
+    "tagline": "Votre coach personnel IA"
+  },
+  "nav": {
+    "home": "Accueil",
+    "analyze": "Analyser",
+    "history": "Historique",
+    "profile": "Profil",
+    "pricing": "Tarifs"
+  },
+  "exercises": {
+    "squat": "Squat",
+    "pushup": "Pompe",
+    "plank": "Planche",
+    "lunge": "Fente",
+    "glute_bridge": "Pont fessier",
+    "side_plank": "Planche latérale",
+    "superman": "Superman",
+    "mountain_climber": "Grimpeur",
+    "burpee": "Burpee"
+  },
   "feedback": {
     "squat": {
       "knees_over_toes": "Genoux au-delà des pieds. Reculez légèrement.",
@@ -31,6 +50,95 @@
       "rest": "Reposez-vous un moment."
     }
   },
-  "session": { "reps": "Répétitions", "score": "Score", "time": "Temps", "start": "Démarrer", "stop": "Arrêter", "pause": "Pause", "resume": "Reprendre" },
-  "auth": { "sign_in": "Se connecter", "sign_up": "S'inscrire", "sign_out": "Se déconnecter", "email": "E-mail", "password": "Mot de passe", "forgot_password": "Mot de passe oublié ?" }
+  "analyze": {
+    "exercise_label": "Exercice",
+    "group_gym": "Salle de sport",
+    "group_home": "À la maison",
+    "session_label": "Séance",
+    "stat_time": "Temps",
+    "stat_reps": "Reps",
+    "stat_good": "Bonnes",
+    "stat_fix": "Corriger",
+    "stat_score": "Score",
+    "start_session": "Démarrer la séance",
+    "stop_session": "Arrêter la séance",
+    "see_plans": "Voir les forfaits",
+    "loading": "Chargement de MediaPipe…",
+    "login_to_save": "Connectez-vous pour sauvegarder votre historique.",
+    "show_skeleton": "Afficher le squelette",
+    "hide_skeleton": "Masquer le squelette",
+    "analyses_count": "{count}/{limit} analyses",
+    "limit_title": "Limite atteinte",
+    "limit_desc": "Vous avez utilisé {count}/{limit} analyses gratuites ce mois-ci. Passez à la version Pro pour continuer.",
+    "upgrade_pro": "Pro — 9,90 €/mois",
+    "see_all_plans": "Voir tous les forfaits →",
+    "enter": "Se connecter",
+    "dashboard_link": "Tableau de bord",
+    "sign_out": "Se déconnecter"
+  },
+  "dashboard": {
+    "train": "S'entraîner",
+    "sign_out": "Se déconnecter",
+    "days_in_a_row": "jours consécutifs",
+    "xp_needed": "Encore {xp} XP → {level}",
+    "max_level": "Niveau maximum atteint",
+    "stat_xp_total": "XP total",
+    "stat_streak": "Série",
+    "stat_best_streak": "Meilleure série",
+    "stat_sessions": "Séances complètes",
+    "stat_total_reps": "Total de reps",
+    "stat_best_score": "Meilleur score",
+    "stat_time_trained": "Temps d'entraînement",
+    "minutes_unit": "min",
+    "weekly_challenge": "Défi de la semaine",
+    "no_challenge": "Aucun défi actif cette semaine.",
+    "completed": "✓ Terminé !",
+    "achievements": "Succès",
+    "recent_sessions": "Séances récentes",
+    "no_sessions": "Aucune séance enregistrée pour l'instant.",
+    "start_now": "Commencer maintenant →",
+    "start_workout": "▶ Démarrer l'entraînement",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "cond_sessions": "{value} séances",
+    "cond_streak": "{value} jours consécutifs",
+    "cond_score": "Score ≥ {value}",
+    "cond_score_triple": "Score ≥ {value} (3x)",
+    "cond_total_reps": "{value} reps au total",
+    "cond_early_morning": "Avant 8h",
+    "cond_exercise_times": "{value}x {name}",
+    "language": "Langue"
+  },
+  "session": {
+    "reps": "Répétitions",
+    "score": "Score",
+    "time": "Temps",
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "pause": "Pause",
+    "resume": "Reprendre"
+  },
+  "subscription": {
+    "free": "Gratuit",
+    "pro": "Pro",
+    "annual": "Annuel",
+    "upgrade": "Passer à Pro",
+    "limit_reached": "Limite de séances atteinte. Passez à Pro pour continuer."
+  },
+  "auth": {
+    "sign_in": "Se connecter",
+    "sign_up": "S'inscrire",
+    "sign_out": "Se déconnecter",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "forgot_password": "Mot de passe oublié ?"
+  },
+  "language": {
+    "label": "Langue",
+    "pt": "Português",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "saved": "Langue sauvegardée !"
+  }
 }

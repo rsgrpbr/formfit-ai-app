@@ -14,7 +14,12 @@
     "squat": "Agachamento",
     "pushup": "Flexão",
     "plank": "Prancha",
-    "lunge": "Afundo"
+    "lunge": "Afundo",
+    "glute_bridge": "Elev. Quadril",
+    "side_plank": "Prancha Lat.",
+    "superman": "Superman",
+    "mountain_climber": "Escalada",
+    "burpee": "Burpee"
   },
   "feedback": {
     "squat": {
@@ -45,6 +50,65 @@
       "rest": "Descanse um momento."
     }
   },
+  "analyze": {
+    "exercise_label": "Exercício",
+    "group_gym": "Academia",
+    "group_home": "Em casa",
+    "session_label": "Sessão",
+    "stat_time": "Tempo",
+    "stat_reps": "Reps",
+    "stat_good": "Boas",
+    "stat_fix": "Corrigir",
+    "stat_score": "Pontuação",
+    "start_session": "Iniciar sessão",
+    "stop_session": "Parar sessão",
+    "see_plans": "Ver planos",
+    "loading": "Carregando MediaPipe…",
+    "login_to_save": "Faça login para salvar seu histórico.",
+    "show_skeleton": "Mostrar esqueleto",
+    "hide_skeleton": "Ocultar esqueleto",
+    "analyses_count": "{count}/{limit} análises",
+    "limit_title": "Limite atingido",
+    "limit_desc": "Você usou {count}/{limit} análises gratuitas este mês. Faça upgrade para continuar.",
+    "upgrade_pro": "Pro — R$ 29,90/mês",
+    "see_all_plans": "Ver todos os planos →",
+    "enter": "Entrar",
+    "dashboard_link": "Dashboard",
+    "sign_out": "Sair"
+  },
+  "dashboard": {
+    "train": "Treinar",
+    "sign_out": "Sair",
+    "days_in_a_row": "dias seguidos",
+    "xp_needed": "Faltam {xp} XP → {level}",
+    "max_level": "Nível máximo",
+    "stat_xp_total": "XP total",
+    "stat_streak": "Sequência",
+    "stat_best_streak": "Melhor streak",
+    "stat_sessions": "Sessões completas",
+    "stat_total_reps": "Total de reps",
+    "stat_best_score": "Melhor score",
+    "stat_time_trained": "Tempo treinado",
+    "minutes_unit": "min",
+    "weekly_challenge": "Desafio da semana",
+    "no_challenge": "Sem desafio ativo esta semana.",
+    "completed": "✓ Concluído!",
+    "achievements": "Conquistas",
+    "recent_sessions": "Últimas sessões",
+    "no_sessions": "Nenhuma sessão registrada ainda.",
+    "start_now": "Começar agora →",
+    "start_workout": "▶ Iniciar treino",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "cond_sessions": "{value} sessões",
+    "cond_streak": "{value} dias seguidos",
+    "cond_score": "Score ≥ {value}",
+    "cond_score_triple": "Score ≥ {value} (3x)",
+    "cond_total_reps": "{value} reps total",
+    "cond_early_morning": "Antes das 8h",
+    "cond_exercise_times": "{value}x {name}",
+    "language": "Idioma"
+  },
   "session": {
     "reps": "Repetições",
     "score": "Pontuação",
@@ -68,5 +132,13 @@
     "email": "E-mail",
     "password": "Senha",
     "forgot_password": "Esqueceu a senha?"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "saved": "Idioma salvo!"
   }
 }

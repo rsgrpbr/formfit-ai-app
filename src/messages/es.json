@@ -1,7 +1,26 @@
 {
-  "app": { "name": "FormFit AI", "tagline": "Tu entrenador personal con IA" },
-  "nav": { "home": "Inicio", "analyze": "Analizar", "history": "Historial", "profile": "Perfil", "pricing": "Planes" },
-  "exercises": { "squat": "Sentadilla", "pushup": "Flexión", "plank": "Plancha", "lunge": "Zancada" },
+  "app": {
+    "name": "FormFit AI",
+    "tagline": "Tu entrenador personal con IA"
+  },
+  "nav": {
+    "home": "Inicio",
+    "analyze": "Analizar",
+    "history": "Historial",
+    "profile": "Perfil",
+    "pricing": "Planes"
+  },
+  "exercises": {
+    "squat": "Sentadilla",
+    "pushup": "Flexión",
+    "plank": "Plancha",
+    "lunge": "Zancada",
+    "glute_bridge": "Puente glúteo",
+    "side_plank": "Plancha lateral",
+    "superman": "Superman",
+    "mountain_climber": "Escalador",
+    "burpee": "Burpee"
+  },
   "feedback": {
     "squat": {
       "knees_over_toes": "Rodillas pasando los pies. Retrocede un poco.",
@@ -31,6 +50,95 @@
       "rest": "Descansa un momento."
     }
   },
-  "session": { "reps": "Repeticiones", "score": "Puntuación", "time": "Tiempo", "start": "Iniciar", "stop": "Detener", "pause": "Pausar", "resume": "Reanudar" },
-  "auth": { "sign_in": "Iniciar sesión", "sign_up": "Crear cuenta", "sign_out": "Cerrar sesión", "email": "Correo", "password": "Contraseña", "forgot_password": "¿Olvidaste tu contraseña?" }
+  "analyze": {
+    "exercise_label": "Ejercicio",
+    "group_gym": "Gimnasio",
+    "group_home": "En casa",
+    "session_label": "Sesión",
+    "stat_time": "Tiempo",
+    "stat_reps": "Reps",
+    "stat_good": "Buenas",
+    "stat_fix": "Corregir",
+    "stat_score": "Puntuación",
+    "start_session": "Iniciar sesión",
+    "stop_session": "Detener sesión",
+    "see_plans": "Ver planes",
+    "loading": "Cargando MediaPipe…",
+    "login_to_save": "Inicia sesión para guardar tu historial.",
+    "show_skeleton": "Mostrar esqueleto",
+    "hide_skeleton": "Ocultar esqueleto",
+    "analyses_count": "{count}/{limit} análisis",
+    "limit_title": "Límite alcanzado",
+    "limit_desc": "Has usado {count}/{limit} análisis gratuitos este mes. Actualiza para continuar.",
+    "upgrade_pro": "Pro — $9.90/mes",
+    "see_all_plans": "Ver todos los planes →",
+    "enter": "Iniciar sesión",
+    "dashboard_link": "Panel",
+    "sign_out": "Cerrar sesión"
+  },
+  "dashboard": {
+    "train": "Entrenar",
+    "sign_out": "Cerrar sesión",
+    "days_in_a_row": "días seguidos",
+    "xp_needed": "Faltan {xp} XP → {level}",
+    "max_level": "Nivel máximo",
+    "stat_xp_total": "XP total",
+    "stat_streak": "Racha",
+    "stat_best_streak": "Mejor racha",
+    "stat_sessions": "Sesiones completas",
+    "stat_total_reps": "Total de reps",
+    "stat_best_score": "Mejor puntuación",
+    "stat_time_trained": "Tiempo entrenado",
+    "minutes_unit": "min",
+    "weekly_challenge": "Desafío semanal",
+    "no_challenge": "Sin desafío activo esta semana.",
+    "completed": "✓ ¡Completado!",
+    "achievements": "Logros",
+    "recent_sessions": "Últimas sesiones",
+    "no_sessions": "Aún no hay sesiones registradas.",
+    "start_now": "Empezar ahora →",
+    "start_workout": "▶ Iniciar entrenamiento",
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "cond_sessions": "{value} sesiones",
+    "cond_streak": "{value} días seguidos",
+    "cond_score": "Puntuación ≥ {value}",
+    "cond_score_triple": "Puntuación ≥ {value} (3x)",
+    "cond_total_reps": "{value} reps total",
+    "cond_early_morning": "Antes de las 8h",
+    "cond_exercise_times": "{value}x {name}",
+    "language": "Idioma"
+  },
+  "session": {
+    "reps": "Repeticiones",
+    "score": "Puntuación",
+    "time": "Tiempo",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "pause": "Pausar",
+    "resume": "Reanudar"
+  },
+  "subscription": {
+    "free": "Gratis",
+    "pro": "Pro",
+    "annual": "Anual",
+    "upgrade": "Actualizar ahora",
+    "limit_reached": "Límite de sesiones alcanzado. Actualiza para continuar."
+  },
+  "auth": {
+    "sign_in": "Iniciar sesión",
+    "sign_up": "Crear cuenta",
+    "sign_out": "Cerrar sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "forgot_password": "¿Olvidaste tu contraseña?"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt": "Português",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "saved": "¡Idioma guardado!"
+  }
 }

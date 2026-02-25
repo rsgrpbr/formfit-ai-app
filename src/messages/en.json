@@ -14,7 +14,12 @@
     "squat": "Squat",
     "pushup": "Push-up",
     "plank": "Plank",
-    "lunge": "Lunge"
+    "lunge": "Lunge",
+    "glute_bridge": "Glute Bridge",
+    "side_plank": "Side Plank",
+    "superman": "Superman",
+    "mountain_climber": "Mountain Climber",
+    "burpee": "Burpee"
   },
   "feedback": {
     "squat": {
@@ -45,6 +50,65 @@
       "rest": "Take a rest."
     }
   },
+  "analyze": {
+    "exercise_label": "Exercise",
+    "group_gym": "Gym",
+    "group_home": "At Home",
+    "session_label": "Session",
+    "stat_time": "Time",
+    "stat_reps": "Reps",
+    "stat_good": "Good",
+    "stat_fix": "Fix",
+    "stat_score": "Score",
+    "start_session": "Start session",
+    "stop_session": "Stop session",
+    "see_plans": "View plans",
+    "loading": "Loading MediaPipe…",
+    "login_to_save": "Log in to save your history.",
+    "show_skeleton": "Show skeleton",
+    "hide_skeleton": "Hide skeleton",
+    "analyses_count": "{count}/{limit} analyses",
+    "limit_title": "Limit reached",
+    "limit_desc": "You've used {count}/{limit} free analyses this month. Upgrade to continue.",
+    "upgrade_pro": "Pro — $9.90/month",
+    "see_all_plans": "See all plans →",
+    "enter": "Log in",
+    "dashboard_link": "Dashboard",
+    "sign_out": "Sign out"
+  },
+  "dashboard": {
+    "train": "Train",
+    "sign_out": "Sign out",
+    "days_in_a_row": "days in a row",
+    "xp_needed": "{xp} XP to go → {level}",
+    "max_level": "Max level reached",
+    "stat_xp_total": "Total XP",
+    "stat_streak": "Streak",
+    "stat_best_streak": "Best streak",
+    "stat_sessions": "Sessions done",
+    "stat_total_reps": "Total reps",
+    "stat_best_score": "Best score",
+    "stat_time_trained": "Time trained",
+    "minutes_unit": "min",
+    "weekly_challenge": "Weekly challenge",
+    "no_challenge": "No active challenge this week.",
+    "completed": "✓ Completed!",
+    "achievements": "Achievements",
+    "recent_sessions": "Recent sessions",
+    "no_sessions": "No sessions recorded yet.",
+    "start_now": "Start now →",
+    "start_workout": "▶ Start workout",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "cond_sessions": "{value} sessions",
+    "cond_streak": "{value} days streak",
+    "cond_score": "Score ≥ {value}",
+    "cond_score_triple": "Score ≥ {value} (3x)",
+    "cond_total_reps": "{value} total reps",
+    "cond_early_morning": "Before 8am",
+    "cond_exercise_times": "{value}x {name}",
+    "language": "Language"
+  },
   "session": {
     "reps": "Reps",
     "score": "Score",
@@ -68,5 +132,13 @@
     "email": "Email",
     "password": "Password",
     "forgot_password": "Forgot password?"
+  },
+  "language": {
+    "label": "Language",
+    "pt": "Português",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "saved": "Language saved!"
   }
 }
