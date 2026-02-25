@@ -8,7 +8,8 @@
     "analyze": "Analisar",
     "history": "Histórico",
     "profile": "Perfil",
-    "pricing": "Planos"
+    "pricing": "Planos",
+    "settings": "Configurações"
   },
   "exercises": {
     "squat": "Agachamento",
@@ -74,11 +75,13 @@
     "see_all_plans": "Ver todos os planos →",
     "enter": "Entrar",
     "dashboard_link": "Dashboard",
+    "settings_link": "Configurações",
     "sign_out": "Sair"
   },
   "dashboard": {
     "train": "Treinar",
     "sign_out": "Sair",
+    "settings_link": "Configurações",
     "days_in_a_row": "dias seguidos",
     "xp_needed": "Faltam {xp} XP → {level}",
     "max_level": "Nível máximo",
@@ -90,6 +93,7 @@
     "stat_best_score": "Melhor score",
     "stat_time_trained": "Tempo treinado",
     "minutes_unit": "min",
+    "reps_unit": "reps",
     "weekly_challenge": "Desafio da semana",
     "no_challenge": "Sem desafio ativo esta semana.",
     "completed": "✓ Concluído!",
@@ -108,6 +112,45 @@
     "cond_early_morning": "Antes das 8h",
     "cond_exercise_times": "{value}x {name}",
     "language": "Idioma"
+  },
+  "settings": {
+    "title": "Configurações",
+    "language_section": "Idioma",
+    "account_section": "Conta",
+    "name_label": "Nome",
+    "name_placeholder": "Como você quer ser chamado",
+    "save": "Salvar alterações",
+    "saving": "Salvando…",
+    "saved": "Salvo!",
+    "back": "← Voltar",
+    "train": "Treinar"
+  },
+  "login": {
+    "train_no_account": "Treinar sem conta →",
+    "title_login": "Entrar",
+    "title_signup": "Criar conta",
+    "title_reset": "Recuperar senha",
+    "sub_login": "Acesse sua conta para salvar seu progresso.",
+    "sub_signup": "Crie sua conta gratuitamente.",
+    "sub_reset": "Informe seu e-mail para redefinir a senha.",
+    "name_label": "Seu nome",
+    "name_placeholder": "Como você quer ser chamado",
+    "email_placeholder": "voce@email.com",
+    "loading": "Aguarde…",
+    "no_account": "Não tem conta? Criar conta grátis",
+    "has_account": "Já tem conta? Entrar",
+    "back_to_login": "← Voltar ao login",
+    "forgot_password": "Esqueci a senha",
+    "email_confirm": "Verifique seu e-mail para confirmar o cadastro.",
+    "reset_sent": "Link de redefinição enviado para seu e-mail."
+  },
+  "modal": {
+    "xp_earned": "XP Ganho",
+    "streak_label": "Sequência",
+    "badge_unlocked": "Badge Desbloqueado",
+    "badges_unlocked": "Badges Desbloqueados",
+    "continue": "Continuar",
+    "xp_to_level": "{xp} XP para {level}"
   },
   "session": {
     "reps": "Repetições",

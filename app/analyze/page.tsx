@@ -396,6 +396,13 @@ export default function AnalyzePage() {
               >
                 {t('dashboard_link')}
               </a>
+              <a
+                href="/settings"
+                title={t('settings_link')}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                ⚙️
+              </a>
               <button
                 onClick={signOut}
                 className="text-xs text-gray-500 hover:text-gray-300 transition-colors"

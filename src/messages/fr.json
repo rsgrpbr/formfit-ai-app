@@ -8,7 +8,8 @@
     "analyze": "Analyser",
     "history": "Historique",
     "profile": "Profil",
-    "pricing": "Tarifs"
+    "pricing": "Tarifs",
+    "settings": "Paramètres"
   },
   "exercises": {
     "squat": "Squat",
@@ -69,16 +70,18 @@
     "hide_skeleton": "Masquer le squelette",
     "analyses_count": "{count}/{limit} analyses",
     "limit_title": "Limite atteinte",
-    "limit_desc": "Vous avez utilisé {count}/{limit} analyses gratuites ce mois-ci. Passez à la version Pro pour continuer.",
+    "limit_desc": "Vous avez utilisé {count}/{limit} analyses gratuites ce mois-ci. Passez à Pro pour continuer.",
     "upgrade_pro": "Pro — 9,90 €/mois",
     "see_all_plans": "Voir tous les forfaits →",
     "enter": "Se connecter",
     "dashboard_link": "Tableau de bord",
+    "settings_link": "Paramètres",
     "sign_out": "Se déconnecter"
   },
   "dashboard": {
     "train": "S'entraîner",
     "sign_out": "Se déconnecter",
+    "settings_link": "Paramètres",
     "days_in_a_row": "jours consécutifs",
     "xp_needed": "Encore {xp} XP → {level}",
     "max_level": "Niveau maximum atteint",
@@ -90,6 +93,7 @@
     "stat_best_score": "Meilleur score",
     "stat_time_trained": "Temps d'entraînement",
     "minutes_unit": "min",
+    "reps_unit": "reps",
     "weekly_challenge": "Défi de la semaine",
     "no_challenge": "Aucun défi actif cette semaine.",
     "completed": "✓ Terminé !",
@@ -108,6 +112,45 @@
     "cond_early_morning": "Avant 8h",
     "cond_exercise_times": "{value}x {name}",
     "language": "Langue"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language_section": "Langue",
+    "account_section": "Compte",
+    "name_label": "Nom",
+    "name_placeholder": "Comment souhaitez-vous être appelé ?",
+    "save": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré !",
+    "back": "← Retour",
+    "train": "S'entraîner"
+  },
+  "login": {
+    "train_no_account": "S'entraîner sans compte →",
+    "title_login": "Se connecter",
+    "title_signup": "Créer un compte",
+    "title_reset": "Récupérer le mot de passe",
+    "sub_login": "Connectez-vous pour sauvegarder vos progrès.",
+    "sub_signup": "Créez votre compte gratuitement.",
+    "sub_reset": "Entrez votre email pour réinitialiser le mot de passe.",
+    "name_label": "Votre nom",
+    "name_placeholder": "Comment souhaitez-vous être appelé ?",
+    "email_placeholder": "vous@email.com",
+    "loading": "Veuillez patienter…",
+    "no_account": "Pas de compte ? Créer un compte gratuit",
+    "has_account": "Déjà un compte ? Se connecter",
+    "back_to_login": "← Retour à la connexion",
+    "forgot_password": "Mot de passe oublié",
+    "email_confirm": "Vérifiez votre email pour confirmer l'inscription.",
+    "reset_sent": "Lien de réinitialisation envoyé à votre email."
+  },
+  "modal": {
+    "xp_earned": "XP Gagné",
+    "streak_label": "Série",
+    "badge_unlocked": "Succès Débloqué",
+    "badges_unlocked": "Succès Débloqués",
+    "continue": "Continuer",
+    "xp_to_level": "{xp} XP pour {level}"
   },
   "session": {
     "reps": "Répétitions",

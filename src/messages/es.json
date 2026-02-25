@@ -8,7 +8,8 @@
     "analyze": "Analizar",
     "history": "Historial",
     "profile": "Perfil",
-    "pricing": "Planes"
+    "pricing": "Planes",
+    "settings": "Configuración"
   },
   "exercises": {
     "squat": "Sentadilla",
@@ -74,11 +75,13 @@
     "see_all_plans": "Ver todos los planes →",
     "enter": "Iniciar sesión",
     "dashboard_link": "Panel",
+    "settings_link": "Configuración",
     "sign_out": "Cerrar sesión"
   },
   "dashboard": {
     "train": "Entrenar",
     "sign_out": "Cerrar sesión",
+    "settings_link": "Configuración",
     "days_in_a_row": "días seguidos",
     "xp_needed": "Faltan {xp} XP → {level}",
     "max_level": "Nivel máximo",
@@ -90,6 +93,7 @@
     "stat_best_score": "Mejor puntuación",
     "stat_time_trained": "Tiempo entrenado",
     "minutes_unit": "min",
+    "reps_unit": "reps",
     "weekly_challenge": "Desafío semanal",
     "no_challenge": "Sin desafío activo esta semana.",
     "completed": "✓ ¡Completado!",
@@ -108,6 +112,45 @@
     "cond_early_morning": "Antes de las 8h",
     "cond_exercise_times": "{value}x {name}",
     "language": "Idioma"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language_section": "Idioma",
+    "account_section": "Cuenta",
+    "name_label": "Nombre",
+    "name_placeholder": "¿Cómo quieres que te llamemos?",
+    "save": "Guardar cambios",
+    "saving": "Guardando…",
+    "saved": "¡Guardado!",
+    "back": "← Volver",
+    "train": "Entrenar"
+  },
+  "login": {
+    "train_no_account": "Entrenar sin cuenta →",
+    "title_login": "Iniciar sesión",
+    "title_signup": "Crear cuenta",
+    "title_reset": "Recuperar contraseña",
+    "sub_login": "Inicia sesión para guardar tu progreso.",
+    "sub_signup": "Crea tu cuenta gratuitamente.",
+    "sub_reset": "Ingresa tu correo para restablecer la contraseña.",
+    "name_label": "Tu nombre",
+    "name_placeholder": "¿Cómo quieres que te llamemos?",
+    "email_placeholder": "tu@correo.com",
+    "loading": "Espera…",
+    "no_account": "¿No tienes cuenta? Crear una gratis",
+    "has_account": "¿Ya tienes cuenta? Iniciar sesión",
+    "back_to_login": "← Volver al inicio de sesión",
+    "forgot_password": "Olvidé mi contraseña",
+    "email_confirm": "Revisa tu correo para confirmar el registro.",
+    "reset_sent": "Enlace de restablecimiento enviado a tu correo."
+  },
+  "modal": {
+    "xp_earned": "XP Ganado",
+    "streak_label": "Racha",
+    "badge_unlocked": "Logro Desbloqueado",
+    "badges_unlocked": "Logros Desbloqueados",
+    "continue": "Continuar",
+    "xp_to_level": "{xp} XP para {level}"
   },
   "session": {
     "reps": "Repeticiones",

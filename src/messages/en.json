@@ -8,7 +8,8 @@
     "analyze": "Analyze",
     "history": "History",
     "profile": "Profile",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "settings": "Settings"
   },
   "exercises": {
     "squat": "Squat",
@@ -74,11 +75,13 @@
     "see_all_plans": "See all plans →",
     "enter": "Log in",
     "dashboard_link": "Dashboard",
+    "settings_link": "Settings",
     "sign_out": "Sign out"
   },
   "dashboard": {
     "train": "Train",
     "sign_out": "Sign out",
+    "settings_link": "Settings",
     "days_in_a_row": "days in a row",
     "xp_needed": "{xp} XP to go → {level}",
     "max_level": "Max level reached",
@@ -90,6 +93,7 @@
     "stat_best_score": "Best score",
     "stat_time_trained": "Time trained",
     "minutes_unit": "min",
+    "reps_unit": "reps",
     "weekly_challenge": "Weekly challenge",
     "no_challenge": "No active challenge this week.",
     "completed": "✓ Completed!",
@@ -108,6 +112,45 @@
     "cond_early_morning": "Before 8am",
     "cond_exercise_times": "{value}x {name}",
     "language": "Language"
+  },
+  "settings": {
+    "title": "Settings",
+    "language_section": "Language",
+    "account_section": "Account",
+    "name_label": "Name",
+    "name_placeholder": "What should we call you?",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "saved": "Saved!",
+    "back": "← Back",
+    "train": "Train"
+  },
+  "login": {
+    "train_no_account": "Train without an account →",
+    "title_login": "Sign in",
+    "title_signup": "Create account",
+    "title_reset": "Reset password",
+    "sub_login": "Sign in to save your progress.",
+    "sub_signup": "Create your free account.",
+    "sub_reset": "Enter your email to reset your password.",
+    "name_label": "Your name",
+    "name_placeholder": "What should we call you?",
+    "email_placeholder": "you@email.com",
+    "loading": "Please wait…",
+    "no_account": "No account? Create one for free",
+    "has_account": "Already have an account? Sign in",
+    "back_to_login": "← Back to login",
+    "forgot_password": "Forgot password",
+    "email_confirm": "Check your email to confirm your registration.",
+    "reset_sent": "Password reset link sent to your email."
+  },
+  "modal": {
+    "xp_earned": "XP Earned",
+    "streak_label": "Streak",
+    "badge_unlocked": "Badge Unlocked",
+    "badges_unlocked": "Badges Unlocked",
+    "continue": "Continue",
+    "xp_to_level": "{xp} XP to {level}"
   },
   "session": {
     "reps": "Reps",

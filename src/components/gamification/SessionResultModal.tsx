@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { GamificationResult, GamificationLevel } from '@/types/gamification';
 
 // ── Constantes de nível ───────────────────────────────────────────────────────
@@ -53,6 +54,8 @@ interface SessionResultModalProps {
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export default function SessionResultModal({ result, onClose }: SessionResultModalProps) {
+  const t = useTranslations('modal');
+
   const {
     xpEarned,
     newTotalXp,
@@ -63,6 +66,11 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
     streakDays,
     streakBonus,
   } = result;
+
+  const nextLevel =
+    newLevel === 'Iniciante'     ? 'Intermediário' :
+    newLevel === 'Intermediário' ? 'Avançado'      :
+                                   'Elite';
 
   return (
     <div className="bg-gray-900 rounded-2xl p-6 max-w-xs mx-4 w-full shadow-2xl flex flex-col gap-4">
@@ -81,7 +89,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
 
       {/* XP ganho */}
       <div className="text-center">
-        <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">XP Ganho</p>
+        <p className="text-gray-400 text-xs uppercase tracking-widest mb-1">{t('xp_earned')}</p>
         <p className="text-5xl font-black text-indigo-400">+{xpEarned}</p>
       </div>
 
@@ -90,7 +98,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
         <div className="flex items-center justify-center gap-2 text-sm">
           <span>🔥</span>
           <span className="text-gray-300">
-            Sequência:{' '}
+            {t('streak_label')}:{' '}
             <span className="text-white font-semibold">
               {streakDays} dia{streakDays !== 1 ? 's' : ''}
             </span>
@@ -107,16 +115,15 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs text-gray-400">
           <span>{newLevel}</span>
-          <span>{newTotalXp.toLocaleString('pt-BR')} XP</span>
+          <span>{newTotalXp.toLocaleString()} XP</span>
         </div>
         <XpProgressBar level={newLevel} totalXp={newTotalXp} />
         {newLevel !== 'Elite' && (
           <p className="text-right text-xs text-gray-500">
-            {(LEVEL_ENDS[newLevel] - newTotalXp).toLocaleString('pt-BR')} XP para {
-              newLevel === 'Iniciante' ? 'Intermediário'
-              : newLevel === 'Intermediário' ? 'Avançado'
-              : 'Elite'
-            }
+            {t('xp_to_level', {
+              xp:    (LEVEL_ENDS[newLevel] - newTotalXp).toLocaleString(),
+              level: nextLevel,
+            })}
           </p>
         )}
       </div>
@@ -125,7 +132,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
       {earnedBadges.length > 0 && (
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">
-            Badge{earnedBadges.length > 1 ? 's' : ''} Desbloqueado{earnedBadges.length > 1 ? 's' : ''}
+            {earnedBadges.length > 1 ? t('badges_unlocked') : t('badge_unlocked')}
           </p>
           <div className="flex flex-col gap-2">
             {earnedBadges.map((badge) => (
@@ -152,7 +159,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
         onClick={onClose}
         className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all active:scale-95"
       >
-        Continuar
+        {t('continue')}
       </button>
     </div>
   );

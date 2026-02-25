@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 
 type Mode = 'login' | 'signup' | 'reset';
@@ -10,6 +11,8 @@ type Mode = 'login' | 'signup' | 'reset';
 export default function LoginPage() {
   const router   = useRouter();
   const supabase = createClient();
+  const t        = useTranslations('login');
+  const tAuth    = useTranslations('auth');
 
   const [mode,     setMode]     = useState<Mode>('login');
   const [email,    setEmail]    = useState('');
@@ -47,7 +50,7 @@ export default function LoginPage() {
           },
         });
         if (error) { setError(error.message); return; }
-        setMessage('Verifique seu e-mail para confirmar o cadastro.');
+        setMessage(t('email_confirm'));
 
       } else {
         // reset
@@ -55,14 +58,17 @@ export default function LoginPage() {
           redirectTo: `${window.location.origin}/analyze`,
         });
         if (error) { setError(error.message); return; }
-        setMessage('Link de redefinição enviado para seu e-mail.');
+        setMessage(t('reset_sent'));
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const title = mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Criar conta' : 'Recuperar senha';
+  const title =
+    mode === 'login'  ? t('title_login')  :
+    mode === 'signup' ? t('title_signup') :
+                        t('title_reset');
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
@@ -70,7 +76,7 @@ export default function LoginPage() {
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight">FormFit AI</Link>
         <Link href="/analyze" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
-          Treinar sem conta →
+          {t('train_no_account')}
         </Link>
       </header>
 
@@ -79,16 +85,16 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <h1 className="text-3xl font-black mb-2">{title}</h1>
           <p className="text-gray-400 text-sm mb-8">
-            {mode === 'login'  && 'Acesse sua conta para salvar seu progresso.'}
-            {mode === 'signup' && 'Crie sua conta gratuitamente.'}
-            {mode === 'reset'  && 'Informe seu e-mail para redefinir a senha.'}
+            {mode === 'login'  && t('sub_login')}
+            {mode === 'signup' && t('sub_signup')}
+            {mode === 'reset'  && t('sub_reset')}
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* E-mail */}
             <div className="flex flex-col gap-1.5">
               <label htmlFor="email" className="text-xs text-gray-400 uppercase tracking-wider">
-                E-mail
+                {tAuth('email')}
               </label>
               <input
                 id="email"
@@ -97,7 +103,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="voce@email.com"
+                placeholder={t('email_placeholder')}
                 className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600
                   focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
               />
@@ -107,7 +113,7 @@ export default function LoginPage() {
             {mode === 'signup' && (
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="name" className="text-xs text-gray-400 uppercase tracking-wider">
-                  Seu nome
+                  {t('name_label')}
                 </label>
                 <input
                   id="name"
@@ -115,7 +121,7 @@ export default function LoginPage() {
                   autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Como você quer ser chamado"
+                  placeholder={t('name_placeholder')}
                   className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-600
                     focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
                 />
@@ -126,7 +132,7 @@ export default function LoginPage() {
             {mode !== 'reset' && (
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="password" className="text-xs text-gray-400 uppercase tracking-wider">
-                  Senha
+                  {tAuth('password')}
                 </label>
                 <input
                   id="password"
@@ -162,7 +168,7 @@ export default function LoginPage() {
               className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-sm
                 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Aguarde…' : title}
+              {loading ? t('loading') : title}
             </button>
           </form>
 
@@ -174,13 +180,13 @@ export default function LoginPage() {
                   onClick={() => switchMode('signup')}
                   className="text-indigo-400 hover:text-indigo-300 transition-colors"
                 >
-                  Não tem conta? Criar conta grátis
+                  {t('no_account')}
                 </button>
                 <button
                   onClick={() => switchMode('reset')}
                   className="text-gray-500 hover:text-gray-300 transition-colors"
                 >
-                  Esqueci a senha
+                  {t('forgot_password')}
                 </button>
               </>
             )}
@@ -190,7 +196,7 @@ export default function LoginPage() {
                 onClick={() => switchMode('login')}
                 className="text-indigo-400 hover:text-indigo-300 transition-colors"
               >
-                Já tem conta? Entrar
+                {t('has_account')}
               </button>
             )}
 
@@ -199,7 +205,7 @@ export default function LoginPage() {
                 onClick={() => switchMode('login')}
                 className="text-indigo-400 hover:text-indigo-300 transition-colors"
               >
-                ← Voltar ao login
+                {t('back_to_login')}
               </button>
             )}
           </div>

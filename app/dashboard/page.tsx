@@ -9,7 +9,6 @@ import { useGamification } from '@/hooks/useGamification';
 import { useWeeklyChallenge } from '@/hooks/useWeeklyChallenge';
 import { useLocale } from '@/providers/I18nProvider';
 import type { Locale } from '@/providers/I18nProvider';
-import { LanguageSelector } from '@/components/LanguageSelector';
 import { getRecentSessionsWithExercise } from '@/lib/supabase/queries';
 import type { SessionWithExercise } from '@/lib/supabase/queries';
 import { getAllBadges } from '@/lib/supabase/gamification';
@@ -166,6 +165,9 @@ export default function DashboardPage() {
           <Link href="/analyze" className="text-gray-400 hover:text-white transition-colors">
             {t('train')}
           </Link>
+          <Link href="/settings" title={t('settings_link')} className="text-gray-400 hover:text-white transition-colors">
+            ⚙️
+          </Link>
           <button
             onClick={signOut}
             className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
@@ -216,10 +218,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Seletor de idioma */}
-          <div className="mt-4 pt-4 border-t border-gray-800">
-            <LanguageSelector userId={user.id} />
-          </div>
         </div>
 
         {/* ── Gamificação: XP · streak · melhor streak ── */}
