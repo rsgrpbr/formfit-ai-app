@@ -122,6 +122,7 @@ export default function AnalyzePage() {
       const key = keys[0];
       if (!key) return;
       const text = getFeedbackText(key, localeRef.current);
+      console.log('[speakFeedback]', { key, locale: localeRef.current, hasText: !!text });
       if (text) speak(text, key.startsWith('general.') ? 'high' : 'low');
     };
 

@@ -183,5 +183,11 @@
     "es": "Español",
     "fr": "Français",
     "saved": "Idioma salvo!"
+  },
+  "levels": {
+    "beginner": "Iniciante",
+    "intermediate": "Intermediário",
+    "advanced": "Avançado",
+    "elite": "Elite"
   }
 }

@@ -53,9 +53,18 @@ const LEVEL_TEXT_COLOR: Record<string, string> = {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
+// Maps internal PT level keys → i18n keys
+const LEVEL_KEY: Record<string, 'beginner' | 'intermediate' | 'advanced' | 'elite'> = {
+  'Iniciante':     'beginner',
+  'Intermediário': 'intermediate',
+  'Avançado':      'advanced',
+  'Elite':         'elite',
+};
+
 export default function DashboardPage() {
   const router = useRouter();
-  const t = useTranslations('dashboard');
+  const t  = useTranslations('dashboard');
+  const tL = useTranslations('levels');
 
   const { user, profile, loading: sessionLoading, signOut } = useSession();
   const { locale, setLocale } = useLocale();
@@ -189,7 +198,7 @@ export default function DashboardPage() {
             <div className="flex-1 min-w-0">
               <p className="text-xl font-bold truncate">{displayName}</p>
               <span className={`text-xs font-semibold uppercase tracking-wider ${textColor}`}>
-                {level}
+                {tL(LEVEL_KEY[level])}
               </span>
             </div>
             <div className="text-right flex-shrink-0">
@@ -202,7 +211,7 @@ export default function DashboardPage() {
               <span>{totalXp.toLocaleString()} XP</span>
               {nextLevel ? (
                 <span>
-                  {t('xp_needed', { xp: xpToNext.toLocaleString(), level: nextLevel })}
+                  {t('xp_needed', { xp: xpToNext.toLocaleString(), level: tL(LEVEL_KEY[nextLevel]) })}
                 </span>
               ) : (
                 <span className="text-yellow-400 font-semibold">✦ {t('max_level')}</span>
@@ -213,7 +222,7 @@ export default function DashboardPage() {
             </div>
             {nextLevel && (
               <div className="flex justify-between text-[10px] text-gray-600 mt-1">
-                <span>{level}</span><span>{nextLevel}</span>
+                <span>{tL(LEVEL_KEY[level])}</span><span>{tL(LEVEL_KEY[nextLevel!])}</span>
               </div>
             )}
           </div>

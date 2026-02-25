@@ -55,13 +55,21 @@ export function useVoiceCoach({
 
   const speak = useCallback(
     (text: string, priority: 'low' | 'high' = 'low') => {
-      if (!enabledRef.current) return;
+      if (!enabledRef.current) {
+        console.log('[VoiceCoach] speak skipped — disabled');
+        return;
+      }
 
       const now      = Date.now();
       const lastTime = lastSpokenRef.current.get(text) ?? 0;
       const cooldown = priority === 'high' ? cooldownRef.current / 3 : cooldownRef.current;
 
-      if (now - lastTime < cooldown) return;
+      if (now - lastTime < cooldown) {
+        console.log('[VoiceCoach] speak skipped — cooldown', { text: text.substring(0, 40) });
+        return;
+      }
+
+      console.log('[VoiceCoach] speak queued', { priority, text: text.substring(0, 40) });
 
       lastSpokenRef.current.set(text, now);
 

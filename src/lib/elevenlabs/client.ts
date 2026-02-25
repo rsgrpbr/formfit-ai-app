@@ -25,7 +25,17 @@ export async function textToSpeech(
   const voiceId = VOICE_IDS[locale] ?? VOICE_IDS.pt;
   const apiKey  = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
 
-  if (!apiKey) throw new Error('NEXT_PUBLIC_ELEVENLABS_API_KEY não configurada');
+  console.log('[ElevenLabs] textToSpeech', {
+    locale,
+    voiceId,
+    hasKey: !!apiKey,
+    text: text.substring(0, 40),
+  });
+
+  if (!apiKey) {
+    console.error('[ElevenLabs] NEXT_PUBLIC_ELEVENLABS_API_KEY não configurada');
+    throw new Error('NEXT_PUBLIC_ELEVENLABS_API_KEY não configurada');
+  }
 
   const response = await fetch(`${API_URL}/${voiceId}`, {
     method: 'POST',
@@ -41,8 +51,11 @@ export async function textToSpeech(
     }),
   });
 
+  console.log('[ElevenLabs] response', { status: response.status, ok: response.ok });
+
   if (!response.ok) {
     const err = await response.text();
+    console.error('[ElevenLabs] API error:', err);
     throw new Error(`ElevenLabs error ${response.status}: ${err}`);
   }
 

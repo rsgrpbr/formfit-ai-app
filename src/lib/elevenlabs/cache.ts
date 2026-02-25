@@ -23,8 +23,12 @@ export async function getOrFetchTTS(
   const now    = Date.now();
 
   const entry = cache.get(key);
-  if (entry && now - entry.createdAt < TTL_MS) return entry.buffer;
+  if (entry && now - entry.createdAt < TTL_MS) {
+    console.log('[TTS Cache] HIT', { locale, text: text.substring(0, 40) });
+    return entry.buffer;
+  }
 
+  console.log('[TTS Cache] MISS — fetching from ElevenLabs', { locale, text: text.substring(0, 40) });
   const buffer = await textToSpeech(text, options);
   cache.set(key, { buffer, createdAt: now });
   return buffer;
@@ -34,12 +38,23 @@ export async function playFromCache(
   text: string,
   options: TTSOptions = {}
 ): Promise<void> {
-  const buffer = await getOrFetchTTS(text, options);
-  const blob   = new Blob([buffer], { type: 'audio/mpeg' });
-  const url    = URL.createObjectURL(blob);
-  const audio  = new Audio(url);
-  audio.onended = () => URL.revokeObjectURL(url);
-  await audio.play();
+  console.log('[TTS Cache] playFromCache', { locale: options.locale, text: text.substring(0, 40) });
+  try {
+    const buffer = await getOrFetchTTS(text, options);
+    const blob   = new Blob([buffer], { type: 'audio/mpeg' });
+    const url    = URL.createObjectURL(blob);
+    const audio  = new Audio(url);
+
+    // Aguarda o áudio terminar de tocar (não só começar)
+    await new Promise<void>((resolve, reject) => {
+      audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+      audio.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+      audio.play().catch(reject);
+    });
+  } catch (err) {
+    console.error('[TTS Cache] playFromCache error:', err);
+    throw err;
+  }
 }
 
 export function clearTTSCache(): void {

@@ -3,6 +3,14 @@
 import { useTranslations } from 'next-intl';
 import type { GamificationResult, GamificationLevel } from '@/types/gamification';
 
+// Maps internal PT level keys → i18n keys
+const LEVEL_KEY: Record<GamificationLevel, 'beginner' | 'intermediate' | 'advanced' | 'elite'> = {
+  'Iniciante':     'beginner',
+  'Intermediário': 'intermediate',
+  'Avançado':      'advanced',
+  'Elite':         'elite',
+};
+
 // ── Constantes de nível ───────────────────────────────────────────────────────
 
 const LEVEL_STARTS: Record<GamificationLevel, number> = {
@@ -54,7 +62,8 @@ interface SessionResultModalProps {
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export default function SessionResultModal({ result, onClose }: SessionResultModalProps) {
-  const t = useTranslations('modal');
+  const t  = useTranslations('modal');
+  const tL = useTranslations('levels');
 
   const {
     xpEarned,
@@ -82,7 +91,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
             Level Up! 🎉
           </p>
           <p className="text-white text-lg font-black mt-0.5">
-            {previousLevel} → {newLevel}
+            {tL(LEVEL_KEY[previousLevel])} → {tL(LEVEL_KEY[newLevel])}
           </p>
         </div>
       )}
@@ -114,7 +123,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
       {/* Barra de progresso */}
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs text-gray-400">
-          <span>{newLevel}</span>
+          <span>{tL(LEVEL_KEY[newLevel])}</span>
           <span>{newTotalXp.toLocaleString()} XP</span>
         </div>
         <XpProgressBar level={newLevel} totalXp={newTotalXp} />
@@ -122,7 +131,7 @@ export default function SessionResultModal({ result, onClose }: SessionResultMod
           <p className="text-right text-xs text-gray-500">
             {t('xp_to_level', {
               xp:    (LEVEL_ENDS[newLevel] - newTotalXp).toLocaleString(),
-              level: nextLevel,
+              level: tL(LEVEL_KEY[nextLevel as GamificationLevel]),
             })}
           </p>
         )}
