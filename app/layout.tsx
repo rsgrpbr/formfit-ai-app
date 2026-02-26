@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/providers/I18nProvider";
+import PWASetup from "@/components/PWASetup";
 import ptMessages from "@/messages/pt.json";
 import "./globals.css";
 
@@ -18,6 +19,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FormFit AI",
   description: "Seu personal trainer com IA",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "FormFit AI",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#080B0F",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -31,6 +46,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <I18nProvider initialLocale="pt" initialMessages={ptMessages}>
+          <PWASetup />
           {children}
           <Toaster
             theme="dark"

@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraFeed from '@/components/camera/CameraFeed';
+import { unlockIOSAudio } from '@/lib/pwa';
 import PoseOverlay from '@/components/camera/PoseOverlay';
 import SessionResultModal from '@/components/gamification/SessionResultModal';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
@@ -87,6 +88,11 @@ export default function AnalyzePage() {
   }, [profile?.locale]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Estado da sessão
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
+  // Desbloqueia áudio no iOS após primeiro toque
+  useEffect(() => { unlockIOSAudio(); }, []);
+
   const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>('squat');
   const [isRunning, setIsRunning]               = useState(false);
   const [score, setScore]                       = useState(100);
@@ -418,13 +424,23 @@ export default function AnalyzePage() {
       </header>
 
       {/* pb-20 no mobile reserva espaço para o botão fixed do esqueleto (bottom-6) */}
-      <div className="flex flex-col lg:flex-row flex-1 gap-4 p-4 pb-20 lg:pb-4">
+      <div className="analyze-layout flex flex-col lg:flex-row flex-1 gap-4 p-4 pb-20 lg:pb-4">
         {/* Câmera + Overlay */}
-        <div className="flex-1 relative rounded-2xl overflow-hidden bg-gray-900 flex items-center justify-center min-h-[360px]">
+        <div className="camera-container flex-1 relative rounded-2xl overflow-hidden bg-gray-900 flex items-center justify-center min-h-[360px]">
           <CameraFeed
             onReady={handleCameraReady}
+            facingMode={facingMode}
             className="w-full h-full"
           />
+
+          {/* Botão troca câmera — sobreposto top-right */}
+          <button
+            onClick={() => setFacingMode((m) => (m === 'user' ? 'environment' : 'user'))}
+            title="Trocar câmera"
+            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-white text-lg transition-all active:scale-90"
+          >
+            🔄
+          </button>
           <PoseOverlay
             landmarks={landmarks}
             width={VIDEO_W}
@@ -508,7 +524,7 @@ export default function AnalyzePage() {
         </div>
 
         {/* Painel lateral */}
-        <aside className="w-full lg:w-72 flex flex-col gap-4">
+        <aside className="analyze-aside w-full lg:w-72 flex flex-col gap-4 p-4 lg:p-0">
           {/* Seleção de exercício */}
           <div className="bg-gray-900 rounded-2xl p-4">
             <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">

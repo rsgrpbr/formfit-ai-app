@@ -1,0 +1,13 @@
+{
+  "name": "FormFit AI",
+  "short_name": "FormFit",
+  "theme_color": "#080B0F",
+  "background_color": "#080B0F",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/analyze",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
