@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/providers/I18nProvider";
 import PWASetup from "@/components/PWASetup";
+import BottomNav from "@/components/BottomNav";
 import ptMessages from "@/messages/pt.json";
 import "./globals.css";
 
@@ -48,6 +49,7 @@ export default function RootLayout({
         <I18nProvider initialLocale="pt" initialMessages={ptMessages}>
           <PWASetup />
           {children}
+          <BottomNav />
           <Toaster
             theme="dark"
             position="bottom-center"

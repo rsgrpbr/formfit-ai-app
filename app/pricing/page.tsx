@@ -124,7 +124,7 @@ function PlanCard({ title, price, period, features, planKey, userId, popular = f
       {isFree ? (
         <Link
           href="/analyze"
-          className={`block text-center py-3 rounded-xl font-semibold transition-all
+          className={`block text-center py-3 min-h-[48px] rounded-xl font-semibold transition-transform duration-150 active:scale-95
             ${popular ? 'bg-white text-indigo-700 hover:bg-gray-100' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}
         >
           Começar grátis
@@ -133,7 +133,7 @@ function PlanCard({ title, price, period, features, planKey, userId, popular = f
         <button
           onClick={() => planKey && userId && redirectToCheckout(planKey, userId)}
           disabled={!userId || !planKey}
-          className={`py-3 rounded-xl font-semibold transition-all active:scale-95
+          className={`py-3 min-h-[48px] rounded-xl font-semibold transition-transform duration-150 active:scale-95
             disabled:opacity-50 disabled:cursor-not-allowed
             ${popular ? 'bg-white text-indigo-700 hover:bg-gray-100' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
         >

@@ -173,22 +173,22 @@ export default function DashboardPage() {
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight">FormFit AI</Link>
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/analyze" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/analyze" className="min-h-[48px] flex items-center px-2 text-gray-400 hover:text-white transition-colors">
             {t('train')}
           </Link>
-          <Link href="/settings" title={t('settings_link')} className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/settings" title={t('settings_link')} className="min-h-[48px] min-w-[48px] flex items-center justify-center text-gray-400 hover:text-white transition-colors">
             ⚙️
           </Link>
           <button
             onClick={signOut}
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            className="min-h-[48px] flex items-center px-2 text-xs text-gray-500 hover:text-gray-300 transition-colors"
           >
             {t('sign_out')}
           </button>
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-8 max-w-2xl mx-auto w-full space-y-4">
+      <main className="flex-1 px-4 py-8 pb-24 max-w-2xl mx-auto w-full space-y-4">
 
         {/* ── Hero: avatar + nome + nível + streak + XP bar ── */}
         <div className="bg-gray-900 rounded-2xl p-6">
@@ -379,8 +379,8 @@ export default function DashboardPage() {
         {/* ── CTA ── */}
         <Link
           href="/analyze"
-          className="block w-full py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-500
-            font-bold text-lg text-center transition-all active:scale-95"
+          className="block w-full py-4 min-h-[48px] rounded-2xl bg-indigo-600 hover:bg-indigo-500
+            font-bold text-lg text-center transition-transform duration-150 active:scale-95"
         >
           {t('start_workout')}
         </Link>

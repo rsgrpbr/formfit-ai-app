@@ -167,26 +167,26 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-sm
-                transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 min-h-[48px] rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-sm
+                transition-transform duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('loading') : title}
             </button>
           </form>
 
           {/* Ações secundárias */}
-          <div className="mt-6 flex flex-col gap-3 text-center text-sm">
+          <div className="mt-6 flex flex-col gap-1 text-center text-sm">
             {mode === 'login' && (
               <>
                 <button
                   onClick={() => switchMode('signup')}
-                  className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                  className="min-h-[48px] flex items-center justify-center px-4 text-indigo-400 hover:text-indigo-300 transition-colors"
                 >
                   {t('no_account')}
                 </button>
                 <button
                   onClick={() => switchMode('reset')}
-                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                  className="min-h-[48px] flex items-center justify-center px-4 text-gray-500 hover:text-gray-300 transition-colors"
                 >
                   {t('forgot_password')}
                 </button>
@@ -196,7 +196,7 @@ export default function LoginPage() {
             {mode === 'signup' && (
               <button
                 onClick={() => switchMode('login')}
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="min-h-[48px] flex items-center justify-center px-4 text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 {t('has_account')}
               </button>
@@ -205,7 +205,7 @@ export default function LoginPage() {
             {mode === 'reset' && (
               <button
                 onClick={() => switchMode('login')}
-                className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="min-h-[48px] flex items-center justify-center px-4 text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 {t('back_to_login')}
               </button>

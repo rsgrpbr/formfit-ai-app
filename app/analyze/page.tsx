@@ -437,7 +437,7 @@ export default function AnalyzePage() {
           <button
             onClick={() => setFacingMode((m) => (m === 'user' ? 'environment' : 'user'))}
             title="Trocar câmera"
-            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-white text-lg transition-all active:scale-90"
+            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center text-white text-lg transition-transform duration-150 active:scale-95"
           >
             🔄
           </button>
@@ -580,7 +580,7 @@ export default function AnalyzePage() {
           {!planLoading && !canAnalyze ? (
             <a
               href="/pricing"
-              className="w-full py-4 rounded-2xl font-bold text-lg text-center transition-all active:scale-95 bg-yellow-500 hover:bg-yellow-400 text-gray-900 block"
+              className="w-full py-4 min-h-[48px] rounded-2xl font-bold text-lg text-center transition-transform duration-150 active:scale-95 bg-yellow-500 hover:bg-yellow-400 text-gray-900 block"
             >
               🔒 {t('see_plans')}
             </a>
@@ -588,7 +588,7 @@ export default function AnalyzePage() {
             <button
               onClick={isRunning ? handleStop : handleStart}
               disabled={!isReady || planLoading}
-              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-95
+              className={`w-full py-4 min-h-[48px] rounded-2xl font-bold text-lg transition-transform duration-150 active:scale-95
                 ${isRunning
                   ? 'bg-red-600 hover:bg-red-500 text-white'
                   : 'bg-indigo-600 hover:bg-indigo-500 text-white'
@@ -607,11 +607,11 @@ export default function AnalyzePage() {
         </aside>
       </div>
 
-      {/* Botão esqueleto — fixed no viewport, z-[9999], independente de qualquer filho */}
+      {/* Botão esqueleto — fixed, acima do BottomNav (bottom-20) */}
       <button
         onClick={() => setShowSkeleton(v => !v)}
         title={showSkeleton ? t('hide_skeleton') : t('show_skeleton')}
-        className={`fixed bottom-6 right-4 z-[9999]
+        className={`fixed bottom-20 right-4 z-[9999]
           min-w-[48px] min-h-[48px] px-4 py-3
           rounded-xl text-sm font-semibold
           shadow-lg backdrop-blur-sm transition-all
@@ -646,7 +646,7 @@ function ExerciseButton({
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 py-3 rounded-xl text-sm font-medium transition-all
+      className={`flex flex-col items-center gap-1 py-3 min-h-[48px] rounded-xl text-sm font-medium transition-transform duration-150 active:scale-95
         ${selected
           ? 'bg-indigo-600 text-white'
           : 'bg-gray-800 text-gray-300 hover:bg-gray-700'

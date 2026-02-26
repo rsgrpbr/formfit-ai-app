@@ -62,16 +62,16 @@ export default function SettingsPage() {
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight">FormFit AI</Link>
         <div className="flex items-center gap-4 text-sm">
-          <Link href="/analyze" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/analyze" className="min-h-[48px] flex items-center px-2 text-gray-400 hover:text-white transition-colors">
             {t('train')}
           </Link>
-          <Link href="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+          <Link href="/dashboard" className="min-h-[48px] flex items-center px-2 text-gray-400 hover:text-white transition-colors">
             Dashboard
           </Link>
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-8 max-w-xl mx-auto w-full space-y-4">
+      <main className="flex-1 px-4 py-8 pb-24 max-w-xl mx-auto w-full space-y-4">
 
         {/* Page title */}
         <h1 className="text-2xl font-black">⚙️ {t('title')}</h1>
@@ -110,8 +110,8 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveName}
               disabled={saving || !name.trim()}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm
-                transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 min-h-[48px] rounded-xl bg-indigo-600 hover:bg-indigo-500 font-semibold text-sm
+                transition-transform duration-150 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? t('saving') : t('save')}
             </button>
