@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import CameraFeed from '@/components/camera/CameraFeed';
