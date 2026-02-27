@@ -41,8 +41,10 @@ export default function MuscleAvatar({
   slug,
   highlightColor = '#6366f1',
   size = 120,
-  gender: _gender = 'male', // eslint-disable-line @typescript-eslint/no-unused-vars
+  gender = 'male',
 }: MuscleAvatarProps) {
+  console.log('[MuscleAvatar] gender do perfil:', gender);
+
   const exercise = EXERCISE_MUSCLES[slug];
   const data: IExerciseData[] = [{ name: exercise.name, muscles: [...exercise.muscles] }];
 
