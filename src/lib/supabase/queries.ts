@@ -10,6 +10,10 @@ export interface Profile {
   plan: 'free' | 'pro' | 'personal' | 'annual';
   streak_days: number;
   total_reps: number;
+  objective: string | null;
+  level: string | null;
+  days_per_week: number | null;
+  location: string | null;
 }
 
 export interface Session {
@@ -52,7 +56,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
 export async function updateProfile(
   userId: string,
-  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale' | 'gender'>>
+  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale' | 'gender' | 'objective' | 'level' | 'days_per_week' | 'location'>>
 ): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase
@@ -172,4 +176,72 @@ export async function getUserSubscription(userId: string) {
     .eq('user_id', userId)
     .single();
   return data;
+}
+
+// ── Training Plans ─────────────────────────────────────────
+
+export interface TrainingPlan {
+  id: string;
+  user_id: string;
+  name: string;
+  objective: string | null;
+  level: string | null;
+  days_per_week: number | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface PlanDay {
+  id: string;
+  plan_id: string;
+  day_number: number;
+  name: string;
+  is_rest: boolean;
+}
+
+export interface PlanExercise {
+  id: string;
+  day_id: string;
+  exercise_id: string;
+  sets: number;
+  reps: number;
+  rest_seconds: number;
+  order_index: number;
+  exercise?: { slug: string; name_pt: string; name_en: string } | null;
+}
+
+export async function getActivePlan(userId: string): Promise<TrainingPlan | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('training_plans')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  if (error) return null;
+  return data as TrainingPlan;
+}
+
+export async function getPlanDays(planId: string): Promise<PlanDay[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('plan_days')
+    .select('*')
+    .eq('plan_id', planId)
+    .order('day_number', { ascending: true });
+  if (error) { console.error('[getPlanDays]', error.message); return []; }
+  return data as PlanDay[];
+}
+
+export async function getPlanExercises(dayId: string): Promise<PlanExercise[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('plan_exercises')
+    .select('*, exercise:exercises(slug, name_pt, name_en)')
+    .eq('day_id', dayId)
+    .order('order_index', { ascending: true });
+  if (error) { console.error('[getPlanExercises]', error.message); return []; }
+  return (data ?? []) as PlanExercise[];
 }

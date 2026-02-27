@@ -194,5 +194,32 @@
     "intermediate": "Intermediário",
     "advanced": "Avançado",
     "elite": "Elite"
+  },
+  "onboarding": {
+    "title_objective": "Qual é seu objetivo?",
+    "title_level": "Qual é seu nível?",
+    "title_days": "Quantos dias por semana?",
+    "title_location": "Onde você vai treinar?",
+    "obj_lose_weight": "Emagrecer",
+    "obj_gain_muscle": "Ganhar massa",
+    "obj_tone": "Definir",
+    "obj_conditioning": "Condicionamento",
+    "level_beginner": "Iniciante",
+    "level_intermediate": "Intermediário",
+    "level_advanced": "Avançado",
+    "loc_home": "Casa",
+    "loc_gym": "Academia",
+    "generating": "Gerando seu plano personalizado…",
+    "error_generating": "Erro ao gerar plano. Tente novamente."
+  },
+  "my_plan": {
+    "rest_day": "Dia de Descanso",
+    "sets_reps": "{sets} séries × {reps} reps",
+    "rest_label": "{seconds}s descanso",
+    "analyze_cta": "📷 Analisar",
+    "regenerate": "Regenerar Plano",
+    "regenerating": "Regenerando…",
+    "no_plan": "Nenhum plano ativo",
+    "create_plan": "Criar meu plano"
   }
 }

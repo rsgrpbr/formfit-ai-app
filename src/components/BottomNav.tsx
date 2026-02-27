@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
   { href: '/analyze',   icon: '🏋️', label: 'Treinar'   },
+  { href: '/my-plan',   icon: '📋', label: 'Meu Plano' },
   { href: '/dashboard', icon: '📊', label: 'Dashboard' },
   { href: '/settings',  icon: '⚙️', label: 'Config'    },
 ] as const;
 
-const SHOW_ON = new Set(['/analyze', '/dashboard', '/settings']);
+const SHOW_ON = new Set(['/analyze', '/my-plan', '/dashboard', '/settings']);
 
 export default function BottomNav() {
   const pathname = usePathname();

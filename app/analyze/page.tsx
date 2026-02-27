@@ -2,8 +2,9 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import CameraFeed from '@/components/camera/CameraFeed';
 import { unlockIOSAudio } from '@/lib/pwa';
 import PoseOverlay from '@/components/camera/PoseOverlay';
@@ -71,7 +72,7 @@ const VIDEO_H = 480;
 
 // ── Componente principal ──────────────────────────────────────────────────────
 
-export default function AnalyzePage() {
+function AnalyzePageInner() {
   const t = useTranslations('analyze');
   const tEx = useTranslations('exercises');
 
@@ -81,6 +82,9 @@ export default function AnalyzePage() {
   const { speak, isSpeaking } = useVoiceCoach({ locale, enabled: true });
   const { plan, canAnalyze, monthlyCount, loading: planLoading } = usePlan();
   const { triggerGamification } = useGamification();
+
+  const searchParams = useSearchParams();
+  const paramExercise = searchParams.get('exercise') as ExerciseSlug | null;
 
   // Sync locale from profile
   useEffect(() => {
@@ -95,7 +99,9 @@ export default function AnalyzePage() {
   // Desbloqueia áudio no iOS após primeiro toque
   useEffect(() => { unlockIOSAudio(); }, []);
 
-  const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>('squat');
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>(
+    (paramExercise && EXERCISES.some(e => e.slug === paramExercise)) ? paramExercise : 'squat'
+  );
   const [isRunning, setIsRunning]               = useState(false);
   const [score, setScore]                       = useState(100);
   const [stats, setStats]                       = useState<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
@@ -641,6 +647,14 @@ export default function AnalyzePage() {
         🦴 {showSkeleton ? 'ON' : 'OFF'}
       </button>
     </div>
+  );
+}
+
+export default function AnalyzePage() {
+  return (
+    <Suspense>
+      <AnalyzePageInner />
+    </Suspense>
   );
 }
 
