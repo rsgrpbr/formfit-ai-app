@@ -43,8 +43,6 @@ export default function MuscleAvatar({
   size = 120,
   gender = 'male',
 }: MuscleAvatarProps) {
-  console.log('[MuscleAvatar] gender do perfil:', gender);
-
   const exercise = EXERCISE_MUSCLES[slug];
   const data: IExerciseData[] = [{ name: exercise.name, muscles: [...exercise.muscles] }];
 
