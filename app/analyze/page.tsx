@@ -8,6 +8,8 @@ import CameraFeed from '@/components/camera/CameraFeed';
 import { unlockIOSAudio } from '@/lib/pwa';
 import PoseOverlay from '@/components/camera/PoseOverlay';
 import SessionResultModal from '@/components/gamification/SessionResultModal';
+import MuscleAvatar from '@/components/MuscleAvatar';
+import type { ExerciseSlug as MuscleAvatarSlug } from '@/components/MuscleAvatar';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
 import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
@@ -559,6 +561,14 @@ export default function AnalyzePage() {
                   onClick={() => setSelectedExercise(ex.slug)}
                 />
               ))}
+            </div>
+
+            {/* Músculos trabalhados */}
+            <div className="mt-4 pt-4 border-t border-gray-800">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">
+                {t('muscles_label')}
+              </p>
+              <MuscleAvatar slug={selectedExercise as MuscleAvatarSlug} size={90} />
             </div>
           </div>
 

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate-videos": "tsx scripts/generate-videos.ts"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.36.0",
@@ -16,6 +17,7 @@
     "next": "16.1.6",
     "next-intl": "^4.8.3",
     "react": "19.2.3",
+    "react-body-highlighter": "^2.0.5",
     "react-dom": "19.2.3",
     "sonner": "^2.0.7"
   },
@@ -28,6 +30,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
