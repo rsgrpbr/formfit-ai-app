@@ -7,6 +7,7 @@ interface MuscleAvatarProps {
   slug: ExerciseSlug;
   highlightColor?: string;
   size?: number;
+  gender?: 'male' | 'female';
 }
 
 const MuscleAvatarClient = dynamic(() => import('./MuscleAvatarClient'), { ssr: false });

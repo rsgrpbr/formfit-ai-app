@@ -26,6 +26,13 @@ interface MuscleAvatarProps {
   highlightColor?: string;
   /** Tamanho do SVG em px (aplicado à largura de cada vista) */
   size?: number;
+  /**
+   * Gênero do avatar.
+   * TODO: react-body-highlighter não possui prop nativa de sexo/gênero (v2.0.5).
+   * Quando a lib adicionar suporte, passar aqui para alternar entre silhuetas.
+   * Por enquanto todos os avatares renderizam o modelo masculino padrão.
+   */
+  gender?: 'male' | 'female';
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
@@ -34,6 +41,7 @@ export default function MuscleAvatar({
   slug,
   highlightColor = '#6366f1',
   size = 120,
+  gender: _gender = 'male', // eslint-disable-line @typescript-eslint/no-unused-vars
 }: MuscleAvatarProps) {
   const exercise = EXERCISE_MUSCLES[slug];
   const data: IExerciseData[] = [{ name: exercise.name, muscles: [...exercise.muscles] }];

@@ -124,7 +124,11 @@
     "saving": "Enregistrement…",
     "saved": "Enregistré !",
     "back": "← Retour",
-    "train": "S'entraîner"
+    "train": "S'entraîner",
+    "avatar_section": "Avatar musculaire",
+    "gender_label": "Genre",
+    "gender_male": "Masculin",
+    "gender_female": "Féminin"
   },
   "login": {
     "train_no_account": "S'entraîner sans compte →",

@@ -124,7 +124,11 @@
     "saving": "Salvando…",
     "saved": "Salvo!",
     "back": "← Voltar",
-    "train": "Treinar"
+    "train": "Treinar",
+    "avatar_section": "Avatar muscular",
+    "gender_label": "Gênero",
+    "gender_male": "Masculino",
+    "gender_female": "Feminino"
   },
   "login": {
     "train_no_account": "Treinar sem conta →",

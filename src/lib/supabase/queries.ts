@@ -6,6 +6,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   locale: string;
+  gender: 'male' | 'female';
   plan: 'free' | 'pro' | 'personal' | 'annual';
   streak_days: number;
   total_reps: number;
@@ -51,7 +52,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
 export async function updateProfile(
   userId: string,
-  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale'>>
+  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale' | 'gender'>>
 ): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase

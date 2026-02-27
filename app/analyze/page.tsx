@@ -571,7 +571,11 @@ export default function AnalyzePage() {
               <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">
                 {t('muscles_label')}
               </p>
-              <MuscleAvatar slug={selectedExercise as MuscleAvatarSlug} size={90} />
+              <MuscleAvatar
+                slug={selectedExercise as MuscleAvatarSlug}
+                size={90}
+                gender={profile?.gender ?? 'male'}
+              />
             </div>
           </div>
 

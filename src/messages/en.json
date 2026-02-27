@@ -124,7 +124,11 @@
     "saving": "Saving…",
     "saved": "Saved!",
     "back": "← Back",
-    "train": "Train"
+    "train": "Train",
+    "avatar_section": "Muscle avatar",
+    "gender_label": "Gender",
+    "gender_male": "Male",
+    "gender_female": "Female"
   },
   "login": {
     "train_no_account": "Train without an account →",

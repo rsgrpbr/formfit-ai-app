@@ -19,8 +19,10 @@ export default function SettingsPage() {
   const { user, profile, loading } = useSession();
   const { locale, setLocale } = useLocale();
 
-  const [name,   setName]   = useState('');
-  const [saving, setSaving] = useState(false);
+  const [name,          setName]          = useState('');
+  const [saving,        setSaving]        = useState(false);
+  const [gender,        setGender]        = useState<'male' | 'female'>('male');
+  const [savingGender,  setSavingGender]  = useState(false);
 
   // Sync locale from profile on first load
   useEffect(() => {
@@ -34,10 +36,14 @@ export default function SettingsPage() {
     if (!loading && !user) router.push('/login');
   }, [loading, user, router]);
 
-  // Pre-fill name from profile
+  // Pre-fill name and gender from profile
   useEffect(() => {
     if (profile?.full_name) setName(profile.full_name);
   }, [profile?.full_name]);
+
+  useEffect(() => {
+    if (profile?.gender) setGender(profile.gender);
+  }, [profile?.gender]);
 
   const handleSaveName = async () => {
     if (!user || !name.trim()) return;
@@ -45,6 +51,15 @@ export default function SettingsPage() {
     const ok = await updateProfile(user.id, { full_name: name.trim() });
     setSaving(false);
     if (ok) toast.success(t('saved'));
+  };
+
+  const handleGenderSelect = async (value: 'male' | 'female') => {
+    if (!user || value === gender) return;
+    setGender(value);
+    setSavingGender(true);
+    await updateProfile(user.id, { gender: value });
+    setSavingGender(false);
+    toast.success(t('saved'));
   };
 
   if (loading || !user) {
@@ -115,6 +130,36 @@ export default function SettingsPage() {
             >
               {saving ? t('saving') : t('save')}
             </button>
+          </div>
+        </section>
+
+        {/* ── Seção: Avatar ── */}
+        <section className="bg-gray-900 rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-800">
+            <h2 className="text-sm font-semibold text-gray-300">{t('avatar_section')}</h2>
+          </div>
+          <div className="px-5 py-5">
+            <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">
+              {t('gender_label')}
+            </p>
+            <div className="flex gap-3">
+              {(['male', 'female'] as const).map((val) => (
+                <button
+                  key={val}
+                  onClick={() => handleGenderSelect(val)}
+                  disabled={savingGender}
+                  className="flex-1 py-3 min-h-[48px] rounded-xl text-sm font-semibold
+                    border-2 transition-all duration-150 active:scale-95 disabled:opacity-50"
+                  style={{
+                    background: '#0F1419',
+                    borderColor: gender === val ? '#C8F135' : '#1E2A35',
+                    color: gender === val ? '#C8F135' : '#9CA3AF',
+                  }}
+                >
+                  {val === 'male' ? t('gender_male') : t('gender_female')}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
