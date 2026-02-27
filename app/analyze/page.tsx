@@ -112,12 +112,15 @@ export default function AnalyzePage() {
   const timerRef           = useRef<ReturnType<typeof setInterval> | null>(null);
   const plankStart         = useRef<number>(0);
   const sessionStartHourRef = useRef<number>(0);
-  const localeRef          = useRef<string>(locale);
-  localeRef.current = locale;
+  const localeRef            = useRef<string>(locale);
+  const selectedExerciseRef  = useRef<ExerciseSlug>('squat');
+  localeRef.current           = locale;
+  selectedExerciseRef.current = selectedExercise;
 
-  // Limpa o errorTracker ao trocar de exercício
+  // Limpa o errorTracker e reseta fase ao trocar de exercício
   useEffect(() => {
     errorTrackerRef.current = {};
+    phaseRef.current = 'up';
   }, [selectedExercise]);
 
   // ── Análise frame a frame ─────────────────────────────────────────────────
@@ -136,7 +139,7 @@ export default function AnalyzePage() {
       if (text) speak(text, key.startsWith('general.') ? 'high' : 'low');
     };
 
-    if (selectedExercise === 'squat') {
+    if (selectedExerciseRef.current === 'squat') {
       const result = analyzeSquat(angles, landmarks, phaseRef.current as SquatPhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -155,7 +158,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'pushup') {
+    if (selectedExerciseRef.current === 'pushup') {
       const result = analyzePushup(angles, landmarks, phaseRef.current as PushupPhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -174,7 +177,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'plank') {
+    if (selectedExerciseRef.current === 'plank') {
       const held   = (Date.now() - plankStart.current) / 1000;
       const result = analyzePlank(angles, landmarks, held, tracker);
       setScore(result.score);
@@ -182,7 +185,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'lunge') {
+    if (selectedExerciseRef.current === 'lunge') {
       const result = analyzeLunge(angles, landmarks, phaseRef.current as LungePhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -201,7 +204,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'glute_bridge') {
+    if (selectedExerciseRef.current === 'glute_bridge') {
       const result = analyzeGluteBridge(angles, landmarks, phaseRef.current as GluteBridgePhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -220,7 +223,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'side_plank') {
+    if (selectedExerciseRef.current === 'side_plank') {
       const held   = (Date.now() - plankStart.current) / 1000;
       const result = analyzeSidePlank(angles, landmarks, held, tracker);
       setScore(result.score);
@@ -228,7 +231,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'superman') {
+    if (selectedExerciseRef.current === 'superman') {
       const held   = (Date.now() - plankStart.current) / 1000;
       const result = analyzeSuperman(angles, landmarks, held, tracker);
       setScore(result.score);
@@ -236,7 +239,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'mountain_climber') {
+    if (selectedExerciseRef.current === 'mountain_climber') {
       const result = analyzeMountainClimber(angles, landmarks, phaseRef.current as MountainClimberPhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -255,7 +258,7 @@ export default function AnalyzePage() {
       speakFeedback(result.feedback);
     }
 
-    if (selectedExercise === 'burpee') {
+    if (selectedExerciseRef.current === 'burpee') {
       const result = analyzeBurpee(angles, landmarks, phaseRef.current as BurpeePhase, tracker);
       phaseRef.current = result.phase;
       setScore(result.score);
@@ -273,7 +276,7 @@ export default function AnalyzePage() {
       }
       speakFeedback(result.feedback);
     }
-  }, [landmarks, isRunning, selectedExercise, speak]);
+  }, [landmarks, isRunning, speak]);
 
   // ── Timer ─────────────────────────────────────────────────────────────────
 
