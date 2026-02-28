@@ -12,7 +12,7 @@ import {
   toggleFavorite,
 } from '@/lib/supabase/queries';
 import type { Exercise } from '@/lib/supabase/queries';
-import { Heart, Dumbbell, Search } from 'lucide-react';
+import { Heart, Dumbbell, Search, ChevronLeft } from 'lucide-react';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
 
@@ -129,30 +129,47 @@ export default function ExercisesPage() {
     setSelectedGroup(null);
   };
 
-  // ── List view (shared for muscle + objective) ─────────────────────────────
+  // ── List view (shared for muscle + objective + favorites) ─────────────────
 
   const ExerciseList = ({ exs }: { exs: Exercise[] }) => (
     exs.length === 0 ? (
-      <p className="text-center text-gray-500 py-12 text-sm">{t('no_results')}</p>
+      <p className="text-center py-12 text-sm" style={{ color: 'var(--text-muted)' }}>{t('no_results')}</p>
     ) : (
       <div className="space-y-3">
         {exs.map(ex => (
           <Link key={ex.id} href={`/exercises/${ex.slug}`}>
-            <div className="bg-gray-900 rounded-2xl p-4 flex items-center gap-4 hover:bg-gray-800 active:scale-[0.98] transition-all">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
+            <div
+              className="rounded-2xl p-5 flex items-center gap-4 transition-all active:scale-[0.98]"
+              style={{ background: 'var(--surface)' }}
+            >
+              {/* Icon */}
+              <div
+                className="flex-shrink-0 rounded-xl p-3 flex items-center justify-center"
+                style={{ background: 'var(--surface2)', color: 'var(--text-muted)' }}
+              >
                 <Dumbbell size={22} />
               </div>
+
+              {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white truncate">{getName(ex)}</p>
-                <div className="flex gap-2 mt-1 flex-wrap">
+                <p className="font-semibold text-white truncate text-base">{getName(ex)}</p>
+                <div className="flex gap-2 mt-1.5 flex-wrap">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${DIFF_STYLE[ex.difficulty] ?? 'bg-gray-700 text-gray-400'}`}>
                     {DIFF_LABEL[ex.difficulty] ?? ex.difficulty}
                   </span>
                   {ex.muscles_primary?.slice(0, 2).map(m => (
-                    <span key={m} className="text-[10px] text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full">{m}</span>
+                    <span
+                      key={m}
+                      className="text-[10px] px-2 py-0.5 rounded-full"
+                      style={{ background: 'var(--surface2)', color: 'var(--text-muted)' }}
+                    >
+                      {m}
+                    </span>
                   ))}
                 </div>
               </div>
+
+              {/* Heart */}
               <button
                 onClick={e => handleToggleFav(e, ex)}
                 className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
@@ -171,132 +188,161 @@ export default function ExercisesPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col pb-24">
+    <div className="min-h-screen text-white flex flex-col pb-24" style={{ background: 'var(--bg)' }}>
 
       {/* Header + search */}
-      <header className="px-4 pt-5 pb-3 border-b border-gray-800">
-        <h1 className="text-xl font-bold mb-3">{t('title')}</h1>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }}>
-            <Search size={16} />
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder={t('search_placeholder')}
-            className="w-full bg-gray-800 text-white rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none
-              focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-500"
-          />
+      <header className="px-4 pt-5 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-xl font-bold mb-3">{t('title')}</h1>
+          <div className="relative">
+            <span
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <Search size={16} />
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t('search_placeholder')}
+              className="w-full rounded-xl pl-9 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+              style={{
+                background: 'var(--surface2)',
+                color: 'var(--text)',
+              }}
+            />
+          </div>
         </div>
       </header>
 
-      {/* Tab bar */}
-      <div className="flex border-b border-gray-800 bg-gray-950">
-        {(['muscle', 'objective', 'favorites'] as Tab[]).map(tabKey => (
-          <button
-            key={tabKey}
-            onClick={() => handleTabChange(tabKey)}
-            className={`flex-1 py-3 text-xs font-semibold transition-colors border-b-2 -mb-px
-              ${tab === tabKey
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-gray-500 hover:text-gray-300'}`}
-          >
-            {tabKey === 'muscle' ? t('tab_muscle') : tabKey === 'objective' ? t('tab_objective') : t('tab_favorites')}
-          </button>
-        ))}
+      {/* Tab bar — sticky */}
+      <div
+        className="sticky top-0 z-10 flex border-b"
+        style={{ background: 'var(--bg)', borderColor: 'var(--border)' }}
+      >
+        <div className="flex w-full max-w-2xl mx-auto">
+          {(['muscle', 'objective', 'favorites'] as Tab[]).map(tabKey => (
+            <button
+              key={tabKey}
+              onClick={() => handleTabChange(tabKey)}
+              className="flex-1 py-3 text-xs font-semibold transition-colors border-b-2 -mb-px"
+              style={{
+                borderColor: tab === tabKey ? 'var(--accent)' : 'transparent',
+                color: tab === tabKey ? 'var(--accent)' : 'var(--text-muted)',
+              }}
+            >
+              {tabKey === 'muscle' ? t('tab_muscle') : tabKey === 'objective' ? t('tab_objective') : t('tab_favorites')}
+            </button>
+          ))}
+        </div>
       </div>
 
       <main className="flex-1 px-4 py-4">
-        {loading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-24 bg-gray-800 rounded-2xl animate-pulse" />
-            ))}
-          </div>
-        ) : tab === 'muscle' ? (
-          selectedGroup ? (
-            <>
-              <button
-                onClick={() => setSelectedGroup(null)}
-                className="text-sm text-gray-400 hover:text-white mb-4 flex items-center gap-1"
-              >
-                {t('back')}
-              </button>
-              <ExerciseList exs={exercisesForMuscle(selectedGroup)} />
-            </>
-          ) : (
+        <div className="max-w-2xl mx-auto">
+          {loading ? (
             <div className="grid grid-cols-2 gap-3">
-              {MUSCLE_GROUPS.map(group => {
-                const count = exercisesForMuscle(group.key).length;
-                return (
-                  <button
-                    key={group.key}
-                    onClick={() => setSelectedGroup(group.key)}
-                    className="bg-gray-900 rounded-2xl p-4 flex flex-col items-center gap-2
-                      hover:bg-gray-800 active:scale-95 transition-all text-center"
-                  >
-                    <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center" style={{ color: 'var(--accent)' }}>
-                      <Dumbbell size={24} />
-                    </div>
-                    <span className="font-semibold text-sm leading-tight">{group.label}</span>
-                    <span className="text-xs text-gray-500">{count} exerc.</span>
-                  </button>
-                );
-              })}
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: 'var(--surface)' }} />
+              ))}
             </div>
-          )
-        ) : tab === 'objective' ? (
-          selectedGroup ? (
-            <>
-              <button
-                onClick={() => setSelectedGroup(null)}
-                className="text-sm text-gray-400 hover:text-white mb-4 flex items-center gap-1"
-              >
-                {t('back')}
-              </button>
-              <ExerciseList exs={exercisesForObjective(selectedGroup)} />
-            </>
+          ) : tab === 'muscle' ? (
+            selectedGroup ? (
+              <>
+                <BackButton onClick={() => setSelectedGroup(null)} label={t('back')} />
+                <ExerciseList exs={exercisesForMuscle(selectedGroup)} />
+              </>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {MUSCLE_GROUPS.map(group => {
+                  const count = exercisesForMuscle(group.key).length;
+                  return (
+                    <button
+                      key={group.key}
+                      onClick={() => setSelectedGroup(group.key)}
+                      className="rounded-2xl p-4 flex flex-col items-center gap-2
+                        active:scale-95 transition-all text-center"
+                      style={{ background: 'var(--surface)' }}
+                    >
+                      <div
+                        className="rounded-xl p-3 flex items-center justify-center"
+                        style={{ background: 'var(--surface2)', color: 'var(--accent)' }}
+                      >
+                        <Dumbbell size={24} />
+                      </div>
+                      <span className="font-semibold text-sm leading-tight">{group.label}</span>
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{count} exerc.</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )
+          ) : tab === 'objective' ? (
+            selectedGroup ? (
+              <>
+                <BackButton onClick={() => setSelectedGroup(null)} label={t('back')} />
+                <ExerciseList exs={exercisesForObjective(selectedGroup)} />
+              </>
+            ) : (
+              <div className="space-y-3">
+                {OBJ_GROUPS.map(group => {
+                  const count = exercisesForObjective(group.key).length;
+                  return (
+                    <button
+                      key={group.key}
+                      onClick={() => setSelectedGroup(group.key)}
+                      className="w-full rounded-2xl p-5 flex items-center gap-4
+                        active:scale-[0.98] transition-all"
+                      style={{ background: 'var(--surface)' }}
+                    >
+                      <div
+                        className="rounded-xl p-3 flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'var(--surface2)', color: 'var(--accent)' }}
+                      >
+                        <Dumbbell size={28} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-lg">{group.label}</p>
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{count} exercícios</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )
           ) : (
-            <div className="space-y-3">
-              {OBJ_GROUPS.map(group => {
-                const count = exercisesForObjective(group.key).length;
-                return (
-                  <button
-                    key={group.key}
-                    onClick={() => setSelectedGroup(group.key)}
-                    className="w-full bg-gray-900 rounded-2xl p-5 flex items-center gap-4
-                      hover:bg-gray-800 active:scale-[0.98] transition-all"
-                  >
-                    <div className="w-14 h-14 rounded-xl bg-gray-800 flex items-center justify-center flex-shrink-0" style={{ color: 'var(--accent)' }}>
-                      <Dumbbell size={28} />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-bold text-lg">{group.label}</p>
-                      <p className="text-sm text-gray-400">{count} exercícios</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )
-        ) : (
-          /* Favorites tab */
-          !user ? (
-            <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
-              <Heart size={40} strokeWidth={1.5} />
-              <p className="text-sm">{t('login_to_fav')}</p>
-            </div>
-          ) : favoriteList.length === 0 ? (
-            <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
-              <Heart size={40} strokeWidth={1.5} />
-              <p className="text-sm">{t('no_favorites')}</p>
-            </div>
-          ) : (
-            <ExerciseList exs={favoriteList} />
-          )
-        )}
+            /* Favorites tab */
+            !user ? (
+              <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
+                <Heart size={40} strokeWidth={1.5} />
+                <p className="text-sm">{t('login_to_fav')}</p>
+              </div>
+            ) : favoriteList.length === 0 ? (
+              <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
+                <Heart size={40} strokeWidth={1.5} />
+                <p className="text-sm">{t('no_favorites')}</p>
+              </div>
+            ) : (
+              <ExerciseList exs={favoriteList} />
+            )
+          )}
+        </div>
       </main>
     </div>
+  );
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function BackButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-4 transition-all active:scale-95"
+      style={{ background: 'var(--surface2)', color: 'var(--text)' }}
+    >
+      <ChevronLeft size={16} />
+      {label.replace('← ', '')}
+    </button>
   );
 }
