@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import { updateProfile } from '@/lib/supabase/queries';
@@ -16,6 +16,8 @@ type Location = 'casa' | 'academia';
 export default function OnboardingPage() {
   const t = useTranslations('onboarding');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isReset = searchParams.get('reset') === 'true';
   const { user, profile, loading } = useSession();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -28,7 +30,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (loading) return;
     if (!user) { router.replace('/login'); return; }
-    if (profile?.objective) { router.replace('/my-plan'); return; }
+    if (profile?.objective && !isReset) { router.replace('/my-plan'); return; }
   }, [user, profile, loading, router]);
 
   const handleFinish = async (loc: Location) => {

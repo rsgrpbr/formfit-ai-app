@@ -286,7 +286,8 @@
     "regenerate": "Régénérer le Plan",
     "regenerating": "Régénération…",
     "no_plan": "Aucun plan actif",
-    "create_plan": "Créer mon plan"
+    "create_plan": "Créer mon plan",
+    "change_objective": "Changer objectif / niveau"
   },
   "profile": {
     "title": "Profil",

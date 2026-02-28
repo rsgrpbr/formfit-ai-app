@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
 import {
@@ -19,6 +20,7 @@ import { Moon, Camera } from 'lucide-react';
 
 export default function MyPlanPage() {
   const t = useTranslations('my_plan');
+  const router = useRouter();
   const { user, profile, loading } = useSession();
 
   const [plan, setPlan] = useState<TrainingPlan | null>(null);
@@ -192,14 +194,21 @@ export default function MyPlanPage() {
         )}
       </div>
 
-      {/* Footer — Regenerate */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 bg-gray-950 border-t border-gray-800">
+      {/* Footer — Regenerate + Change objective */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 bg-gray-950 border-t border-gray-800 flex flex-col gap-2">
         <button
           onClick={handleRegenerate}
           disabled={!canRegenerate || regenerating}
           className="w-full py-4 rounded-2xl bg-gray-800 hover:bg-gray-700 text-white font-semibold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {regenerating ? t('regenerating') : t('regenerate')}
+        </button>
+        <button
+          onClick={() => router.push('/onboarding?reset=true')}
+          className="w-full py-2.5 rounded-2xl text-sm font-medium transition-all active:scale-95"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          {t('change_objective')}
         </button>
       </div>
     </div>

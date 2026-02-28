@@ -343,6 +343,7 @@
     "regenerate": "Regenerate Plan",
     "regenerating": "Regenerating…",
     "no_plan": "No active plan",
-    "create_plan": "Create my plan"
+    "create_plan": "Create my plan",
+    "change_objective": "Change goal / level"
   }
 }
