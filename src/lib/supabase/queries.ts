@@ -228,9 +228,9 @@ export async function getActivePlan(userId: string): Promise<TrainingPlan | null
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
   if (error) return null;
-  return data as TrainingPlan;
+  return data as TrainingPlan | null;
 }
 
 export async function getPlanDays(planId: string): Promise<PlanDay[]> {
