@@ -254,5 +254,24 @@
     "regenerating": "Regenerando…",
     "no_plan": "Sin plan activo",
     "create_plan": "Crear mi plan"
+  },
+  "progress": {
+    "title": "Progreso",
+    "heatmap_title": "Semana actual",
+    "week_sessions": "sesiones esta semana",
+    "chart_title": "Evolución del form score",
+    "filter_all": "Todos",
+    "no_data": "No se encontraron sesiones.",
+    "gamification_title": "Gamificación",
+    "streak_label": "días seguidos",
+    "recent_badges": "Últimos logros",
+    "stats_title": "Estadísticas generales",
+    "stat_sessions": "Total sesiones",
+    "stat_reps": "Total reps",
+    "stat_best_score": "Mejor puntuación",
+    "stat_time": "Tiempo total",
+    "stat_fav": "Ejercicio favorito",
+    "stat_best_streak": "Mejor racha",
+    "stat_streak_days": "días"
   }
 }

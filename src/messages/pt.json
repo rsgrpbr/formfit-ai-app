@@ -212,6 +212,25 @@
     "generating": "Gerando seu plano personalizado…",
     "error_generating": "Erro ao gerar plano. Tente novamente."
   },
+  "progress": {
+    "title": "Progresso",
+    "heatmap_title": "Semana atual",
+    "week_sessions": "sessões esta semana",
+    "chart_title": "Evolução do form score",
+    "filter_all": "Todos",
+    "no_data": "Nenhuma sessão encontrada.",
+    "gamification_title": "Gamificação",
+    "streak_label": "dias seguidos",
+    "recent_badges": "Últimas conquistas",
+    "stats_title": "Estatísticas gerais",
+    "stat_sessions": "Total sessões",
+    "stat_reps": "Total reps",
+    "stat_best_score": "Melhor score",
+    "stat_time": "Tempo total",
+    "stat_fav": "Exercício favorito",
+    "stat_best_streak": "Melhor sequência",
+    "stat_streak_days": "dias"
+  },
   "workouts": {
     "title": "Treinos",
     "minutes": "{min} min",
