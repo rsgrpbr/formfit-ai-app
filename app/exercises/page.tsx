@@ -135,9 +135,9 @@ export default function ExercisesPage() {
     exs.length === 0 ? (
       <p className="text-center py-12 text-sm" style={{ color: 'var(--text-muted)' }}>{t('no_results')}</p>
     ) : (
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {exs.map(ex => (
-          <Link key={ex.id} href={`/exercises/${ex.slug}`}>
+          <Link key={ex.id} href={`/exercises/${ex.slug}`} className="block">
             <div
               className="rounded-2xl p-5 flex items-center gap-4 transition-all active:scale-[0.98]"
               style={{ background: 'var(--surface)' }}
@@ -284,7 +284,7 @@ export default function ExercisesPage() {
                 <ExerciseList exs={exercisesForObjective(selectedGroup)} />
               </>
             ) : (
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3">
                 {OBJ_GROUPS.map(group => {
                   const count = exercisesForObjective(group.key).length;
                   return (
