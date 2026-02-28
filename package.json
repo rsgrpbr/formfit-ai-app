@@ -10,6 +10,7 @@
     "generate-videos": "tsx scripts/generate-videos.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@elevenlabs/elevenlabs-js": "^2.36.0",
     "@mediapipe/tasks-vision": "^0.10.32",
     "@supabase/ssr": "^0.8.0",

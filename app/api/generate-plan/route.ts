@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { createAdminClient } from '@/lib/supabase/server';
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 interface DayInput {
   day_number: number;
@@ -22,40 +25,38 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  // 1. Call Anthropic API
-  const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-5',
-      max_tokens: 2048,
-      system:
-        'Você é personal trainer. Gere um plano de treino semanal em JSON usando apenas estes exercícios: ' +
-        'squat, pushup, plank, lunge, glute_bridge, side_plank, superman, mountain_climber, burpee. ' +
-        'Retorne APENAS JSON válido, sem markdown, sem texto extra.',
-      messages: [
-        {
-          role: 'user',
-          content: `Objetivo: ${objective}, Nível: ${level}, ${days_per_week} dias/semana, Local: ${location}. ` +
-            'Responda no formato: {"name":"...","days":[{"day_number":1,"name":"...","is_rest":false,' +
-            '"exercises":[{"slug":"squat","sets":3,"reps":12,"rest_seconds":60}]}]}',
-        },
-      ],
-    }),
-  });
-
-  if (!anthropicRes.ok) {
-    const errText = await anthropicRes.text();
-    console.error('[generate-plan] Anthropic error:', errText);
+  // 1. Call Claude API via SDK
+  let rawContent: string;
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: `Você é personal trainer. Gere plano semanal em JSON usando APENAS esses exercícios:
+squat, pushup, plank, lunge, glute_bridge, side_plank, superman, mountain_climber, burpee.
+Retorne APENAS JSON válido nesse formato exato, sem markdown:
+{
+  "name": "Nome do plano",
+  "days": [
+    {
+      "day_number": 1,
+      "name": "Nome do dia",
+      "is_rest": false,
+      "exercises": [
+        { "slug": "squat", "sets": 3, "reps": 12, "rest_seconds": 60 }
+      ]
+    }
+  ]
+}`,
+      messages: [{
+        role: 'user',
+        content: `Objetivo: ${objective}, Nível: ${level}, ${days_per_week} dias/semana, Local: ${location}.`,
+      }],
+    });
+    rawContent = (message.content[0] as { type: string; text: string }).text ?? '';
+  } catch (err) {
+    console.error('[generate-plan] Anthropic SDK error:', err);
     return NextResponse.json({ error: 'AI generation failed' }, { status: 502 });
   }
-
-  const anthropicData = await anthropicRes.json();
-  let rawContent: string = anthropicData?.content?.[0]?.text ?? '';
 
   // Strip possible ```json fences
   rawContent = rawContent.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
