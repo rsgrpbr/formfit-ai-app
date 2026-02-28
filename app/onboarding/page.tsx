@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useSession } from '@/hooks/useSession';
@@ -13,7 +13,7 @@ type Objective = 'emagrecer' | 'ganhar_massa' | 'definir' | 'condicionamento';
 type Level = 'iniciante' | 'intermediario' | 'avancado';
 type Location = 'casa' | 'academia';
 
-export default function OnboardingPage() {
+function OnboardingContent() {
   const t = useTranslations('onboarding');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -141,6 +141,14 @@ export default function OnboardingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-950" />}>
+      <OnboardingContent />
+    </Suspense>
   );
 }
 
