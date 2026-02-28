@@ -1,16 +1,16 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS } from '../mediapipe/landmarks';
+import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
 import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type PushupPhase = 'up' | 'down' | 'transition';
 
-// ── Limiares +15% de tolerância ──────────────────────────────────────────────
+// ── Limiares tolerantes ───────────────────────────────────────────────────────
 const ELBOW_DOWN_MAX   = 95;               // detecção de fase (inalterado)
 const ELBOW_UP_MIN     = 155;              // detecção de fase (inalterado)
-const BODY_ALIGN_THR   = 0.092;            // era 0.08  → × 1.15
-const DEPTH_ELBOW_THR  = 127;              // era 110   → × 1.15
-const ELBOW_ASYM_THR   = 23;              // era 20    → × 1.15
+const BODY_ALIGN_THR   = 0.106;            // 0.092 × 1.15
+const DEPTH_ELBOW_THR  = 146;              // 127 × 1.15
+const ELBOW_ASYM_THR   = 26;              // 23 × 1.15
 
 // Deduções de pontuação (imediatas, independente do debounce)
 const PEN_BODY    = 18;
@@ -45,6 +45,10 @@ export function analyzePushup(
   prevPhase: PushupPhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
+  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_SHOULDER, LANDMARKS.RIGHT_SHOULDER, LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP])) {
+    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
+  }
+
   const elbow = (angles.leftElbow + angles.rightElbow) / 2;
   const feedback: string[] = [];
   let score = 100;

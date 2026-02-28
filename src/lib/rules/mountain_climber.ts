@@ -1,18 +1,18 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS } from '../mediapipe/landmarks';
+import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
 import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type MountainClimberPhase = 'up' | 'down' | 'transition';
 
-// ── Limiares +15% de tolerância ──────────────────────────────────────────────
+// ── Limiares tolerantes ───────────────────────────────────────────────────────
 // KNEE_DRIVE_THR: joelho considerado avançado quando Y(joelho) - Y(quadril) < -THR
 // (joelho acima do quadril na tela = drive para frente)
-const KNEE_DRIVE_THR = 0.057;  // 0.05 × 1.15
+const KNEE_DRIVE_THR = 0.050;  // 0.057 × 0.87 (mais fácil de acionar o drive)
 
 // Alinhamento do quadril na posição de prancha (ombro-quadril-tornozelo)
-const HIP_HIGH_THR = 0.069;    // 0.06 × 1.15 — quadril muito alto (pike)
-const HIP_SAG_THR  = 0.069;    // 0.06 × 1.15 — quadril caindo
+const HIP_HIGH_THR = 0.079;    // 0.069 × 1.15
+const HIP_SAG_THR  = 0.079;    // 0.069 × 1.15
 
 const PEN_HIP_HIGH = 22;
 const PEN_HIP_SAG  = 22;
@@ -45,6 +45,10 @@ export function analyzeMountainClimber(
   prevPhase: MountainClimberPhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
+  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP, LANDMARKS.LEFT_KNEE, LANDMARKS.RIGHT_KNEE])) {
+    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
+  }
+
   const feedback: string[] = [];
   let score = 100;
 

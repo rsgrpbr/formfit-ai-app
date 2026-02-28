@@ -1,19 +1,19 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS } from '../mediapipe/landmarks';
+import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
 import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type GluteBridgePhase = 'up' | 'down' | 'transition';
 
-// ── Limiares +15% de tolerância ──────────────────────────────────────────────
+// ── Limiares tolerantes ───────────────────────────────────────────────────────
 // Ângulo ombro-quadril-joelho (angles.leftHip / rightHip)
 // Ponte no topo: quadril levantado → ângulo aumenta (~150°+)
 // Posição baixa: quadril no chão → ângulo menor (~90-115°)
 const HIP_UP_MIN    = 150;   // fase "up": quadril levantado
 const HIP_DOWN_MAX  = 115;   // fase "down": quadril no chão
-const HIP_PEAK_THR  = 138;   // pontuação mínima no topo: 120° × 1.15
-const HIP_ASYM_THR  = 0.069; // assimetria lateral quadril: 0.06 × 1.15
-const FEET_WIDE_THR = 1.61;  // relação ankleSpread/hipSpread: 1.4 × 1.15
+const HIP_PEAK_THR  = 120;   // 138 × 0.87 (mais fácil de atingir o topo)
+const HIP_ASYM_THR  = 0.079; // 0.069 × 1.15
+const FEET_WIDE_THR = 1.85;  // 1.61 × 1.15
 
 const PEN_LOW   = 18;
 const PEN_ASYM  = 12;
@@ -47,6 +47,10 @@ export function analyzeGluteBridge(
   prevPhase: GluteBridgePhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
+  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP, LANDMARKS.LEFT_KNEE, LANDMARKS.RIGHT_KNEE])) {
+    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
+  }
+
   const avgHip = (angles.leftHip + angles.rightHip) / 2;
   const feedback: string[] = [];
   let score = 100;

@@ -96,6 +96,11 @@ function AnalyzePageInner() {
   // Estado da sessão
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
 
+  // Zoom via ImageCapture API
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomCaps, setZoomCaps] = useState<{ min: number; max: number; step: number } | null>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
+
   // Desbloqueia áudio no iOS após primeiro toque
   useEffect(() => { unlockIOSAudio(); }, []);
 
@@ -160,8 +165,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
 
     if (selectedExerciseRef.current === 'pushup') {
@@ -179,8 +190,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
 
     if (selectedExerciseRef.current === 'plank') {
@@ -206,8 +223,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
 
     if (selectedExerciseRef.current === 'glute_bridge') {
@@ -225,8 +248,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
 
     if (selectedExerciseRef.current === 'side_plank') {
@@ -260,8 +289,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
 
     if (selectedExerciseRef.current === 'burpee') {
@@ -279,8 +314,14 @@ function AnalyzePageInner() {
           scores:    [...statsRef.current.scores, result.score],
         };
         setStats({ ...statsRef.current });
+        const reps = statsRef.current.totalReps;
+        if (reps === 1) speak(getFeedbackText('general.first_rep', localeRef.current), 'high');
+        else if (reps % 10 === 0) speak(getFeedbackText('general.ten_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else if (reps % 5 === 0) speak(getFeedbackText('general.milestone_reps', localeRef.current).replace('{reps}', String(reps)), 'high');
+        else speakFeedback(result.feedback);
+      } else {
+        speakFeedback(result.feedback);
       }
-      speakFeedback(result.feedback);
     }
   }, [landmarks, isRunning, speak]);
 
@@ -300,9 +341,35 @@ function AnalyzePageInner() {
   const handleCameraReady = useCallback(
     (video: HTMLVideoElement) => {
       if (isReady) startDetection(video);
+
+      // Try to get zoom capabilities
+      const stream = video.srcObject as MediaStream | null;
+      if (stream) {
+        const track = stream.getVideoTracks()[0];
+        if (track) {
+          trackRef.current = track;
+          try {
+            const caps = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number; step: number } };
+            if (caps.zoom) {
+              setZoomCaps({ min: caps.zoom.min, max: caps.zoom.max, step: caps.zoom.step });
+              setZoomLevel(caps.zoom.min);
+              track.applyConstraints({ advanced: [{ zoom: caps.zoom.min } as MediaTrackConstraintSet] }).catch(() => {});
+            }
+          } catch { /* zoom not supported */ }
+        }
+      }
     },
     [isReady, startDetection]
   );
+
+  const adjustZoom = useCallback((delta: number) => {
+    if (!zoomCaps || !trackRef.current) return;
+    setZoomLevel(prev => {
+      const next = Math.max(zoomCaps.min, Math.min(zoomCaps.max, prev + delta * zoomCaps.step));
+      trackRef.current!.applyConstraints({ advanced: [{ zoom: next } as MediaTrackConstraintSet] }).catch(() => {});
+      return next;
+    });
+  }, [zoomCaps]);
 
   const handleStart = useCallback(async () => {
     if (!canAnalyze) return;
@@ -452,6 +519,26 @@ function AnalyzePageInner() {
           >
             🔄
           </button>
+
+          {/* Zoom buttons — only if camera supports zoom */}
+          {zoomCaps && (
+            <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-1">
+              <button
+                onClick={() => adjustZoom(1)}
+                className="bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-white text-xl font-bold transition-all active:scale-95"
+                aria-label="Zoom in"
+              >
+                +
+              </button>
+              <button
+                onClick={() => adjustZoom(-1)}
+                className="bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-white text-xl font-bold transition-all active:scale-95"
+                aria-label="Zoom out"
+              >
+                −
+              </button>
+            </div>
+          )}
           <PoseOverlay
             landmarks={landmarks}
             width={VIDEO_W}
@@ -735,6 +822,10 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Abaixe o quadril — não pike.',
     'mountain_climber.hip_sagging':      'Suba o quadril — mantenha prancha.',
     'burpee.arched_back':                'Mantenha o tronco reto na prancha.',
+    'general.first_rep':         'Primeira rep! Vamos lá!',
+    'general.milestone_reps':    '{reps} repetições! Continue assim!',
+    'general.ten_reps':          'Incrível! {reps} repetições!',
+    'general.not_visible':       'Posicione-se melhor na câmera.',
   },
   en: {
     'general.perfect_form':      'Perfect form!',
@@ -764,6 +855,10 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Lower your hips — no piking.',
     'mountain_climber.hip_sagging':      'Raise your hips — keep plank form.',
     'burpee.arched_back':                'Keep your core tight in plank.',
+    'general.first_rep':         "First rep! Let's go!",
+    'general.milestone_reps':    '{reps} reps! Keep it up!',
+    'general.ten_reps':          'Amazing! {reps} reps!',
+    'general.not_visible':       'Position yourself better in the camera.',
   },
   es: {
     'general.perfect_form':      '¡Forma perfecta!',
@@ -793,6 +888,10 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Baja las caderas — sin pike.',
     'mountain_climber.hip_sagging':      'Sube las caderas — mantén la plancha.',
     'burpee.arched_back':                'Mantén el core apretado en la plancha.',
+    'general.first_rep':         '¡Primera rep! ¡Vamos!',
+    'general.milestone_reps':    '¡{reps} repeticiones! ¡Sigue así!',
+    'general.ten_reps':          '¡Increíble! ¡{reps} repeticiones!',
+    'general.not_visible':       'Colócate mejor frente a la cámara.',
   },
   fr: {
     'general.perfect_form':      'Forme parfaite !',
@@ -822,6 +921,10 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Abaissez les hanches — pas de pic.',
     'mountain_climber.hip_sagging':      'Levez les hanches — maintenez la planche.',
     'burpee.arched_back':                'Gardez le corps droit en planche.',
+    'general.first_rep':         'Première rép ! Allez !',
+    'general.milestone_reps':    '{reps} répétitions ! Continuez !',
+    'general.ten_reps':          'Incroyable ! {reps} répétitions !',
+    'general.not_visible':       'Positionnez-vous mieux face à la caméra.',
   },
 };
 

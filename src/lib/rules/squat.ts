@@ -1,6 +1,6 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS } from '../mediapipe/landmarks';
+import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
 
 export interface ExerciseResult {
   repComplete: boolean;
@@ -18,12 +18,12 @@ export type SquatPhase = 'up' | 'down' | 'transition';
  */
 export type ErrorTracker = Record<string, number>;
 
-// ── Limiares +15% de tolerância ──────────────────────────────────────────────
-const KNEE_DOWN_MAX    = 100;                // detecção de fase (inalterado)
-const KNEE_UP_MIN      = 160;               // detecção de fase (inalterado)
-const KNEE_TOE_THR     = 0.092;             // era 0.08  → × 1.15
-const DEPTH_KNEE_THR   = 127;              // era 110   → × 1.15
-const BACK_TILT_DEG    = 52;               // era 45°   → × 1.15  (spine < 128)
+// ── Limiares tolerantes ───────────────────────────────────────────────────────
+const KNEE_DOWN_MAX    = 120;              // detecção de fase
+const KNEE_UP_MIN      = 155;             // detecção de fase
+const KNEE_TOE_THR     = 0.12;            // tolerância joelho-dedo
+const DEPTH_KNEE_THR   = 140;             // profundidade mínima
+const BACK_TILT_DEG    = 60;              // inclinação máxima das costas (spine < 120)
 
 // Deduções de pontuação (imediatas, independente do debounce)
 const PEN_KNEE_TOE  = 18;
@@ -62,6 +62,10 @@ export function analyzeSquat(
   prevPhase: SquatPhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
+  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_KNEE, LANDMARKS.RIGHT_KNEE, LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP])) {
+    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
+  }
+
   const knee = (angles.leftKnee + angles.rightKnee) / 2;
   const feedback: string[] = [];
   let score = 100;
