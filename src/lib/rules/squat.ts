@@ -20,7 +20,7 @@ export type ErrorTracker = Record<string, number>;
 
 // ── Limiares tolerantes ───────────────────────────────────────────────────────
 const KNEE_DOWN_MAX    = 140;              // agachar ~40° de flexão já conta como 'down'
-const KNEE_UP_MIN      = 145;             // zona de transição mínima (140-145°)
+const KNEE_UP_MIN      = 150;             // zona de transição 140-150°
 const KNEE_TOE_THR     = 0.12;            // tolerância joelho-dedo
 const DEPTH_KNEE_THR   = 140;             // profundidade mínima
 const BACK_TILT_DEG    = 60;              // inclinação máxima das costas (spine < 120)
@@ -72,8 +72,10 @@ export function analyzeSquat(
   else if (knee > KNEE_UP_MIN) phase = 'up';
   else                          phase = 'transition';
 
-  // prevPhase !== 'up' cobre tanto down→up quanto transition→up (zona de transição pequena)
-  const repComplete = prevPhase !== 'up' && phase === 'up';
+  // Requer que tenha chegado em 'down' real antes de contar a rep
+  if (phase === 'down') errorTracker['_squat._was_down'] = 1;
+  const repComplete = prevPhase !== 'up' && phase === 'up' && !!errorTracker['_squat._was_down'];
+  if (repComplete) delete errorTracker['_squat._was_down'];
 
   // ── Joelhos passando os pés ───────────────────────────────────────────────
   const lKneeX = landmarks[LANDMARKS.LEFT_KNEE].x;

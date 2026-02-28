@@ -57,7 +57,9 @@ export function analyzeGluteBridge(
   else if (avgHip < HIP_DOWN_MAX) phase = 'down';
   else                            phase = 'transition';
 
-  const repComplete = prevPhase === 'down' && phase === 'up';
+  if (phase === 'down') errorTracker['_glute._was_down'] = 1;
+  const repComplete = prevPhase !== 'up' && phase === 'up' && !!errorTracker['_glute._was_down'];
+  if (repComplete) delete errorTracker['_glute._was_down'];
 
   // ── Quadril não sobe o suficiente ─────────────────────────────────────────
   const hipLow = phase === 'up' && avgHip < HIP_PEAK_THR;

@@ -55,7 +55,9 @@ export function analyzePushup(
   else if (elbow > ELBOW_UP_MIN) phase = 'up';
   else                            phase = 'transition';
 
-  const repComplete = prevPhase === 'down' && phase === 'up';
+  if (phase === 'down') errorTracker['_pushup._was_down'] = 1;
+  const repComplete = prevPhase !== 'up' && phase === 'up' && !!errorTracker['_pushup._was_down'];
+  if (repComplete) delete errorTracker['_pushup._was_down'];
 
   // ── Alinhamento do corpo ──────────────────────────────────────────────────
   const shoulderY    = (landmarks[LANDMARKS.LEFT_SHOULDER].y + landmarks[LANDMARKS.RIGHT_SHOULDER].y) / 2;

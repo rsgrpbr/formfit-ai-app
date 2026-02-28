@@ -55,7 +55,9 @@ export function analyzeLunge(
   else if (frontKnee > FRONT_KNEE_UP_MIN) phase = 'up';
   else                                     phase = 'transition';
 
-  const repComplete = prevPhase === 'down' && phase === 'up';
+  if (phase === 'down') errorTracker['_lunge._was_down'] = 1;
+  const repComplete = prevPhase !== 'up' && phase === 'up' && !!errorTracker['_lunge._was_down'];
+  if (repComplete) delete errorTracker['_lunge._was_down'];
 
   // ── Joelho da frente alinhado com o dedo do pé ────────────────────────────
   const frontIsLeft = angles.leftKnee < angles.rightKnee;

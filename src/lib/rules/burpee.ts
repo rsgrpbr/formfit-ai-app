@@ -55,7 +55,9 @@ export function analyzeBurpee(
   else if (avgKnee <= DOWN_THR)   phase = 'down';
   else                             phase = 'transition';
 
-  const repComplete = prevPhase === 'down' && phase === 'up';
+  if (phase === 'down') errorTracker['_burpee._was_down'] = 1;
+  const repComplete = prevPhase !== 'up' && phase === 'up' && !!errorTracker['_burpee._was_down'];
+  if (repComplete) delete errorTracker['_burpee._was_down'];
 
   // ── Costas arqueadas (quadril caindo na fase de prancha) ──────────────────
   // Monitora o alinhamento ombro-quadril-tornozelo continuamente
