@@ -122,7 +122,7 @@ export default function MyPlanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col pb-24">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col pb-48">
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-800">
         <div className="flex items-center justify-between">
@@ -194,8 +194,8 @@ export default function MyPlanPage() {
         )}
       </div>
 
-      {/* Footer — Regenerate + Change objective */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 bg-gray-950 border-t border-gray-800 flex flex-col gap-2">
+      {/* Footer — Regenerate + Change objective (acima da BottomNav) */}
+      <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 pt-2 bg-gray-950 border-t border-gray-800 flex flex-col gap-2">
         <button
           onClick={handleRegenerate}
           disabled={!canRegenerate || regenerating}
