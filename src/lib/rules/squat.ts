@@ -19,8 +19,8 @@ export type SquatPhase = 'up' | 'down' | 'transition';
 export type ErrorTracker = Record<string, number>;
 
 // ── Limiares tolerantes ───────────────────────────────────────────────────────
-const KNEE_DOWN_MAX    = 120;              // detecção de fase
-const KNEE_UP_MIN      = 155;             // detecção de fase
+const KNEE_DOWN_MAX    = 125;              // detecção de fase
+const KNEE_UP_MIN      = 148;             // detecção de fase (zona de transição 125-148)
 const KNEE_TOE_THR     = 0.12;            // tolerância joelho-dedo
 const DEPTH_KNEE_THR   = 140;             // profundidade mínima
 const BACK_TILT_DEG    = 60;              // inclinação máxima das costas (spine < 120)
@@ -86,7 +86,10 @@ export function analyzeSquat(
   trackError('squat.knees_over_toes', kneesToo, errorTracker, feedback);
 
   // ── Profundidade insuficiente (só na fase baixa) ──────────────────────────
-  const tooShallow = phase === 'down' && knee > DEPTH_KNEE_THR;
+  // Limiar dinâmico: ajusta ±10% com base na proporção do corpo visível
+  const bodyHeight = Math.abs(landmarks[LANDMARKS.LEFT_ANKLE].y - landmarks[LANDMARKS.LEFT_HIP].y);
+  const dynamicDepthThr = DEPTH_KNEE_THR * (1 + (0.5 - bodyHeight) * 0.2);
+  const tooShallow = phase === 'down' && knee > dynamicDepthThr;
   if (tooShallow) score -= PEN_DEPTH;
   trackError('squat.go_deeper', tooShallow, errorTracker, feedback);
 

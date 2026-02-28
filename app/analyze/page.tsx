@@ -20,7 +20,7 @@ import { useLocale } from '@/providers/I18nProvider';
 import type { Locale } from '@/providers/I18nProvider';
 import { redirectToCheckout } from '@/lib/perfectpay';
 import type { GamificationResult } from '@/types/gamification';
-import { computeJointAngles } from '@/lib/angles/joints';
+import { computeJointAngles, angleBuffer } from '@/lib/angles/joints';
 import {
   analyzeSquat, analyzePushup, analyzePlank, analyzeLunge,
   analyzeGluteBridge, analyzeSidePlank, analyzeSuperman,
@@ -376,6 +376,7 @@ function AnalyzePageInner() {
     phaseRef.current        = 'up';
     statsRef.current        = { totalReps: 0, goodReps: 0, badReps: 0, scores: [] };
     errorTrackerRef.current = {};
+    angleBuffer.reset();
     setStats({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
     setElapsed(0);
     setScore(100);

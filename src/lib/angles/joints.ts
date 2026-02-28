@@ -1,4 +1,5 @@
 import { angleBetweenPoints } from './calculator';
+import { AngleBuffer } from './smoothing';
 import { LANDMARKS, type PoseLandmarks } from '../mediapipe/landmarks';
 
 export interface JointAngles {
@@ -15,19 +16,23 @@ export interface JointAngles {
   spine: number;
 }
 
+export const angleBuffer = new AngleBuffer();
+
 export function computeJointAngles(lm: PoseLandmarks): JointAngles {
   const L = LANDMARKS;
+  const a = (key: string, ...pts: Parameters<typeof angleBetweenPoints>) =>
+    angleBuffer.smooth(key, angleBetweenPoints(...pts));
   return {
-    leftKnee:      angleBetweenPoints(lm[L.LEFT_HIP],      lm[L.LEFT_KNEE],    lm[L.LEFT_ANKLE]),
-    rightKnee:     angleBetweenPoints(lm[L.RIGHT_HIP],     lm[L.RIGHT_KNEE],   lm[L.RIGHT_ANKLE]),
-    leftHip:       angleBetweenPoints(lm[L.LEFT_SHOULDER], lm[L.LEFT_HIP],     lm[L.LEFT_KNEE]),
-    rightHip:      angleBetweenPoints(lm[L.RIGHT_SHOULDER],lm[L.RIGHT_HIP],    lm[L.RIGHT_KNEE]),
-    leftElbow:     angleBetweenPoints(lm[L.LEFT_SHOULDER], lm[L.LEFT_ELBOW],   lm[L.LEFT_WRIST]),
-    rightElbow:    angleBetweenPoints(lm[L.RIGHT_SHOULDER],lm[L.RIGHT_ELBOW],  lm[L.RIGHT_WRIST]),
-    leftShoulder:  angleBetweenPoints(lm[L.LEFT_ELBOW],    lm[L.LEFT_SHOULDER],lm[L.LEFT_HIP]),
-    rightShoulder: angleBetweenPoints(lm[L.RIGHT_ELBOW],   lm[L.RIGHT_SHOULDER],lm[L.RIGHT_HIP]),
-    leftAnkle:     angleBetweenPoints(lm[L.LEFT_KNEE],     lm[L.LEFT_ANKLE],   lm[L.LEFT_FOOT_INDEX]),
-    rightAnkle:    angleBetweenPoints(lm[L.RIGHT_KNEE],    lm[L.RIGHT_ANKLE],  lm[L.RIGHT_FOOT_INDEX]),
-    spine:         angleBetweenPoints(lm[L.LEFT_SHOULDER], lm[L.LEFT_HIP],     lm[L.LEFT_KNEE]),
+    leftKnee:      a('leftKnee',      lm[L.LEFT_HIP],       lm[L.LEFT_KNEE],     lm[L.LEFT_ANKLE]),
+    rightKnee:     a('rightKnee',     lm[L.RIGHT_HIP],      lm[L.RIGHT_KNEE],    lm[L.RIGHT_ANKLE]),
+    leftHip:       a('leftHip',       lm[L.LEFT_SHOULDER],  lm[L.LEFT_HIP],      lm[L.LEFT_KNEE]),
+    rightHip:      a('rightHip',      lm[L.RIGHT_SHOULDER], lm[L.RIGHT_HIP],     lm[L.RIGHT_KNEE]),
+    leftElbow:     a('leftElbow',     lm[L.LEFT_SHOULDER],  lm[L.LEFT_ELBOW],    lm[L.LEFT_WRIST]),
+    rightElbow:    a('rightElbow',    lm[L.RIGHT_SHOULDER], lm[L.RIGHT_ELBOW],   lm[L.RIGHT_WRIST]),
+    leftShoulder:  a('leftShoulder',  lm[L.LEFT_ELBOW],     lm[L.LEFT_SHOULDER], lm[L.LEFT_HIP]),
+    rightShoulder: a('rightShoulder', lm[L.RIGHT_ELBOW],    lm[L.RIGHT_SHOULDER],lm[L.RIGHT_HIP]),
+    leftAnkle:     a('leftAnkle',     lm[L.LEFT_KNEE],      lm[L.LEFT_ANKLE],    lm[L.LEFT_FOOT_INDEX]),
+    rightAnkle:    a('rightAnkle',    lm[L.RIGHT_KNEE],     lm[L.RIGHT_ANKLE],   lm[L.RIGHT_FOOT_INDEX]),
+    spine:         a('spine',         lm[L.LEFT_SHOULDER],  lm[L.LEFT_HIP],      lm[L.LEFT_KNEE]),
   };
 }

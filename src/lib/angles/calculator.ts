@@ -5,25 +5,19 @@ export function toDegrees(radians: number): number {
   return (radians * 180) / Math.PI;
 }
 
-/** Calcula o ângulo em graus entre três pontos (A–B–C), onde B é o vértice */
+/** Calcula o ângulo em graus entre três pontos (A–B–C) usando vetores 3D, onde B é o vértice */
 export function angleBetweenPoints(
   a: NormalizedLandmark,
   b: NormalizedLandmark,
   c: NormalizedLandmark
 ): number {
-  const ax = a.x - b.x;
-  const ay = a.y - b.y;
-  const cx = c.x - b.x;
-  const cy = c.y - b.y;
-
-  const dot = ax * cx + ay * cy;
-  const magA = Math.sqrt(ax * ax + ay * ay);
-  const magC = Math.sqrt(cx * cx + cy * cy);
-
-  if (magA === 0 || magC === 0) return 0;
-
-  const cosAngle = Math.min(1, Math.max(-1, dot / (magA * magC)));
-  return toDegrees(Math.acos(cosAngle));
+  const v1 = { x: a.x - b.x, y: a.y - b.y, z: (a.z ?? 0) - (b.z ?? 0) };
+  const v2 = { x: c.x - b.x, y: c.y - b.y, z: (c.z ?? 0) - (b.z ?? 0) };
+  const dot  = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+  const mag1 = Math.sqrt(v1.x ** 2 + v1.y ** 2 + v1.z ** 2);
+  const mag2 = Math.sqrt(v2.x ** 2 + v2.y ** 2 + v2.z ** 2);
+  if (mag1 === 0 || mag2 === 0) return 0;
+  return Math.acos(Math.min(1, Math.max(-1, dot / (mag1 * mag2)))) * (180 / Math.PI);
 }
 
 /** Distância euclidiana entre dois pontos (2D) */
