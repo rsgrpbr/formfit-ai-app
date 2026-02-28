@@ -1,6 +1,6 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
+import { LANDMARKS } from '../mediapipe/landmarks';
 import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type PushupPhase = 'up' | 'down' | 'transition';
@@ -45,10 +45,6 @@ export function analyzePushup(
   prevPhase: PushupPhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
-  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_SHOULDER, LANDMARKS.RIGHT_SHOULDER, LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP])) {
-    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
-  }
-
   const elbow = (angles.leftElbow + angles.rightElbow) / 2;
   const feedback: string[] = [];
   let score = 100;

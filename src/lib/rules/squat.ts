@@ -1,6 +1,6 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
+import { LANDMARKS } from '../mediapipe/landmarks';
 
 export interface ExerciseResult {
   repComplete: boolean;
@@ -62,10 +62,6 @@ export function analyzeSquat(
   prevPhase: SquatPhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
-  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_KNEE, LANDMARKS.RIGHT_KNEE, LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP])) {
-    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
-  }
-
   const knee = (angles.leftKnee + angles.rightKnee) / 2;
   const feedback: string[] = [];
   let score = 100;

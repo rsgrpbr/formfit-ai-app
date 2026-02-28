@@ -1,6 +1,6 @@
 import type { JointAngles } from '../angles/joints';
 import type { PoseLandmarks } from '../mediapipe/landmarks';
-import { LANDMARKS, areLandmarksVisible } from '../mediapipe/landmarks';
+import { LANDMARKS } from '../mediapipe/landmarks';
 import type { ExerciseResult, ErrorTracker } from './squat';
 
 export type GluteBridgePhase = 'up' | 'down' | 'transition';
@@ -47,10 +47,6 @@ export function analyzeGluteBridge(
   prevPhase: GluteBridgePhase,
   errorTracker: ErrorTracker = {}
 ): ExerciseResult {
-  if (!areLandmarksVisible(landmarks, [LANDMARKS.LEFT_HIP, LANDMARKS.RIGHT_HIP, LANDMARKS.LEFT_KNEE, LANDMARKS.RIGHT_KNEE])) {
-    return { repComplete: false, score: 0, quality: 'corrective', feedback: ['general.not_visible'], phase: prevPhase };
-  }
-
   const avgHip = (angles.leftHip + angles.rightHip) / 2;
   const feedback: string[] = [];
   let score = 100;
