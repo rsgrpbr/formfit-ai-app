@@ -7,12 +7,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getWorkoutTemplate, type WorkoutTemplate } from '@/lib/supabase/queries';
-
-const EXERCISE_ICONS: Record<string, string> = {
-  squat: '🦵', pushup: '💪', plank: '🏋️', lunge: '🚶',
-  glute_bridge: '🍑', side_plank: '⬛', superman: '🦸',
-  mountain_climber: '🏔️', burpee: '💥',
-};
+import { Clock, Layers, Repeat2, MapPin, Dumbbell, Camera } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 const OBJECTIVE_COLORS: Record<string, string> = {
   emagrecer:       'bg-orange-500/20 text-orange-400',
@@ -76,8 +72,9 @@ export default function WorkoutDetailPage() {
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${LEVEL_COLORS[workout.level] ?? 'bg-gray-700 text-gray-300'}`}>
             {t(`level_${workout.level}` as Parameters<typeof t>[0])}
           </span>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-gray-800 text-gray-400">
-            {workout.location === 'casa' ? '🏠' : '🏋️'} {t(`loc_${workout.location}` as Parameters<typeof t>[0])}
+          <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-gray-800 text-gray-400">
+            <MapPin size={10} />
+            {t(`loc_${workout.location}` as Parameters<typeof t>[0])}
           </span>
         </div>
 
@@ -89,9 +86,9 @@ export default function WorkoutDetailPage() {
 
         {/* Stats row */}
         <div className="flex gap-4">
-          <StatBadge icon="⏱" value={t('minutes', { min: workout.duration_minutes })} />
-          <StatBadge icon="🏃" value={t('exercises_count', { count: workout.exercises.length })} />
-          <StatBadge icon="🔁" value={`${totalSets} séries`} />
+          <StatBadge Icon={Clock}   value={t('minutes', { min: workout.duration_minutes })} />
+          <StatBadge Icon={Layers}  value={t('exercises_count', { count: workout.exercises.length })} />
+          <StatBadge Icon={Repeat2} value={`${totalSets} séries`} />
         </div>
       </div>
 
@@ -100,7 +97,9 @@ export default function WorkoutDetailPage() {
         {workout.exercises.map((ex, idx) => (
           <div key={idx} className="bg-gray-900 rounded-2xl p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-2xl flex-shrink-0">{EXERCISE_ICONS[ex.slug] ?? '💪'}</span>
+              <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
+                <Dumbbell size={18} />
+              </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <p className="font-semibold text-white truncate">{tEx(ex.slug as Parameters<typeof tEx>[0])}</p>
                 <p className="text-xs text-gray-400">
@@ -110,9 +109,11 @@ export default function WorkoutDetailPage() {
             </div>
             <Link
               href={`/analyze?exercise=${ex.slug}`}
-              className="flex-shrink-0 px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold transition-all active:scale-95"
+              className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+              style={{ background: 'var(--surface2)', color: 'var(--text-muted)' }}
             >
-              {t('analyze_form')}
+              <Camera size={12} />
+              {t('analyze_form').replace('📷 ', '')}
             </Link>
           </div>
         ))}
@@ -122,19 +123,19 @@ export default function WorkoutDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 px-4 pb-4 pt-2 bg-gray-950 border-t border-gray-800">
         <Link
           href={`/workouts/${workout.id}/session`}
-          className="block w-full py-4 text-center rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg transition-all active:scale-95"
+          className="font-display btn-primary"
         >
-          ▶ {t('start_guided')}
+          {t('start_guided').toUpperCase()}
         </Link>
       </div>
     </div>
   );
 }
 
-function StatBadge({ icon, value }: { icon: string; value: string }) {
+function StatBadge({ Icon, value }: { Icon: LucideIcon; value: string }) {
   return (
     <div className="flex items-center gap-1.5 text-sm text-gray-300">
-      <span>{icon}</span>
+      <Icon size={14} style={{ color: 'var(--text-muted)' }} />
       <span>{value}</span>
     </div>
   );

@@ -11,6 +11,7 @@ import { useSession } from '@/hooks/useSession';
 import { useLocale } from '@/providers/I18nProvider';
 import type { Locale } from '@/providers/I18nProvider';
 import { updateProfile } from '@/lib/supabase/queries';
+import { LogOut, Trash2, Zap } from 'lucide-react';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
 
@@ -219,7 +220,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col pb-28">
 
       <header className="px-4 pt-5 pb-3 border-b border-gray-800">
-        <h1 className="text-xl font-bold">👤 {t('title')}</h1>
+        <h1 className="text-xl font-bold">{t('title')}</h1>
       </header>
 
       <main className="flex-1 px-4 py-4 space-y-4 max-w-xl mx-auto w-full">
@@ -278,7 +279,8 @@ export default function ProfilePage() {
                 bg-[#C8F135]/10 border border-[#C8F135]/30 text-[#C8F135] font-semibold text-sm
                 hover:bg-[#C8F135]/20 transition-colors"
             >
-              ⬆️ {t('upgrade_btn')}
+              <Zap size={15} />
+              {t('upgrade_btn')}
             </Link>
           )}
         </Section>
@@ -406,16 +408,18 @@ export default function ProfilePage() {
         <Section title={t('section_danger')}>
           <button
             onClick={handleSignOut}
-            className="w-full py-3 mb-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white
+            className="w-full flex items-center justify-center gap-2 py-3 mb-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white
               font-semibold text-sm transition-all active:scale-95"
           >
+            <LogOut size={16} />
             {t('sign_out')}
           </button>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="w-full py-3 rounded-xl bg-red-900/30 hover:bg-red-900/50 text-red-400
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-900/30 hover:bg-red-900/50 text-red-400
               border border-red-900/50 font-semibold text-sm transition-all active:scale-95"
           >
+            <Trash2 size={16} />
             {t('delete_account')}
           </button>
         </Section>

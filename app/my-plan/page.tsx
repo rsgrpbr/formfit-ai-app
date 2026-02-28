@@ -15,6 +15,7 @@ import {
   type PlanExercise,
 } from '@/lib/supabase/queries';
 import { toast } from 'sonner';
+import { Moon, Camera } from 'lucide-react';
 
 export default function MyPlanPage() {
   const t = useTranslations('my_plan');
@@ -152,8 +153,8 @@ export default function MyPlanPage() {
       {/* Day content */}
       <div className="flex-1 px-4 py-4">
         {selectedDay?.is_rest ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-500">
-            <span className="text-5xl">😴</span>
+          <div className="flex flex-col items-center justify-center gap-3 py-16" style={{ color: 'var(--text-muted)' }}>
+            <Moon size={48} strokeWidth={1.5} />
             <p className="text-lg font-medium">{t('rest_day')}</p>
           </div>
         ) : (
@@ -177,9 +178,11 @@ export default function MyPlanPage() {
                   {slug && (
                     <Link
                       href={`/analyze?exercise=${slug}`}
-                      className="flex-shrink-0 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition-all active:scale-95"
+                      className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                      style={{ background: 'var(--accent)', color: 'var(--bg)' }}
                     >
-                      {t('analyze_cta')}
+                      <Camera size={14} />
+                      {t('analyze_cta').replace('📷 ', '')}
                     </Link>
                   )}
                 </div>

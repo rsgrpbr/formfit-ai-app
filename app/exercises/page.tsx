@@ -12,14 +12,9 @@ import {
   toggleFavorite,
 } from '@/lib/supabase/queries';
 import type { Exercise } from '@/lib/supabase/queries';
+import { Heart, Dumbbell, Search } from 'lucide-react';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
-
-const EXERCISE_EMOJI: Record<string, string> = {
-  squat: '🦵', pushup: '💪', plank: '🏋️', lunge: '🚶',
-  glute_bridge: '🍑', side_plank: '⬛', superman: '🦸',
-  mountain_climber: '🏔️', burpee: '💥',
-};
 
 const DIFF_STYLE: Record<string, string> = {
   beginner:     'bg-green-900/50  text-green-400',
@@ -38,24 +33,24 @@ export default function ExercisesPage() {
   const { user } = useSession();
 
   const MUSCLE_GROUPS = [
-    { key: 'pernas',   icon: '🦵', label: t('group_legs'),
+    { key: 'pernas',   label: t('group_legs'),
       keywords: ['quadriceps', 'hamstrings', 'calves', 'Quadríceps', 'Isquiotibiais', 'Panturrilhas'] },
-    { key: 'peito',    icon: '💪', label: t('group_chest'),
+    { key: 'peito',    label: t('group_chest'),
       keywords: ['chest', 'triceps', 'pectoral', 'Peitoral', 'Tríceps'] },
-    { key: 'costas',   icon: '🔙', label: t('group_back'),
+    { key: 'costas',   label: t('group_back'),
       keywords: ['lower_back', 'back', 'Lombar', 'Rombóides', 'Dorsal'] },
-    { key: 'core',     icon: '🎯', label: t('group_core'),
+    { key: 'core',     label: t('group_core'),
       keywords: ['core', 'obliques', 'Core', 'Abdômen', 'Oblíquos', 'full_body'] },
-    { key: 'ombros',   icon: '🏋️', label: t('group_shoulders'),
+    { key: 'ombros',   label: t('group_shoulders'),
       keywords: ['shoulders', 'Deltóide', 'Ombros'] },
-    { key: 'gluteos',  icon: '🍑', label: t('group_glutes'),
+    { key: 'gluteos',  label: t('group_glutes'),
       keywords: ['glutes', 'Glúteos'] },
   ];
 
   const OBJ_GROUPS = [
-    { key: 'forca',  icon: '🏋️', label: t('obj_strength'), categories: ['lower', 'upper'] },
-    { key: 'cardio', icon: '🏃', label: t('obj_cardio'),   categories: ['cardio'] },
-    { key: 'core',   icon: '🎯', label: t('obj_core'),     categories: ['core'] },
+    { key: 'forca',  label: t('obj_strength'), categories: ['lower', 'upper'] },
+    { key: 'cardio', label: t('obj_cardio'),   categories: ['cardio'] },
+    { key: 'core',   label: t('obj_core'),     categories: ['core'] },
   ];
 
   const DIFF_LABEL: Record<string, string> = {
@@ -144,9 +139,9 @@ export default function ExercisesPage() {
         {exs.map(ex => (
           <Link key={ex.id} href={`/exercises/${ex.slug}`}>
             <div className="bg-gray-900 rounded-2xl p-4 flex items-center gap-4 hover:bg-gray-800 active:scale-[0.98] transition-all">
-              <span className="text-4xl flex-shrink-0 w-12 text-center">
-                {EXERCISE_EMOJI[ex.slug] ?? '🏃'}
-              </span>
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center" style={{ color: 'var(--text-muted)' }}>
+                <Dumbbell size={22} />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-white truncate">{getName(ex)}</p>
                 <div className="flex gap-2 mt-1 flex-wrap">
@@ -160,11 +155,11 @@ export default function ExercisesPage() {
               </div>
               <button
                 onClick={e => handleToggleFav(e, ex)}
-                className={`flex-shrink-0 text-xl w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                  ${favorites.has(ex.id) ? 'text-rose-400' : 'text-gray-600 hover:text-gray-400'}`}
+                className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+                style={{ color: favorites.has(ex.id) ? '#f43f5e' : 'var(--text-muted)' }}
                 aria-label={favorites.has(ex.id) ? 'Remover favorito' : 'Adicionar favorito'}
               >
-                {favorites.has(ex.id) ? '❤️' : '♡'}
+                <Heart size={18} fill={favorites.has(ex.id) ? '#f43f5e' : 'none'} />
               </button>
             </div>
           </Link>
@@ -182,7 +177,9 @@ export default function ExercisesPage() {
       <header className="px-4 pt-5 pb-3 border-b border-gray-800">
         <h1 className="text-xl font-bold mb-3">{t('title')}</h1>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }}>
+            <Search size={16} />
+          </span>
           <input
             type="search"
             value={search}
@@ -239,7 +236,9 @@ export default function ExercisesPage() {
                     className="bg-gray-900 rounded-2xl p-4 flex flex-col items-center gap-2
                       hover:bg-gray-800 active:scale-95 transition-all text-center"
                   >
-                    <span className="text-4xl">{group.icon}</span>
+                    <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center" style={{ color: 'var(--accent)' }}>
+                      <Dumbbell size={24} />
+                    </div>
                     <span className="font-semibold text-sm leading-tight">{group.label}</span>
                     <span className="text-xs text-gray-500">{count} exerc.</span>
                   </button>
@@ -269,7 +268,9 @@ export default function ExercisesPage() {
                     className="w-full bg-gray-900 rounded-2xl p-5 flex items-center gap-4
                       hover:bg-gray-800 active:scale-[0.98] transition-all"
                   >
-                    <span className="text-5xl">{group.icon}</span>
+                    <div className="w-14 h-14 rounded-xl bg-gray-800 flex items-center justify-center flex-shrink-0" style={{ color: 'var(--accent)' }}>
+                      <Dumbbell size={28} />
+                    </div>
                     <div className="text-left">
                       <p className="font-bold text-lg">{group.label}</p>
                       <p className="text-sm text-gray-400">{count} exercícios</p>
@@ -282,13 +283,13 @@ export default function ExercisesPage() {
         ) : (
           /* Favorites tab */
           !user ? (
-            <div className="text-center py-16 text-gray-500">
-              <p className="text-4xl mb-4">🔒</p>
+            <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
+              <Heart size={40} strokeWidth={1.5} />
               <p className="text-sm">{t('login_to_fav')}</p>
             </div>
           ) : favoriteList.length === 0 ? (
-            <div className="text-center py-16 text-gray-500">
-              <p className="text-4xl mb-4">♡</p>
+            <div className="text-center py-16 flex flex-col items-center gap-3" style={{ color: 'var(--text-muted)' }}>
+              <Heart size={40} strokeWidth={1.5} />
               <p className="text-sm">{t('no_favorites')}</p>
             </div>
           ) : (

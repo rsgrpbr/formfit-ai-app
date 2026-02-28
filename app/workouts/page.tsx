@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getWorkoutTemplates, type WorkoutTemplate } from '@/lib/supabase/queries';
+import { Clock, MapPin, Layers } from 'lucide-react';
 
 const OBJECTIVES = ['emagrecer', 'ganhar_massa', 'definir', 'condicionamento'] as const;
 const LEVELS     = ['iniciante', 'intermediario', 'avancado'] as const;
@@ -24,7 +25,6 @@ const LEVEL_COLORS: Record<string, string> = {
   avancado:      'bg-red-500/20 text-red-400',
 };
 
-const LOCATION_ICONS: Record<string, string> = { casa: '🏠', academia: '🏋️' };
 
 export default function WorkoutsPage() {
   const t = useTranslations('workouts');
@@ -83,7 +83,7 @@ export default function WorkoutsPage() {
             <FilterChip
               key={loc}
               active={location === loc}
-              label={`${LOCATION_ICONS[loc]} ${t(`loc_${loc}` as Parameters<typeof t>[0])}`}
+              label={t(`loc_${loc}` as Parameters<typeof t>[0])}
               onClick={() => setLocation(location === loc ? '' : loc)}
             />
           ))}
@@ -147,15 +147,15 @@ function WorkoutCard({
       {/* Meta */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span>⏱</span>
+          <Clock size={12} />
           <span>{t('minutes', { min: w.duration_minutes })}</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span>{LOCATION_ICONS[w.location]}</span>
+          <MapPin size={12} />
           <span>{t(`loc_${w.location}` as Parameters<typeof t>[0])}</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-          <span>🏃</span>
+          <Layers size={12} />
           <span>{t('exercises_count', { count: w.exercises.length })}</span>
         </div>
       </div>

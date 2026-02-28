@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Bebas_Neue } from "next/font/google";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/providers/I18nProvider";
 import PWASetup from "@/components/PWASetup";
@@ -14,6 +14,12 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const bebasNeue = Bebas_Neue({
+  variable: "--font-display",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -44,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} antialiased`}
       >
         <I18nProvider initialLocale="pt" initialMessages={ptMessages}>
           <PWASetup />

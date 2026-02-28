@@ -5,7 +5,6 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Bebas_Neue } from 'next/font/google';
 import {
   LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Tooltip,
 } from 'recharts';
@@ -18,21 +17,12 @@ import {
   getUserExerciseSessions,
 } from '@/lib/supabase/queries';
 import type { Exercise, Session } from '@/lib/supabase/queries';
-
-// ── Font ──────────────────────────────────────────────────────────────────────
-
-const bebas = Bebas_Neue({ weight: '400', subsets: ['latin'] });
+import { Heart, Camera } from 'lucide-react';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
 
-const EXERCISE_EMOJI: Record<string, string> = {
-  squat: '🦵', pushup: '💪', plank: '🏋️', lunge: '🚶',
-  glute_bridge: '🍑', side_plank: '⬛', superman: '🦸',
-  mountain_climber: '🏔️', burpee: '💥',
-};
-
 const CATEGORY_LABEL: Record<string, string> = {
-  lower: '🦵 Inferior', upper: '💪 Superior', core: '🎯 Core', cardio: '🏃 Cardio',
+  lower: 'Inferior', upper: 'Superior', core: 'Core', cardio: 'Cardio',
 };
 
 const DIFF_STYLE: Record<string, string> = {
@@ -144,8 +134,7 @@ export default function ExerciseDetailPage() {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <div className="px-4 pt-3 pb-6">
-        <div className="text-6xl mb-3">{EXERCISE_EMOJI[exercise.slug] ?? '🏃'}</div>
-        <h1 className={`${bebas.className} text-[52px] leading-none tracking-wide mb-3`}>
+        <h1 className="font-display text-[52px] leading-none tracking-wide mb-3">
           {getName(exercise)}
         </h1>
         <div className="flex flex-wrap gap-2">
@@ -169,7 +158,7 @@ export default function ExerciseDetailPage() {
 
         {/* ── Como fazer ────────────────────────────────────────────────── */}
         {instructions.length > 0 && (
-          <Section title={`📋 ${t('how_to')}`}>
+          <Section title={t('how_to')}>
             <ol className="space-y-3">
               {instructions.map((step, i) => (
                 <li key={i} className="flex gap-3">
@@ -188,7 +177,7 @@ export default function ExerciseDetailPage() {
 
         {/* ── Músculos ──────────────────────────────────────────────────── */}
         {(exercise.muscles_primary?.length || exercise.muscles_secondary?.length) ? (
-          <Section title={`💪 ${t('muscles_section')}`}>
+          <Section title={t('muscles_section')}>
             {exercise.muscles_primary?.length ? (
               <div className="mb-3">
                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">{t('muscles_primary')}</p>
@@ -222,7 +211,7 @@ export default function ExerciseDetailPage() {
 
         {/* ── Dicas ─────────────────────────────────────────────────────── */}
         {tips.length > 0 && (
-          <Section title={`💡 ${t('tips_section')}`}>
+          <Section title={t('tips_section')}>
             <ul className="space-y-2.5">
               {tips.map((tip, i) => (
                 <li key={i} className="flex gap-2 text-sm text-gray-300">
@@ -236,7 +225,7 @@ export default function ExerciseDetailPage() {
 
         {/* ── Meu histórico ─────────────────────────────────────────────── */}
         {user && (
-          <Section title={`📊 ${t('history_section')}`}>
+          <Section title={t('history_section')}>
             {sessions.length === 0 ? (
               <p className="text-sm text-gray-500 text-center py-4">{t('no_history')}</p>
             ) : (
@@ -307,24 +296,23 @@ export default function ExerciseDetailPage() {
       </div>
 
       {/* ── Fixed footer CTA ──────────────────────────────────────────────────── */}
-      <div className="fixed bottom-16 left-0 right-0 z-40 px-4 py-3 bg-gray-950/95 backdrop-blur-md border-t border-gray-800">
+      <div className="fixed bottom-16 left-0 right-0 z-40 px-4 py-3 backdrop-blur-md border-t" style={{ background: 'rgba(3,7,18,0.95)', borderColor: 'var(--border)' }}>
         <Link
           href={`/analyze?exercise=${exercise.slug}`}
-          className="block w-full text-center font-black text-[15px] tracking-wide text-gray-900 py-4 rounded-2xl mb-2"
-          style={{ background: ACCENT }}
+          className="font-display btn-primary mb-2 flex items-center justify-center gap-2"
         >
-          📷 {t('analyze_cta')}
+          <Camera size={18} />
+          {t('analyze_cta').replace('📷 ', '')}
         </Link>
         {user && (
           <button
             onClick={handleToggleFav}
             disabled={favLoading}
-            className={`w-full text-center font-semibold text-sm py-2.5 rounded-2xl transition-colors
-              ${isFav
-                ? 'bg-rose-900/40 text-rose-400 border border-rose-800'
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+            className="btn-secondary flex items-center justify-center gap-2"
+            style={isFav ? { borderColor: '#f43f5e', color: '#f43f5e' } : undefined}
           >
-            {isFav ? `❤️ ${t('unfavorite_btn')}` : `♡ ${t('favorite_btn')}`}
+            <Heart size={16} fill={isFav ? '#f43f5e' : 'none'} color={isFav ? '#f43f5e' : undefined} />
+            {isFav ? t('unfavorite_btn') : t('favorite_btn')}
           </button>
         )}
       </div>

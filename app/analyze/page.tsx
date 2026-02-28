@@ -55,16 +55,16 @@ interface SessionStats {
 
 // ── Constantes ───────────────────────────────────────────────────────────────
 
-const EXERCISES: { slug: ExerciseSlug; icon: string; group: 'gym' | 'home' }[] = [
-  { slug: 'squat',            icon: '🦵', group: 'gym'  },
-  { slug: 'pushup',           icon: '💪', group: 'gym'  },
-  { slug: 'plank',            icon: '🏋️', group: 'gym'  },
-  { slug: 'lunge',            icon: '🚶', group: 'gym'  },
-  { slug: 'glute_bridge',     icon: '🍑', group: 'home' },
-  { slug: 'side_plank',       icon: '⬛', group: 'home' },
-  { slug: 'superman',         icon: '🦸', group: 'home' },
-  { slug: 'mountain_climber', icon: '🏔️', group: 'home' },
-  { slug: 'burpee',           icon: '💥', group: 'home' },
+const EXERCISES: { slug: ExerciseSlug; group: 'gym' | 'home' }[] = [
+  { slug: 'squat',            group: 'gym'  },
+  { slug: 'pushup',           group: 'gym'  },
+  { slug: 'plank',            group: 'gym'  },
+  { slug: 'lunge',            group: 'gym'  },
+  { slug: 'glute_bridge',     group: 'home' },
+  { slug: 'side_plank',       group: 'home' },
+  { slug: 'superman',         group: 'home' },
+  { slug: 'mountain_climber', group: 'home' },
+  { slug: 'burpee',           group: 'home' },
 ];
 
 const VIDEO_W = 640;
@@ -543,7 +543,7 @@ function AnalyzePageInner() {
             </h2>
 
             {/* Academia */}
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏋️ {t('group_gym')}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">{t('group_gym')}</p>
             <div className="grid grid-cols-2 gap-2 mb-4">
               {EXERCISES.filter(e => e.group === 'gym').map(ex => (
                 <ExerciseButton
@@ -558,7 +558,7 @@ function AnalyzePageInner() {
             </div>
 
             {/* Casa */}
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">🏠 {t('group_home')}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">{t('group_home')}</p>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
               {EXERCISES.filter(e => e.group === 'home').map(ex => (
                 <ExerciseButton
@@ -611,14 +611,9 @@ function AnalyzePageInner() {
             <button
               onClick={isRunning ? handleStop : handleStart}
               disabled={!isReady || planLoading}
-              className={`w-full py-4 min-h-[48px] rounded-2xl font-bold text-lg transition-transform duration-150 active:scale-95
-                ${isRunning
-                  ? 'bg-red-600 hover:bg-red-500 text-white'
-                  : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                }
-                disabled:opacity-40 disabled:cursor-not-allowed`}
+              className={`font-display ${isRunning ? 'btn-danger' : 'btn-primary'}`}
             >
-              {isRunning ? `⏹ ${t('stop_session')}` : `▶ ${t('start_session')}`}
+              {isRunning ? t('stop_session').toUpperCase() : t('start_session').toUpperCase()}
             </button>
           )}
 
@@ -667,7 +662,7 @@ function ExerciseButton({
   disabled,
   onClick,
 }: {
-  ex: { slug: string; icon: string };
+  ex: { slug: string };
   label: string;
   selected: boolean;
   disabled: boolean;
@@ -677,15 +672,15 @@ function ExerciseButton({
     <button
       disabled={disabled}
       onClick={onClick}
-      className={`flex flex-col items-center gap-1 py-3 min-h-[48px] rounded-xl text-sm font-medium transition-transform duration-150 active:scale-95
+      className={`flex items-center justify-center py-3 min-h-[48px] rounded-xl text-xs font-semibold transition-transform duration-150 active:scale-95
         ${selected
-          ? 'bg-indigo-600 text-white'
+          ? 'text-gray-950'
           : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
         }
         disabled:opacity-50 disabled:cursor-not-allowed`}
+      style={selected ? { background: 'var(--accent)' } : undefined}
     >
-      <span className="text-xl">{ex.icon}</span>
-      <span className="text-xs leading-tight text-center">{label}</span>
+      {label}
     </button>
   );
 }

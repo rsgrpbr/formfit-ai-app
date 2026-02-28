@@ -8,6 +8,8 @@ import { useTranslations } from 'next-intl';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { Flame, Calendar, Repeat2, Star, Clock, Trophy } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { useGamification } from '@/hooks/useGamification';
 import { useWeeklyChallenge } from '@/hooks/useWeeklyChallenge';
@@ -177,7 +179,7 @@ export default function ProgressPage() {
       <main className="flex-1 px-4 py-4 space-y-4 max-w-2xl mx-auto w-full">
 
         {/* ── SEÇÃO 1: Mapa de calor semanal ─────────────────────────────── */}
-        <Section title={`🗓 ${t('heatmap_title')}`}>
+        <Section title={t('heatmap_title')}>
           <div className="flex items-end gap-2">
             {last7.map(({ dateStr, day }) => {
               const trained = trainedDays.has(dateStr);
@@ -202,7 +204,7 @@ export default function ProgressPage() {
         </Section>
 
         {/* ── SEÇÃO 2: Gráfico de evolução ───────────────────────────────── */}
-        <Section title={`📈 ${t('chart_title')}`}>
+        <Section title={t('chart_title')}>
           {/* Filtro de exercício */}
           <div className="flex gap-2 overflow-x-auto scrollbar-none pb-2">
             <FilterChip active={!filter} label={t('filter_all')} onClick={() => setFilter('')} />
@@ -268,7 +270,7 @@ export default function ProgressPage() {
         </Section>
 
         {/* ── SEÇÃO 3: Gamificação ────────────────────────────────────────── */}
-        <Section title={`🏆 ${t('gamification_title')}`}>
+        <Section title={t('gamification_title')}>
 
           {/* XP + nível */}
           <div className="space-y-2">
@@ -293,7 +295,7 @@ export default function ProgressPage() {
 
           {/* Streak */}
           <div className="flex items-center gap-3 bg-gray-800 rounded-xl px-4 py-3 mt-3">
-            <span className="text-2xl">🔥</span>
+            <Flame size={24} style={{ color: 'var(--accent)' }} />
             <div>
               <p className="font-bold text-white text-lg leading-none">
                 {streak?.current_streak ?? 0}
@@ -352,7 +354,7 @@ export default function ProgressPage() {
         </Section>
 
         {/* ── SEÇÃO 4: Estatísticas gerais ───────────────────────────────── */}
-        <Section title={`📊 ${t('stats_title')}`}>
+        <Section title={t('stats_title')}>
           {dataLoading ? (
             <div className="grid grid-cols-2 gap-3">
               {[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-gray-800 rounded-xl animate-pulse" />)}
@@ -360,33 +362,34 @@ export default function ProgressPage() {
           ) : (
             <>
               <div className="grid grid-cols-2 gap-3">
-                <StatCard value={String(stats.totalSessions)} label={t('stat_sessions')}  color="text-green-400" />
-                <StatCard value={stats.totalReps.toLocaleString()} label={t('stat_reps')} color="text-blue-400" />
-                <StatCard value={String(stats.bestScore)}      label={t('stat_best_score')} color="text-yellow-400" />
-                <StatCard value={`${stats.totalMinutes}min`}   label={t('stat_time')}     color="text-rose-400" />
+                <StatCard Icon={Calendar} value={String(stats.totalSessions)} label={t('stat_sessions')} />
+                <StatCard Icon={Repeat2}  value={stats.totalReps.toLocaleString()} label={t('stat_reps')} />
+                <StatCard Icon={Star}     value={String(stats.bestScore)} label={t('stat_best_score')} />
+                <StatCard Icon={Clock}    value={`${stats.totalMinutes}m`} label={t('stat_time')} />
               </div>
 
               {/* Exercício favorito */}
               {stats.favSlug && (
-                <div className="mt-3 bg-gray-800 rounded-xl px-4 py-3 flex items-center justify-between">
+                <div className="mt-3 rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: 'var(--surface2)' }}>
                   <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{t('stat_fav')}</p>
+                    <p className="text-xs uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-muted)' }}>{t('stat_fav')}</p>
                     <p className="font-bold text-white">
                       {tEx(stats.favSlug as Parameters<typeof tEx>[0])}
                     </p>
                   </div>
-                  <span className="text-3xl">🏅</span>
+                  <Trophy size={28} style={{ color: 'var(--accent)' }} />
                 </div>
               )}
 
               {/* Melhor sequência */}
-              <div className="mt-3 bg-gray-800 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div className="mt-3 rounded-xl px-4 py-3 flex items-center justify-between" style={{ background: 'var(--surface2)' }}>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{t('stat_best_streak')}</p>
+                  <p className="text-xs uppercase tracking-wider mb-0.5" style={{ color: 'var(--text-muted)' }}>{t('stat_best_streak')}</p>
                   <p className="font-bold text-white text-xl">
-                    🔥 {streak?.longest_streak ?? 0} {t('stat_streak_days')}
+                    {streak?.longest_streak ?? 0} {t('stat_streak_days')}
                   </p>
                 </div>
+                <Flame size={28} style={{ color: 'var(--accent)' }} />
               </div>
             </>
           )}
@@ -421,11 +424,12 @@ function FilterChip({ active, label, onClick }: { active: boolean; label: string
   );
 }
 
-function StatCard({ value, label, color }: { value: string; label: string; color: string }) {
+function StatCard({ Icon, value, label }: { Icon: LucideIcon; value: string; label: string }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-3 text-center">
-      <p className={`text-2xl font-black ${color}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{label}</p>
+    <div className="rounded-xl p-4 flex flex-col gap-2" style={{ background: 'var(--surface2)' }}>
+      <Icon size={20} style={{ color: 'var(--text-muted)' }} />
+      <p className="font-display text-[42px] leading-none" style={{ color: 'var(--text)' }}>{value}</p>
+      <p className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{label}</p>
     </div>
   );
 }
