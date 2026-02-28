@@ -5,16 +5,23 @@ import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
   { href: '/analyze',   icon: '🏋️', label: 'Treinar'   },
+  { href: '/workouts',  icon: '💪', label: 'Treinos'   },
   { href: '/my-plan',   icon: '📋', label: 'Meu Plano' },
   { href: '/dashboard', icon: '📊', label: 'Dashboard' },
   { href: '/settings',  icon: '⚙️', label: 'Config'    },
 ] as const;
 
-const SHOW_ON = new Set(['/analyze', '/my-plan', '/dashboard', '/settings']);
+const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/my-plan', '/dashboard', '/settings']);
 
 export default function BottomNav() {
   const pathname = usePathname();
-  if (!SHOW_ON.has(pathname)) return null;
+
+  // Show on static routes + /workouts/[id] detail, but NOT on /workouts/[id]/session
+  const showNav =
+    STATIC_ROUTES.has(pathname) ||
+    (/^\/workouts\/[^/]+$/.test(pathname));
+
+  if (!showNav) return null;
 
   return (
     <nav

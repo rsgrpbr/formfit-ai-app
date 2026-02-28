@@ -245,3 +245,47 @@ export async function getPlanExercises(dayId: string): Promise<PlanExercise[]> {
   if (error) { console.error('[getPlanExercises]', error.message); return []; }
   return (data ?? []) as PlanExercise[];
 }
+
+// ── Workout Templates ──────────────────────────────────────
+
+export interface WorkoutExercise {
+  slug: string;
+  sets: number;
+  reps: number;
+  rest_seconds: number;
+}
+
+export interface WorkoutTemplate {
+  id: string;
+  name_pt: string;
+  name_en: string;
+  name_es: string | null;
+  name_fr: string | null;
+  objective: string;
+  level: string;
+  duration_minutes: number;
+  location: string;
+  description_pt: string | null;
+  exercises: WorkoutExercise[];
+}
+
+export async function getWorkoutTemplates(): Promise<WorkoutTemplate[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('workout_templates')
+    .select('*')
+    .order('objective', { ascending: true });
+  if (error) { console.error('[getWorkoutTemplates]', error.message); return []; }
+  return (data ?? []) as WorkoutTemplate[];
+}
+
+export async function getWorkoutTemplate(id: string): Promise<WorkoutTemplate | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('workout_templates')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) return null;
+  return data as WorkoutTemplate;
+}
