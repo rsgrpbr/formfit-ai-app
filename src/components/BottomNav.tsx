@@ -9,10 +9,10 @@ const NAV_ITEMS = [
   { href: '/exercises', icon: '📚', label: 'Exerc.'   },
   { href: '/my-plan',   icon: '📋', label: 'Plano'    },
   { href: '/progress',  icon: '📈', label: 'Progresso'},
-  { href: '/settings',  icon: '⚙️', label: 'Config'   },
+  { href: '/profile',   icon: '👤', label: 'Perfil'   },
 ] as const;
 
-const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/exercises', '/my-plan', '/progress', '/settings']);
+const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/exercises', '/my-plan', '/progress', '/profile']);
 
 export default function BottomNav() {
   const pathname = usePathname();

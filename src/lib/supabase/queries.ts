@@ -14,6 +14,7 @@ export interface Profile {
   level: string | null;
   days_per_week: number | null;
   location: string | null;
+  voice_coach_enabled: boolean;
 }
 
 export interface Session {
@@ -64,7 +65,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 
 export async function updateProfile(
   userId: string,
-  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale' | 'gender' | 'objective' | 'level' | 'days_per_week' | 'location'>>
+  updates: Partial<Pick<Profile, 'full_name' | 'avatar_url' | 'locale' | 'gender' | 'objective' | 'level' | 'days_per_week' | 'location' | 'voice_coach_enabled'>>
 ): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase
