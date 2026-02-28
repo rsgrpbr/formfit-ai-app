@@ -4,22 +4,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { href: '/analyze',   icon: '🏋️', label: 'Treinar'   },
-  { href: '/workouts',  icon: '💪', label: 'Treinos'   },
-  { href: '/my-plan',   icon: '📋', label: 'Meu Plano' },
-  { href: '/progress',  icon: '📈', label: 'Progresso' },
-  { href: '/settings',  icon: '⚙️', label: 'Config'    },
+  { href: '/analyze',   icon: '🏋️', label: 'Treinar'  },
+  { href: '/workouts',  icon: '💪', label: 'Treinos'  },
+  { href: '/exercises', icon: '📚', label: 'Exerc.'   },
+  { href: '/my-plan',   icon: '📋', label: 'Plano'    },
+  { href: '/progress',  icon: '📈', label: 'Progresso'},
+  { href: '/settings',  icon: '⚙️', label: 'Config'   },
 ] as const;
 
-const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/my-plan', '/progress', '/settings']);
+const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/exercises', '/my-plan', '/progress', '/settings']);
 
 export default function BottomNav() {
   const pathname = usePathname();
 
-  // Show on static routes + /workouts/[id] detail, but NOT on /workouts/[id]/session
+  // Show on static routes + /workouts/[id] and /exercises/[slug], but NOT on session pages
   const showNav =
     STATIC_ROUTES.has(pathname) ||
-    (/^\/workouts\/[^/]+$/.test(pathname));
+    /^\/workouts\/[^/]+$/.test(pathname) ||
+    /^\/exercises\/[^/]+$/.test(pathname);
 
   if (!showNav) return null;
 

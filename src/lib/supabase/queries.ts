@@ -39,6 +39,14 @@ export interface Exercise {
   category: string;
   difficulty: string;
   muscles: string[];
+  // Added in migration 009
+  instructions_pt: string | null;
+  instructions_en: string | null;
+  muscles_primary: string[] | null;
+  muscles_secondary: string[] | null;
+  equipment: string[] | null;
+  tips_pt: string | null;
+  tips_en: string | null;
 }
 
 // ── Profile ──────────────────────────────────────────────
@@ -288,4 +296,54 @@ export async function getWorkoutTemplate(id: string): Promise<WorkoutTemplate | 
     .single();
   if (error) return null;
   return data as WorkoutTemplate;
+}
+
+// ── Favorites ──────────────────────────────────────────────
+
+export async function getUserFavorites(userId: string): Promise<string[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('user_favorites')
+    .select('exercise_id')
+    .eq('user_id', userId);
+  if (error) return [];
+  return (data ?? []).map((r: { exercise_id: string }) => r.exercise_id);
+}
+
+export async function toggleFavorite(
+  userId: string,
+  exerciseId: string,
+  isFavorited: boolean,
+): Promise<boolean> {
+  const supabase = createClient();
+  if (isFavorited) {
+    const { error } = await supabase
+      .from('user_favorites')
+      .delete()
+      .eq('user_id', userId)
+      .eq('exercise_id', exerciseId);
+    return !error;
+  }
+  const { error } = await supabase
+    .from('user_favorites')
+    .insert({ user_id: userId, exercise_id: exerciseId });
+  return !error;
+}
+
+export async function getUserExerciseSessions(
+  userId: string,
+  exerciseId: string,
+  limit = 20,
+): Promise<Session[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('exercise_id', exerciseId)
+    .not('ended_at', 'is', null)
+    .order('started_at', { ascending: false })
+    .limit(limit);
+  if (error) return [];
+  return data as Session[];
 }
