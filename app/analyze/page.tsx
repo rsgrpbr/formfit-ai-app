@@ -26,14 +26,14 @@ import {
   analyzeSquat, analyzePushup, analyzePlank, analyzeLunge,
   analyzeGluteBridge, analyzeSidePlank, analyzeSuperman,
   analyzeMountainClimber, analyzeBurpee,
+  analyzeJumpSquat, analyzeSumoSquat, analyzeDonkeyKick, analyzeFireHydrant,
+  analyzeHipThrust, analyzeWallSit,
+  analyzeCrunch, analyzeBicycleCrunch, analyzeLegRaise, analyzeRussianTwist,
+  analyzeDeadBug, analyzeBirdDog, analyzeFlutterKick,
+  analyzePikePushup, analyzeDiamondPushup, analyzeWidePushup, analyzeTricepDip,
+  analyzeHighKnees, analyzeBearCrawl, analyzeInchworm,
 } from '@/lib/rules';
 import type { ErrorTracker } from '@/lib/rules';
-import type { SquatPhase } from '@/lib/rules/squat';
-import type { PushupPhase } from '@/lib/rules/pushup';
-import type { LungePhase } from '@/lib/rules/lunge';
-import type { GluteBridgePhase } from '@/lib/rules/glute_bridge';
-import type { MountainClimberPhase } from '@/lib/rules/mountain_climber';
-import type { BurpeePhase } from '@/lib/rules/burpee';
 import {
   createSession,
   finishSession,
@@ -45,7 +45,15 @@ import {
 type ExerciseSlug =
   | 'squat' | 'pushup' | 'plank' | 'lunge'
   | 'glute_bridge' | 'side_plank' | 'superman'
-  | 'mountain_climber' | 'burpee';
+  | 'mountain_climber' | 'burpee'
+  | 'jump_squat' | 'sumo_squat' | 'donkey_kick' | 'fire_hydrant'
+  | 'hip_thrust' | 'wall_sit'
+  | 'crunch' | 'bicycle_crunch' | 'leg_raise' | 'russian_twist'
+  | 'dead_bug' | 'bird_dog' | 'flutter_kick'
+  | 'pike_pushup' | 'diamond_pushup' | 'wide_pushup' | 'tricep_dip'
+  | 'high_knees' | 'bear_crawl' | 'inchworm';
+
+type ExercisePhase = 'up' | 'down' | 'transition';
 
 interface SessionStats {
   totalReps: number;
@@ -56,19 +64,18 @@ interface SessionStats {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const EXERCISES: { slug: ExerciseSlug; group: 'gym' | 'home' }[] = [
-  { slug: 'squat',            group: 'gym'  },
-  { slug: 'pushup',           group: 'gym'  },
-  { slug: 'plank',            group: 'gym'  },
-  { slug: 'lunge',            group: 'gym'  },
-  { slug: 'glute_bridge',     group: 'home' },
-  { slug: 'side_plank',       group: 'home' },
-  { slug: 'superman',         group: 'home' },
-  { slug: 'mountain_climber', group: 'home' },
-  { slug: 'burpee',           group: 'home' },
+const EXERCISES: ExerciseSlug[] = [
+  'squat', 'pushup', 'plank', 'lunge', 'glute_bridge',
+  'side_plank', 'superman', 'mountain_climber', 'burpee',
+  'jump_squat', 'sumo_squat', 'donkey_kick', 'fire_hydrant',
+  'hip_thrust', 'wall_sit',
+  'crunch', 'bicycle_crunch', 'leg_raise', 'russian_twist',
+  'dead_bug', 'bird_dog', 'flutter_kick',
+  'pike_pushup', 'diamond_pushup', 'wide_pushup', 'tricep_dip',
+  'high_knees', 'bear_crawl', 'inchworm',
 ];
 
-const TIME_BASED: ExerciseSlug[] = ['plank', 'side_plank', 'superman'];
+const TIME_BASED: ExerciseSlug[] = ['plank', 'side_plank', 'superman', 'wall_sit', 'dead_bug', 'bird_dog'];
 
 const VIDEO_W = 640;
 const VIDEO_H = 480;
@@ -105,8 +112,9 @@ function AnalyzePageInner() {
 
   // ── Exercise / session state ───────────────────────────────────────────────
   const [selectedExercise, setSelectedExercise] = useState<ExerciseSlug>(
-    (paramExercise && EXERCISES.some(e => e.slug === paramExercise)) ? paramExercise : 'squat'
+    (paramExercise && EXERCISES.includes(paramExercise)) ? paramExercise : 'squat'
   );
+  const [searchQuery, setSearchQuery] = useState('');
   const [isRunning, setIsRunning]     = useState(false);
   const [score, setScore]             = useState(100);
   const [stats, setStats]             = useState<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
@@ -125,7 +133,7 @@ function AnalyzePageInner() {
   const [restCountdown, setRestCountdown] = useState(0);
 
   // ── Stable refs ───────────────────────────────────────────────────────────
-  const phaseRef            = useRef<SquatPhase | PushupPhase | LungePhase | GluteBridgePhase | MountainClimberPhase | BurpeePhase>('up');
+  const phaseRef            = useRef<ExercisePhase>('up');
   const statsRef            = useRef<SessionStats>({ totalReps: 0, goodReps: 0, badReps: 0, scores: [] });
   const errorTrackerRef     = useRef<ErrorTracker>({});
   const timerRef            = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -213,24 +221,24 @@ function AnalyzePageInner() {
     };
 
     if (selectedExerciseRef.current === 'squat') {
-      const r = analyzeSquat(angles, landmarks, phaseRef.current as SquatPhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzeSquat(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
     if (selectedExerciseRef.current === 'pushup') {
-      const r = analyzePushup(angles, landmarks, phaseRef.current as PushupPhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzePushup(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
     if (selectedExerciseRef.current === 'plank') {
       const r = analyzePlank(angles, landmarks, (Date.now() - plankStart.current) / 1000, tracker);
       setScore(r.score); setFeedback(r.feedback); speakFeedback(r.feedback);
     }
     if (selectedExerciseRef.current === 'lunge') {
-      const r = analyzeLunge(angles, landmarks, phaseRef.current as LungePhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzeLunge(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
     if (selectedExerciseRef.current === 'glute_bridge') {
-      const r = analyzeGluteBridge(angles, landmarks, phaseRef.current as GluteBridgePhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzeGluteBridge(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
     if (selectedExerciseRef.current === 'side_plank') {
       const r = analyzeSidePlank(angles, landmarks, (Date.now() - plankStart.current) / 1000, tracker);
@@ -241,12 +249,92 @@ function AnalyzePageInner() {
       setScore(r.score); setFeedback(r.feedback); speakFeedback(r.feedback);
     }
     if (selectedExerciseRef.current === 'mountain_climber') {
-      const r = analyzeMountainClimber(angles, landmarks, phaseRef.current as MountainClimberPhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzeMountainClimber(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
     if (selectedExerciseRef.current === 'burpee') {
-      const r = analyzeBurpee(angles, landmarks, phaseRef.current as BurpeePhase, tracker);
-      phaseRef.current = r.phase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+      const r = analyzeBurpee(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'jump_squat') {
+      const r = analyzeJumpSquat(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'sumo_squat') {
+      const r = analyzeSumoSquat(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'donkey_kick') {
+      const r = analyzeDonkeyKick(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'fire_hydrant') {
+      const r = analyzeFireHydrant(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'hip_thrust') {
+      const r = analyzeHipThrust(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'wall_sit') {
+      const r = analyzeWallSit(angles, landmarks, phaseRef.current, tracker);
+      setScore(r.score); setFeedback(r.feedback); speakFeedback(r.feedback);
+    }
+    if (selectedExerciseRef.current === 'crunch') {
+      const r = analyzeCrunch(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'bicycle_crunch') {
+      const r = analyzeBicycleCrunch(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'leg_raise') {
+      const r = analyzeLegRaise(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'russian_twist') {
+      const r = analyzeRussianTwist(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'dead_bug') {
+      const r = analyzeDeadBug(angles, landmarks, phaseRef.current, tracker);
+      setScore(r.score); setFeedback(r.feedback); speakFeedback(r.feedback);
+    }
+    if (selectedExerciseRef.current === 'bird_dog') {
+      const r = analyzeBirdDog(angles, landmarks, phaseRef.current, tracker);
+      setScore(r.score); setFeedback(r.feedback); speakFeedback(r.feedback);
+    }
+    if (selectedExerciseRef.current === 'flutter_kick') {
+      const r = analyzeFlutterKick(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'pike_pushup') {
+      const r = analyzePikePushup(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'diamond_pushup') {
+      const r = analyzeDiamondPushup(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'wide_pushup') {
+      const r = analyzeWidePushup(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'tricep_dip') {
+      const r = analyzeTricepDip(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'high_knees') {
+      const r = analyzeHighKnees(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'bear_crawl') {
+      const r = analyzeBearCrawl(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
+    }
+    if (selectedExerciseRef.current === 'inchworm') {
+      const r = analyzeInchworm(angles, landmarks, phaseRef.current, tracker);
+      phaseRef.current = r.phase as ExercisePhase; setScore(r.score); setFeedback(r.feedback); handleRep(r);
     }
   }, [landmarks, isRunning, speak]);
 
@@ -420,6 +508,10 @@ function AnalyzePageInner() {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
+  const filteredExercises = searchQuery
+    ? EXERCISES.filter(slug => tEx(slug).toLowerCase().includes(searchQuery.toLowerCase()))
+    : EXERCISES;
+
   const scoreColor  = score >= 80 ? 'text-green-400' : score >= 50 ? 'text-yellow-400' : 'text-red-400';
   const formatTime  = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -510,13 +602,21 @@ function AnalyzePageInner() {
             <p className="text-[10px] uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
               Exercício
             </p>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar exercício…"
+              className="w-full px-3 py-2 rounded-xl text-sm mb-2 outline-none"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+            />
             <div className="grid grid-cols-3 gap-2">
-              {EXERCISES.map(ex => {
-                const sel = selectedExercise === ex.slug;
+              {filteredExercises.map(slug => {
+                const sel = selectedExercise === slug;
                 return (
                   <button
-                    key={ex.slug}
-                    onClick={() => setSelectedExercise(ex.slug)}
+                    key={slug}
+                    onClick={() => setSelectedExercise(slug)}
                     className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl text-[11px] font-semibold transition-all active:scale-95 border"
                     style={sel
                       ? { borderColor: 'var(--accent)', color: 'var(--accent)', background: 'rgba(200,241,53,0.12)' }
@@ -524,7 +624,7 @@ function AnalyzePageInner() {
                     }
                   >
                     <Dumbbell size={15} />
-                    <span className="text-center leading-tight">{tEx(ex.slug)}</span>
+                    <span className="text-center leading-tight">{tEx(slug)}</span>
                   </button>
                 );
               })}
@@ -860,6 +960,45 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Abaixe o quadril — não pike.',
     'mountain_climber.hip_sagging':      'Suba o quadril — mantenha prancha.',
     'burpee.arched_back':                'Mantenha o tronco reto na prancha.',
+    'jump_squat.go_deeper':              'Desça mais antes de saltar.',
+    'jump_squat.land_evenly':            'Pouse os dois pés juntos.',
+    'sumo_squat.go_deeper':              'Desça mais! Abaixo de 90 graus.',
+    'sumo_squat.widen_stance':           'Abra mais os pés.',
+    'sumo_squat.knees_out':              'Empurre os joelhos para fora.',
+    'donkey_kick.keep_hips_level':       'Mantenha o quadril nivelado.',
+    'donkey_kick.kick_higher':           'Chute mais alto.',
+    'fire_hydrant.keep_hips_level':      'Não rotacione o quadril.',
+    'fire_hydrant.lift_higher':          'Levante mais a perna.',
+    'hip_thrust.thrust_higher':          'Suba mais o quadril.',
+    'hip_thrust.hip_asymmetry':          'Quadril desnivelado — alinhe os lados.',
+    'wall_sit.adjust_knee_angle':        'Ajuste o ângulo dos joelhos — 90 graus.',
+    'wall_sit.keep_back_straight':       'Mantenha as costas retas na parede.',
+    'crunch.crunch_higher':              'Contraia mais — eleve os ombros.',
+    'bicycle_crunch.lower_hips':         'Abaixe o quadril.',
+    'bicycle_crunch.raise_hips':         'Suba o quadril.',
+    'leg_raise.keep_back_flat':          'Mantenha a lombar no chão.',
+    'russian_twist.maintain_lean':       'Mantenha o tronco inclinado a 45 graus.',
+    'dead_bug.keep_back_flat':           'Pressione a lombar no chão.',
+    'dead_bug.keep_hips_level':          'Mantenha o quadril nivelado.',
+    'bird_dog.keep_hips_level':          'Não deixe o quadril rodar.',
+    'bird_dog.keep_back_neutral':        'Mantenha as costas neutras.',
+    'flutter_kick.keep_back_flat':       'Mantenha a lombar no chão.',
+    'pike_pushup.raise_hips':            'Suba mais o quadril — posição V.',
+    'pike_pushup.keep_body_straight':    'Alinhe o corpo durante a descida.',
+    'diamond_pushup.keep_body_straight': 'Corpo alinhado — não suba o quadril.',
+    'diamond_pushup.go_lower':           'Desça mais — cotovelos a 90 graus.',
+    'diamond_pushup.bring_hands_together': 'Aproxime mais as mãos.',
+    'wide_pushup.keep_body_straight':    'Corpo alinhado — não suba o quadril.',
+    'wide_pushup.go_lower':              'Desça mais — cotovelos a 90 graus.',
+    'wide_pushup.align_elbows':          'Alinhe os cotovelos.',
+    'tricep_dip.dip_lower':              'Desça mais — cotovelos a 90 graus.',
+    'tricep_dip.align_elbows':           'Alinhe os cotovelos.',
+    'tricep_dip.keep_hips_close':        'Mantenha o quadril próximo ao banco.',
+    'high_knees.stay_upright':           'Mantenha o tronco ereto.',
+    'bear_crawl.lower_hips':             'Abaixe o quadril.',
+    'bear_crawl.raise_hips':             'Suba o quadril.',
+    'inchworm.keep_hips_aligned':        'Alinhe o quadril na prancha.',
+    'inchworm.keep_legs_straight':       'Mantenha as pernas estendidas.',
   },
   en: {
     'general.perfect_form':      'Perfect form!',
@@ -897,6 +1036,45 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Lower your hips — no piking.',
     'mountain_climber.hip_sagging':      'Raise your hips — keep plank form.',
     'burpee.arched_back':                'Keep your core tight in plank.',
+    'jump_squat.go_deeper':              'Squat deeper before jumping.',
+    'jump_squat.land_evenly':            'Land on both feet evenly.',
+    'sumo_squat.go_deeper':              'Go deeper! Below 90 degrees.',
+    'sumo_squat.widen_stance':           'Widen your stance.',
+    'sumo_squat.knees_out':              'Push your knees out.',
+    'donkey_kick.keep_hips_level':       'Keep your hips level.',
+    'donkey_kick.kick_higher':           'Kick higher.',
+    'fire_hydrant.keep_hips_level':      "Don't rotate your hips.",
+    'fire_hydrant.lift_higher':          'Lift your leg higher.',
+    'hip_thrust.thrust_higher':          'Push your hips higher.',
+    'hip_thrust.hip_asymmetry':          'Uneven hips — align both sides.',
+    'wall_sit.adjust_knee_angle':        'Adjust knee angle to 90 degrees.',
+    'wall_sit.keep_back_straight':       'Keep your back flat against the wall.',
+    'crunch.crunch_higher':              'Crunch higher — lift your shoulders.',
+    'bicycle_crunch.lower_hips':         'Lower your hips.',
+    'bicycle_crunch.raise_hips':         'Raise your hips.',
+    'leg_raise.keep_back_flat':          'Keep your lower back pressed down.',
+    'russian_twist.maintain_lean':       'Maintain a 45-degree lean.',
+    'dead_bug.keep_back_flat':           'Press your lower back into the floor.',
+    'dead_bug.keep_hips_level':          'Keep your hips level.',
+    'bird_dog.keep_hips_level':          "Don't let your hips rotate.",
+    'bird_dog.keep_back_neutral':        'Keep your back neutral.',
+    'flutter_kick.keep_back_flat':       'Keep your lower back pressed down.',
+    'pike_pushup.raise_hips':            'Raise your hips into a V shape.',
+    'pike_pushup.keep_body_straight':    'Keep your body aligned on the way down.',
+    'diamond_pushup.keep_body_straight': 'Keep your body aligned.',
+    'diamond_pushup.go_lower':           'Go lower! Elbows at 90 degrees.',
+    'diamond_pushup.bring_hands_together': 'Bring your hands closer together.',
+    'wide_pushup.keep_body_straight':    'Keep your body aligned.',
+    'wide_pushup.go_lower':              'Go lower! Elbows at 90 degrees.',
+    'wide_pushup.align_elbows':          'Align your elbows.',
+    'tricep_dip.dip_lower':              'Dip lower — elbows at 90 degrees.',
+    'tricep_dip.align_elbows':           'Align your elbows.',
+    'tricep_dip.keep_hips_close':        'Keep your hips close to the bench.',
+    'high_knees.stay_upright':           'Stay upright — do not lean back.',
+    'bear_crawl.lower_hips':             'Lower your hips.',
+    'bear_crawl.raise_hips':             'Raise your hips.',
+    'inchworm.keep_hips_aligned':        'Keep your hips aligned in plank.',
+    'inchworm.keep_legs_straight':       'Keep your legs straight.',
   },
   es: {
     'general.perfect_form':      '¡Forma perfecta!',
@@ -934,6 +1112,45 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Baja las caderas — sin pike.',
     'mountain_climber.hip_sagging':      'Sube las caderas — mantén la plancha.',
     'burpee.arched_back':                'Mantén el core apretado en la plancha.',
+    'jump_squat.go_deeper':              'Baja más antes de saltar.',
+    'jump_squat.land_evenly':            'Aterriza con los dos pies al mismo tiempo.',
+    'sumo_squat.go_deeper':              '¡Baja más! Menos de 90 grados.',
+    'sumo_squat.widen_stance':           'Abre más los pies.',
+    'sumo_squat.knees_out':              'Empuja las rodillas hacia afuera.',
+    'donkey_kick.keep_hips_level':       'Mantén las caderas niveladas.',
+    'donkey_kick.kick_higher':           'Patea más alto.',
+    'fire_hydrant.keep_hips_level':      'No rotas las caderas.',
+    'fire_hydrant.lift_higher':          'Levanta más la pierna.',
+    'hip_thrust.thrust_higher':          'Sube más las caderas.',
+    'hip_thrust.hip_asymmetry':          'Caderas desniveladas — alinea los lados.',
+    'wall_sit.adjust_knee_angle':        'Ajusta el ángulo de las rodillas a 90 grados.',
+    'wall_sit.keep_back_straight':       'Mantén la espalda recta contra la pared.',
+    'crunch.crunch_higher':              'Contrae más — eleva los hombros.',
+    'bicycle_crunch.lower_hips':         'Baja las caderas.',
+    'bicycle_crunch.raise_hips':         'Sube las caderas.',
+    'leg_raise.keep_back_flat':          'Mantén la zona lumbar pegada al suelo.',
+    'russian_twist.maintain_lean':       'Mantén el torso inclinado a 45 grados.',
+    'dead_bug.keep_back_flat':           'Presiona la zona lumbar contra el suelo.',
+    'dead_bug.keep_hips_level':          'Mantén las caderas niveladas.',
+    'bird_dog.keep_hips_level':          'No dejes que las caderas roten.',
+    'bird_dog.keep_back_neutral':        'Mantén la espalda neutral.',
+    'flutter_kick.keep_back_flat':       'Mantén la zona lumbar pegada al suelo.',
+    'pike_pushup.raise_hips':            'Sube las caderas en forma de V.',
+    'pike_pushup.keep_body_straight':    'Mantén el cuerpo alineado al bajar.',
+    'diamond_pushup.keep_body_straight': 'Mantén el cuerpo alineado.',
+    'diamond_pushup.go_lower':           '¡Baja más! Codos a 90 grados.',
+    'diamond_pushup.bring_hands_together': 'Junta más las manos.',
+    'wide_pushup.keep_body_straight':    'Mantén el cuerpo alineado.',
+    'wide_pushup.go_lower':              '¡Baja más! Codos a 90 grados.',
+    'wide_pushup.align_elbows':          'Alinea los codos.',
+    'tricep_dip.dip_lower':              'Baja más — codos a 90 grados.',
+    'tricep_dip.align_elbows':           'Alinea los codos.',
+    'tricep_dip.keep_hips_close':        'Mantén las caderas cerca del banco.',
+    'high_knees.stay_upright':           'Mantén el torso erguido.',
+    'bear_crawl.lower_hips':             'Baja las caderas.',
+    'bear_crawl.raise_hips':             'Sube las caderas.',
+    'inchworm.keep_hips_aligned':        'Alinea las caderas en la plancha.',
+    'inchworm.keep_legs_straight':       'Mantén las piernas estiradas.',
   },
   fr: {
     'general.perfect_form':      'Forme parfaite !',
@@ -971,6 +1188,45 @@ const FEEDBACK_TEXTS: Record<string, Record<string, string>> = {
     'mountain_climber.hip_too_high':     'Abaissez les hanches — pas de pic.',
     'mountain_climber.hip_sagging':      'Levez les hanches — maintenez la planche.',
     'burpee.arched_back':                'Gardez le corps droit en planche.',
+    'jump_squat.go_deeper':              'Descendez plus avant de sauter.',
+    'jump_squat.land_evenly':            'Atterrissez sur les deux pieds.',
+    'sumo_squat.go_deeper':              'Descendez plus ! Moins de 90 degrés.',
+    'sumo_squat.widen_stance':           'Écartez davantage les pieds.',
+    'sumo_squat.knees_out':              'Poussez les genoux vers lextérieur.',
+    'donkey_kick.keep_hips_level':       'Gardez les hanches de niveau.',
+    'donkey_kick.kick_higher':           'Montez la jambe plus haut.',
+    'fire_hydrant.keep_hips_level':      'Ne faites pas pivoter les hanches.',
+    'fire_hydrant.lift_higher':          'Levez la jambe plus haut.',
+    'hip_thrust.thrust_higher':          'Poussez les hanches plus haut.',
+    'hip_thrust.hip_asymmetry':          'Hanches inégales — alignez les deux côtés.',
+    'wall_sit.adjust_knee_angle':        'Ajustez langle des genoux à 90 degrés.',
+    'wall_sit.keep_back_straight':       'Gardez le dos droit contre le mur.',
+    'crunch.crunch_higher':              'Contractez plus — soulevez les épaules.',
+    'bicycle_crunch.lower_hips':         'Abaissez les hanches.',
+    'bicycle_crunch.raise_hips':         'Levez les hanches.',
+    'leg_raise.keep_back_flat':          'Gardez le bas du dos plaqué au sol.',
+    'russian_twist.maintain_lean':       'Maintenez une inclinaison de 45 degrés.',
+    'dead_bug.keep_back_flat':           'Plaque le bas du dos au sol.',
+    'dead_bug.keep_hips_level':          'Gardez les hanches de niveau.',
+    'bird_dog.keep_hips_level':          'Ne laissez pas les hanches pivoter.',
+    'bird_dog.keep_back_neutral':        'Gardez le dos neutre.',
+    'flutter_kick.keep_back_flat':       'Gardez le bas du dos plaqué au sol.',
+    'pike_pushup.raise_hips':            'Levez les hanches en forme de V.',
+    'pike_pushup.keep_body_straight':    'Gardez le corps aligné à la descente.',
+    'diamond_pushup.keep_body_straight': 'Gardez le corps aligné.',
+    'diamond_pushup.go_lower':           'Descendez plus ! Coudes à 90 degrés.',
+    'diamond_pushup.bring_hands_together': 'Rapprochez les mains.',
+    'wide_pushup.keep_body_straight':    'Gardez le corps aligné.',
+    'wide_pushup.go_lower':              'Descendez plus ! Coudes à 90 degrés.',
+    'wide_pushup.align_elbows':          'Alignez les coudes.',
+    'tricep_dip.dip_lower':              'Descendez plus — coudes à 90 degrés.',
+    'tricep_dip.align_elbows':           'Alignez les coudes.',
+    'tricep_dip.keep_hips_close':        'Gardez les hanches près du banc.',
+    'high_knees.stay_upright':           'Restez droit — ne vous penchez pas.',
+    'bear_crawl.lower_hips':             'Abaissez les hanches.',
+    'bear_crawl.raise_hips':             'Levez les hanches.',
+    'inchworm.keep_hips_aligned':        'Alignez les hanches en planche.',
+    'inchworm.keep_legs_straight':       'Gardez les jambes tendues.',
   },
 };
 

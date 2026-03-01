@@ -20,7 +20,27 @@
     "side_plank": "Planche latérale",
     "superman": "Superman",
     "mountain_climber": "Grimpeur",
-    "burpee": "Burpee"
+    "burpee": "Burpee",
+    "jump_squat": "Squat sauté",
+    "sumo_squat": "Squat sumo",
+    "donkey_kick": "Coup de pied d'âne",
+    "fire_hydrant": "Fire Hydrant",
+    "hip_thrust": "Hip Thrust",
+    "wall_sit": "Chaise isométrique",
+    "crunch": "Crunch",
+    "bicycle_crunch": "Crunch vélo",
+    "leg_raise": "Levée de jambes",
+    "russian_twist": "Torsion russe",
+    "dead_bug": "Dead Bug",
+    "bird_dog": "Bird Dog",
+    "flutter_kick": "Flutter Kick",
+    "pike_pushup": "Pompe pike",
+    "diamond_pushup": "Pompe diamant",
+    "wide_pushup": "Pompe large",
+    "tricep_dip": "Dip triceps",
+    "high_knees": "Genoux hauts",
+    "bear_crawl": "Bear Crawl",
+    "inchworm": "Inchworm"
   },
   "feedback": {
     "squat": {
