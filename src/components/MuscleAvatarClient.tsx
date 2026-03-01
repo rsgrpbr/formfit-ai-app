@@ -5,15 +5,40 @@ import Model, { type IExerciseData } from 'react-body-highlighter';
 // ── Mapa de músculos por exercício ────────────────────────────────────────────
 
 const EXERCISE_MUSCLES = {
-  squat:            { name: 'Agachamento', muscles: ['quadriceps', 'gluteal'] },
-  pushup:           { name: 'Flexão',      muscles: ['chest', 'triceps', 'front-deltoids'] },
-  plank:            { name: 'Prancha',     muscles: ['abs', 'obliques'] },
-  lunge:            { name: 'Afundo',      muscles: ['quadriceps', 'gluteal'] },
-  glute_bridge:     { name: 'Elevação',    muscles: ['gluteal', 'hamstring'] },
-  side_plank:       { name: 'Prancha Lat', muscles: ['obliques'] },
-  mountain_climber: { name: 'Escalada',    muscles: ['abs', 'quadriceps'] },
-  superman:         { name: 'Superman',    muscles: ['lower-back', 'gluteal'] },
-  burpee:           { name: 'Burpee',      muscles: ['chest', 'quadriceps', 'abs'] },
+  // ── Original 9 ────────────────────────────────────────────────────────────
+  squat:            { name: 'Agachamento',     muscles: ['quadriceps', 'gluteal'] },
+  pushup:           { name: 'Flexão',          muscles: ['chest', 'triceps', 'front-deltoids'] },
+  plank:            { name: 'Prancha',         muscles: ['abs', 'obliques'] },
+  lunge:            { name: 'Afundo',          muscles: ['quadriceps', 'gluteal'] },
+  glute_bridge:     { name: 'Elev. Quadril',   muscles: ['gluteal', 'hamstring'] },
+  side_plank:       { name: 'Prancha Lat.',    muscles: ['obliques'] },
+  mountain_climber: { name: 'Escalada',        muscles: ['abs', 'quadriceps'] },
+  superman:         { name: 'Superman',        muscles: ['lower-back', 'gluteal'] },
+  burpee:           { name: 'Burpee',          muscles: ['chest', 'quadriceps', 'abs'] },
+  // ── Pernas / glúteos ──────────────────────────────────────────────────────
+  jump_squat:       { name: 'Agach. c/ Salto', muscles: ['quadriceps', 'calves', 'gluteal', 'hamstring'] },
+  sumo_squat:       { name: 'Agach. Sumô',     muscles: ['quadriceps', 'adductor', 'gluteal'] },
+  donkey_kick:      { name: 'Chute Traseiro',  muscles: ['gluteal', 'hamstring'] },
+  fire_hydrant:     { name: 'Fire Hydrant',    muscles: ['adductor', 'gluteal'] },
+  hip_thrust:       { name: 'Hip Thrust',      muscles: ['gluteal', 'hamstring'] },
+  wall_sit:         { name: 'Cadeira Isom.',   muscles: ['quadriceps', 'gluteal'] },
+  // ── Core ──────────────────────────────────────────────────────────────────
+  crunch:           { name: 'Crunch',          muscles: ['abs'] },
+  bicycle_crunch:   { name: 'Crunch Bicicleta',muscles: ['abs', 'obliques'] },
+  leg_raise:        { name: 'Elev. de Pernas', muscles: ['abs', 'abductors'] },
+  russian_twist:    { name: 'Torção Russa',    muscles: ['abs', 'obliques'] },
+  dead_bug:         { name: 'Dead Bug',        muscles: ['abs', 'lower-back'] },
+  bird_dog:         { name: 'Bird Dog',        muscles: ['abs', 'gluteal', 'lower-back'] },
+  flutter_kick:     { name: 'Flutter Kick',    muscles: ['abs', 'abductors'] },
+  // ── Push ──────────────────────────────────────────────────────────────────
+  pike_pushup:      { name: 'Flexão Pike',     muscles: ['front-deltoids', 'triceps', 'upper-back'] },
+  diamond_pushup:   { name: 'Flexão Diamante', muscles: ['chest', 'triceps'] },
+  wide_pushup:      { name: 'Flexão Aberta',   muscles: ['chest', 'front-deltoids'] },
+  tricep_dip:       { name: 'Tríceps Dip',     muscles: ['triceps', 'chest'] },
+  // ── Full body ─────────────────────────────────────────────────────────────
+  high_knees:       { name: 'Joelhos Altos',   muscles: ['quadriceps', 'abs', 'gluteal', 'hamstring'] },
+  bear_crawl:       { name: 'Bear Crawl',      muscles: ['front-deltoids', 'abs', 'gluteal'] },
+  inchworm:         { name: 'Inchworm',        muscles: ['abs', 'chest', 'hamstring', 'lower-back'] },
 } as const;
 
 export type ExerciseSlug = keyof typeof EXERCISE_MUSCLES;
