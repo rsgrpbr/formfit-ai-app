@@ -153,7 +153,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight">FormFit AI</Link>
+        <Link href="/"><img src="/logo.png" alt="meMove" className="h-8" /></Link>
         <Link href="/analyze" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
           ← Voltar ao treino
         </Link>

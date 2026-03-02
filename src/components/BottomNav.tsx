@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Zap, LayoutGrid, Dumbbell, ClipboardList, BarChart2, User } from 'lucide-react';
@@ -14,18 +15,28 @@ const NAV_ITEMS: { href: string; Icon: LucideIcon; label: string }[] = [
   { href: '/profile',   Icon: User,          label: 'Perfil'    },
 ] as const;
 
-const STATIC_ROUTES = new Set(['/workouts', '/exercises', '/my-plan', '/progress', '/profile']);
+const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/exercises', '/my-plan', '/progress', '/profile']);
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [sessionRunning, setSessionRunning] = useState(false);
 
-  // Show on static routes + /workouts/[id] and /exercises/[slug], but NOT on session pages
+  // Observe body[data-running] set by the analyze page during an active session
+  useEffect(() => {
+    setSessionRunning(document.body.hasAttribute('data-running'));
+    const observer = new MutationObserver(() => {
+      setSessionRunning(document.body.hasAttribute('data-running'));
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-running'] });
+    return () => observer.disconnect();
+  }, []);
+
   const showNav =
     STATIC_ROUTES.has(pathname) ||
     /^\/workouts\/[^/]+$/.test(pathname) ||
     /^\/exercises\/[^/]+$/.test(pathname);
 
-  if (!showNav) return null;
+  if (!showNav || sessionRunning) return null;
 
   return (
     <nav

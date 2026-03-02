@@ -157,6 +157,16 @@ function AnalyzePageInner() {
   restTimeRef.current         = restTime;
   speakRef.current            = speak;
 
+  // Signal BottomNav to hide itself while session is running
+  useEffect(() => {
+    if (isRunning) {
+      document.body.setAttribute('data-running', 'true');
+    } else {
+      document.body.removeAttribute('data-running');
+    }
+    return () => { document.body.removeAttribute('data-running'); };
+  }, [isRunning]);
+
   // Reset tracker/phase on exercise change
   useEffect(() => {
     errorTrackerRef.current = {};
@@ -558,7 +568,7 @@ function AnalyzePageInner() {
         {/* Header */}
         <header className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl tracking-widest">FORMFIT AI</h1>
+            <img src="/logo.png" alt="meMove" className="h-8" />
             {plan !== 'free' && (
               <span
                 className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest"
