@@ -847,7 +847,7 @@ function AnalyzePageInner() {
       </button>
 
       {/* BOTTOM — stats + stop */}
-      <div className="absolute bottom-0 left-0 right-0 z-10 bg-black/60 backdrop-blur-md px-4 pt-3 pb-4">
+      <div className="absolute bottom-16 left-0 right-0 z-10 bg-black/60 backdrop-blur-md px-4 pt-3 pb-4">
         <div className="grid grid-cols-3 gap-2 mb-3">
           <RunStat label="TEMPO" value={formatTime(elapsed)} />
           <RunStat label="REPS"  value={`${repsInSet}/${targetReps}`} />

@@ -14,7 +14,7 @@ const NAV_ITEMS: { href: string; Icon: LucideIcon; label: string }[] = [
   { href: '/profile',   Icon: User,          label: 'Perfil'    },
 ] as const;
 
-const STATIC_ROUTES = new Set(['/analyze', '/workouts', '/exercises', '/my-plan', '/progress', '/profile']);
+const STATIC_ROUTES = new Set(['/workouts', '/exercises', '/my-plan', '/progress', '/profile']);
 
 export default function BottomNav() {
   const pathname = usePathname();
