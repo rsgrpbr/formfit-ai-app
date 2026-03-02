@@ -13,8 +13,8 @@ export default function AppHeader() {
         borderColor: 'var(--border)',
       }}
     >
-      <span className="font-display text-2xl tracking-widest" style={{ color: 'var(--text)' }}>
-        FORMFIT<span style={{ color: 'var(--accent)' }}>AI</span>
+      <span className="text-2xl font-bold tracking-wide" style={{ color: 'var(--text)' }}>
+        me<span style={{ color: 'var(--accent)' }}>Move</span>
       </span>
 
       <Link

@@ -24,13 +24,14 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "FormFit AI",
-  description: "Seu personal trainer com IA",
+  title: "meMove",
+  description: "Move yourself forward with AI-powered workouts",
   manifest: "/manifest.json",
+  icons: { icon: "/logo.png" },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "FormFit AI",
+    title: "meMove",
   },
 };
 
