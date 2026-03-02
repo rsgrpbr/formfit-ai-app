@@ -3,16 +3,67 @@
 import { useSession } from '@/hooks/useSession';
 import { getSubscriptionStatus } from '@/lib/subscription';
 
-const PLANS = {
-  mensal: process.env.NEXT_PUBLIC_CARTPANDA_MENSAL ||
-    'https://rsgroup.mycartpanda.com/checkout/208184469:1',
-  trimestral: process.env.NEXT_PUBLIC_CARTPANDA_TRIMESTRAL ||
-    'https://rsgroup.mycartpanda.com/checkout/208184474:1',
-  anual: process.env.NEXT_PUBLIC_CARTPANDA_ANUAL ||
-    'https://rsgroup.mycartpanda.com/checkout/208184481:1',
-};
+interface Plan {
+  id: string;
+  name: string;
+  price: string;
+  period: string;
+  badge: string | null;
+  features: string[];
+  url: string;
+  highlight: boolean;
+}
 
-console.log('[Paywall] PLANS:', PLANS);
+const PLANS: Plan[] = [
+  {
+    id: 'mensal',
+    name: 'PRO Mensal',
+    price: 'R$19,90',
+    period: '/mês',
+    badge: null,
+    features: [
+      '30 exercícios em casa',
+      'Análise de forma com IA',
+      'Plano personalizado',
+      'Feedback por voz',
+      'Histórico completo',
+    ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184469:1',
+    highlight: false,
+  },
+  {
+    id: 'anual',
+    name: 'PRO Anual',
+    price: 'R$149',
+    period: '/ano',
+    badge: '38% OFF',
+    features: [
+      'Tudo do PRO Mensal',
+      '2 meses grátis',
+      'Desafio 21 dias incluso',
+      'E-book Detox incluso',
+      'Plano Alimentar IA incluso',
+    ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184481:1',
+    highlight: true,
+  },
+  {
+    id: 'trimestral',
+    name: 'PRO Trimestral',
+    price: 'R$37,90',
+    period: '/trimestre',
+    badge: null,
+    features: [
+      'Tudo do PRO Mensal',
+      '~R$12,63/mês',
+      'Sem compromisso anual',
+    ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184474:1',
+    highlight: false,
+  },
+];
+
+console.log('[Paywall] PLANS:', PLANS.map(p => ({ id: p.id, url: p.url })));
 
 interface PaywallProps {
   onClose?: () => void;
@@ -39,17 +90,12 @@ export default function Paywall({ onClose }: PaywallProps) {
   console.log('[Paywall] status:', status, 'email:', p?.email ?? 'anon');
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm px-4 overflow-y-auto"
-    >
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm px-4 overflow-y-auto">
       <div className="w-full max-w-sm py-8 space-y-3">
 
         {/* Header */}
         <div className="text-center mb-6">
-          <p
-            className="font-display text-4xl tracking-widest"
-            style={{ color: 'var(--accent)' }}
-          >
+          <p className="font-display text-4xl tracking-widest" style={{ color: 'var(--accent)' }}>
             meMove PRO
           </p>
           <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>
@@ -59,34 +105,10 @@ export default function Paywall({ onClose }: PaywallProps) {
           </p>
         </div>
 
-        {/* Mensal */}
-        <PlanCard
-          href={PLANS.mensal}
-          label="MENSAL"
-          price="R$ 29,90"
-          period="por mês"
-          highlight={false}
-        />
-
-        {/* Trimestral */}
-        <PlanCard
-          href={PLANS.trimestral}
-          label="TRIMESTRAL"
-          price="R$ 19,90"
-          period="por mês · cobrado a cada 3 meses"
-          highlight
-          badge="POPULAR"
-        />
-
-        {/* Anual */}
-        <PlanCard
-          href={PLANS.anual}
-          label="ANUAL"
-          price="R$ 9,90"
-          period="por mês · cobrado anualmente"
-          highlight={false}
-          badge="MELHOR CUSTO"
-        />
+        {/* Plan cards */}
+        {PLANS.map(plan => (
+          <PlanCard key={plan.id} plan={plan} />
+        ))}
 
         {onClose && (
           <button
@@ -102,61 +124,61 @@ export default function Paywall({ onClose }: PaywallProps) {
   );
 }
 
-function PlanCard({
-  href,
-  label,
-  price,
-  period,
-  highlight,
-  badge,
-}: {
-  href: string;
-  label: string;
-  price: string;
-  period: string;
-  highlight: boolean;
-  badge?: string;
-}) {
+function PlanCard({ plan }: { plan: Plan }) {
+  const handleClick = () => {
+    window.open(plan.url, '_blank');
+  };
+
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-between px-5 py-4 rounded-2xl border transition-all active:scale-95 relative overflow-hidden block"
+    <div
+      className="rounded-2xl border px-5 py-4 relative overflow-hidden"
       style={{
-        background: highlight ? 'rgba(200,241,53,0.10)' : 'var(--surface)',
-        borderColor: highlight ? 'var(--accent)' : 'var(--border)',
+        background: plan.highlight ? 'rgba(200,241,53,0.08)' : 'var(--surface)',
+        borderColor: plan.highlight ? 'var(--accent)' : 'var(--border)',
       }}
     >
-      {badge && (
+      {/* Badge */}
+      {plan.badge && (
         <span
-          className="absolute top-2 right-3 text-[9px] font-bold tracking-widest px-2 py-0.5 rounded-full"
+          className="absolute top-3 right-3 text-[9px] font-bold tracking-widest px-2 py-0.5 rounded-full"
           style={{ background: 'var(--accent)', color: 'var(--bg)' }}
         >
-          {badge}
+          {plan.badge}
         </span>
       )}
-      <div>
-        <p
-          className="font-display text-[10px] tracking-widest"
-          style={{ color: 'var(--text-muted)' }}
-        >
-          {label}
-        </p>
-        <p className="font-display text-2xl tracking-wide text-white">{price}</p>
-        <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)' }}>
-          {period}
-        </p>
-      </div>
-      <span
-        className="font-display text-sm tracking-widest px-4 py-2 rounded-xl flex-shrink-0"
-        style={{
-          background: highlight ? 'var(--accent)' : 'var(--surface2)',
-          color: highlight ? 'var(--bg)' : 'var(--text)',
-        }}
+
+      {/* Name + price */}
+      <p className="font-display text-[10px] tracking-widest mb-0.5" style={{ color: 'var(--text-muted)' }}>
+        {plan.name.toUpperCase()}
+      </p>
+      <p className="font-display text-3xl tracking-wide text-white">
+        {plan.price}
+        <span className="text-base font-sans ml-1" style={{ color: 'var(--text-muted)' }}>
+          {plan.period}
+        </span>
+      </p>
+
+      {/* Features */}
+      <ul className="mt-3 mb-4 space-y-1">
+        {plan.features.map(f => (
+          <li key={f} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+            <span style={{ color: 'var(--accent)' }}>✓</span>
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      {/* CTA button */}
+      <button
+        onClick={handleClick}
+        className="w-full h-12 rounded-xl font-display tracking-widest text-sm transition-all active:scale-95"
+        style={plan.highlight
+          ? { background: 'var(--accent)', color: 'var(--bg)' }
+          : { background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }
+        }
       >
-        ASSINAR
-      </span>
-    </a>
+        {plan.highlight ? 'ASSINAR ANUAL — MELHOR OFERTA' : 'Assinar agora'}
+      </button>
+    </div>
   );
 }
