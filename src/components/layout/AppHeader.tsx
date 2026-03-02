@@ -13,9 +13,7 @@ export default function AppHeader() {
         borderColor: 'var(--border)',
       }}
     >
-      <span className="text-2xl font-bold tracking-wide" style={{ color: 'var(--text)' }}>
-        me<span style={{ color: 'var(--accent)' }}>Move</span>
-      </span>
+      <img src="/logo.png" alt="meMove" className="h-8 w-auto object-contain" />
 
       <Link
         href="/profile"

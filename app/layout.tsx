@@ -28,9 +28,12 @@ export const metadata: Metadata = {
   description: "Move yourself forward with AI-powered workouts",
   manifest: "/manifest.json",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-    shortcut: "/logo.png",
+    icon: [
+      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/logo.png',
+    shortcut: '/logo.png',
   },
   appleWebApp: {
     capable: true,
