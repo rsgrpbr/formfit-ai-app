@@ -27,7 +27,11 @@ export const metadata: Metadata = {
   title: "meMove",
   description: "Move yourself forward with AI-powered workouts",
   manifest: "/manifest.json",
-  icons: { icon: "/logo.png" },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+    shortcut: "/logo.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
