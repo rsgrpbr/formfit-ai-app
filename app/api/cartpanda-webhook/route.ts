@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       const { error } = await supabase
         .from('profiles')
         .update({
-          is_pro: true,
+          plan: 'pro',
           pro_expires_at: expiresAt.toISOString(),
         })
         .eq('email', email.toLowerCase());
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     if (body.event === 'order.refunded' || body.event === 'subscription.cancelled') {
       await supabase
         .from('profiles')
-        .update({ is_pro: false, pro_expires_at: null })
+        .update({ plan: 'free', pro_expires_at: null })
         .eq('email', email.toLowerCase());
 
       console.log(`PRO removido para ${email}`);

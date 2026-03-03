@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       await supabase
         .from('profiles')
         .update({
-          is_pro: true,
+          plan: 'pro',
           pro_expires_at: expiresAt.toISOString(),
         })
         .eq('email', email);

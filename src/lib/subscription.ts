@@ -1,13 +1,13 @@
 export type SubscriptionStatus = 'pro' | 'trial' | 'expired';
 
 export function getSubscriptionStatus(profile: {
-  is_pro: boolean;
+  plan: string;
   trial_expires_at: string;
   pro_expires_at: string | null;
 }): SubscriptionStatus {
   const now = new Date();
 
-  if (profile.is_pro && profile.pro_expires_at) {
+  if (profile.plan === 'pro' && profile.pro_expires_at) {
     if (new Date(profile.pro_expires_at) > now) return 'pro';
   }
 
