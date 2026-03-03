@@ -27,7 +27,7 @@ const PLANS: Plan[] = [
       'Feedback por voz',
       'Histórico completo',
     ],
-    url: 'https://rsgroup.mycartpanda.com/checkout/208184469:1?test_mode=true',
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184469:1',
   },
   {
     name: 'PRO Anual',
@@ -42,7 +42,7 @@ const PLANS: Plan[] = [
       'E-book Detox incluso',
       'Plano Alimentar IA incluso',
     ],
-    url: 'https://rsgroup.mycartpanda.com/checkout/208184481:1?test_mode=true',
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184481:1',
   },
   {
     name: 'PRO Trimestral',
@@ -55,7 +55,7 @@ const PLANS: Plan[] = [
       '~R$12,63/mês',
       'Sem compromisso anual',
     ],
-    url: 'https://rsgroup.mycartpanda.com/checkout/208184474:1?test_mode=true',
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184474:1',
   },
 ];
 
