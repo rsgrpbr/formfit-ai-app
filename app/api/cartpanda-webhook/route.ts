@@ -4,57 +4,36 @@ import { NextRequest } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('CartPanda event:', body.event);
 
-    // Log completo para debug
-    console.log('WEBHOOK FULL PAYLOAD:', JSON.stringify(body, null, 2));
+    const order = body.order;
+    if (!order) {
+      return Response.json({ error: 'No order' }, { status: 400 });
+    }
 
-    // CartPanda envia status do pedido
-    const status = body.status || body.order_status || body.financial_status;
-
-    // Tentar extrair email de todos os campos possíveis
-    const email =
-      body.customer?.email ||
-      body.email ||
-      body.customer_email ||
-      body.billing_address?.email ||
-      body.contact_email ||
-      body.buyer?.email ||
-      body.order?.customer?.email ||
-      body.order?.email ||
-      body.data?.customer?.email ||
-      body.data?.email;
-
-    console.log('Email encontrado:', email);
-    console.log('Status:', status);
-    console.log('Todos os campos:', Object.keys(body));
+    // Email está em order.email ou order.customer.email
+    const email = order.email || order.customer?.email;
+    console.log('Email:', email);
 
     if (!email) {
-      console.log('PAYLOAD COMPLETO para debug:', JSON.stringify(body));
       return Response.json({ error: 'No email' }, { status: 400 });
     }
 
-    // Só processa pedidos pagos
-    if (status === 'paid' || status === 'approved' || status === 'complete') {
+    // Variant ID está em order.line_items[0].variant_id
+    const variantId = order.line_items?.[0]?.variant_id?.toString();
+    console.log('Variant ID:', variantId);
 
-      // Calcular expiração baseado no produto
-      const productId = body.product_id?.toString()
-        || body.line_items?.[0]?.product_id?.toString();
+    const supabase = await createAdminClient();
+
+    // PEDIDO PAGO ou ASSINATURA CRIADA → ativar PRO
+    if (body.event === 'order.paid' || body.event === 'subscription.created') {
 
       let expiresAt = new Date();
-
-      // Mensal BR
-      if (productId === '208184469') expiresAt.setMonth(expiresAt.getMonth() + 1);
-      // Trimestral BR
-      if (productId === '208184474') expiresAt.setMonth(expiresAt.getMonth() + 3);
-      // Anual BR
-      if (productId === '208184481') expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-      // Default: 1 mês se produto não identificado
-      if (expiresAt.getTime() === new Date().getTime()) {
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-      }
-
-      const supabase = await createAdminClient();
+      // Mapear variant_id para período
+      if (variantId === '208184469') expiresAt.setMonth(expiresAt.getMonth() + 1);           // Mensal BR
+      else if (variantId === '208184474') expiresAt.setMonth(expiresAt.getMonth() + 3);      // Trimestral BR
+      else if (variantId === '208184481') expiresAt.setFullYear(expiresAt.getFullYear() + 1); // Anual BR
+      else expiresAt.setMonth(expiresAt.getMonth() + 1);                                     // fallback 1 mês
 
       const { error } = await supabase
         .from('profiles')
@@ -65,11 +44,21 @@ export async function POST(req: NextRequest) {
         .eq('email', email.toLowerCase());
 
       if (error) {
-        console.error('Supabase update error:', error);
+        console.error('Supabase error:', error);
         return Response.json({ error: 'DB error' }, { status: 500 });
       }
 
-      console.log(`PRO activated for ${email} until ${expiresAt}`);
+      console.log(`PRO ativado para ${email} até ${expiresAt}`);
+    }
+
+    // REEMBOLSO ou CANCELAMENTO → remover PRO
+    if (body.event === 'order.refunded' || body.event === 'subscription.cancelled') {
+      await supabase
+        .from('profiles')
+        .update({ is_pro: false, pro_expires_at: null })
+        .eq('email', email.toLowerCase());
+
+      console.log(`PRO removido para ${email}`);
     }
 
     return Response.json({ received: true }, { status: 200 });
