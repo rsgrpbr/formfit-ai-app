@@ -2,179 +2,173 @@
 
 import Link from 'next/link';
 import { useSession } from '@/hooks/useSession';
-import { redirectToCheckout } from '@/lib/perfectpay';
 
-// ── Tipos ────────────────────────────────────────────────────────────────────
-
-interface PlanCardProps {
-  title: string;
+interface Plan {
+  name: string;
   price: string;
   period: string;
+  badge: string | null;
+  highlight: boolean;
   features: string[];
-  planKey?: string;
-  userId?: string;
-  popular?: boolean;
-  isFree?: boolean;
-  badge?: string;
+  url: string;
 }
 
-// ── Dados dos planos ──────────────────────────────────────────────────────────
-
-const PLAN_LIST: PlanCardProps[] = [
+const PLANS: Plan[] = [
   {
-    title:   'Free',
-    price:   'R$ 0',
-    period:  'para sempre',
-    isFree:  true,
+    name: 'PRO Mensal',
+    price: 'R$19,90',
+    period: '/mês',
+    badge: null,
+    highlight: false,
     features: [
-      '5 análises por mês',
-      '4 exercícios',
-      'Feedback visual em tempo real',
-      'Histórico básico',
-    ],
-  },
-  {
-    title:   'Pro Mensal',
-    price:   'R$ 29,90',
-    period:  '/mês',
-    planKey: 'pro_mensal',
-    popular: true,
-    features: [
-      'Análises ilimitadas',
-      'Todos os exercícios',
-      'Feedback por voz (ElevenLabs)',
+      '30 exercícios em casa',
+      'Análise de forma com IA',
+      'Plano personalizado',
+      'Feedback por voz',
       'Histórico completo',
-      'Export CSV',
     ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184469:1',
   },
   {
-    title:   'Pro Anual',
-    price:   'R$ 199',
-    period:  '/ano',
-    planKey: 'pro_anual',
-    badge:   '44% OFF',
+    name: 'PRO Anual',
+    price: 'R$149',
+    period: '/ano',
+    badge: '38% OFF — MAIS POPULAR',
+    highlight: true,
     features: [
-      'Tudo do Pro Mensal',
+      'Tudo do PRO Mensal',
       '2 meses grátis',
-      'Suporte prioritário',
-      'Análise avançada',
+      'Desafio 21 dias incluso',
+      'E-book Detox incluso',
+      'Plano Alimentar IA incluso',
     ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184481:1',
   },
   {
-    title:   'Personal Mensal',
-    price:   'R$ 79,90',
-    period:  '/mês',
-    planKey: 'personal_mensal',
+    name: 'PRO Trimestral',
+    price: 'R$37,90',
+    period: '/trimestre',
+    badge: null,
+    highlight: false,
     features: [
-      'Tudo do Pro',
-      'Gerenciar até 30 alunos',
-      'Dashboard do professor',
-      'Relatórios por aluno',
-      'Suporte prioritário',
+      'Tudo do PRO Mensal',
+      '~R$12,63/mês',
+      'Sem compromisso anual',
     ],
-  },
-  {
-    title:   'Personal Anual',
-    price:   'R$ 599',
-    period:  '/ano',
-    planKey: 'personal_anual',
-    badge:   '37% OFF',
-    features: [
-      'Tudo do Personal Mensal',
-      '2 meses grátis',
-      'Acesso antecipado a novos exercícios',
-    ],
+    url: 'https://rsgroup.mycartpanda.com/checkout/208184474:1',
   },
 ];
 
-// ── Card ──────────────────────────────────────────────────────────────────────
-
-function PlanCard({ title, price, period, features, planKey, userId, popular = false, isFree = false, badge }: PlanCardProps) {
+function PlanCard({
+  plan,
+  onSubscribe,
+}: {
+  plan: Plan;
+  onSubscribe: (url: string) => void;
+}) {
   return (
-    <div className={`relative flex flex-col rounded-2xl p-6 h-full
-      ${popular ? 'bg-indigo-600 ring-2 ring-indigo-400 shadow-xl shadow-indigo-900/40' : 'bg-gray-900'}`}
+    <div
+      className="relative flex flex-col rounded-2xl px-6 py-6 h-full"
+      style={{
+        background: plan.highlight ? 'rgba(200,241,53,0.08)' : 'var(--surface)',
+        border: `1px solid ${plan.highlight ? 'var(--accent)' : 'var(--border)'}`,
+      }}
     >
-      {popular && (
-        <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 bg-yellow-400 text-gray-900 text-xs font-black rounded-full uppercase tracking-wide whitespace-nowrap">
-          Mais popular
-        </span>
-      )}
-      {badge && (
-        <span className="absolute -top-3.5 right-4 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-          {badge}
+      {plan.badge && (
+        <span
+          className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-wide whitespace-nowrap"
+          style={{ background: 'var(--accent)', color: 'var(--bg)' }}
+        >
+          {plan.badge}
         </span>
       )}
 
-      <h3 className="text-lg font-bold mb-1">{title}</h3>
+      <p
+        className="font-display text-xs tracking-widest mb-2"
+        style={{ color: 'var(--text-muted)' }}
+      >
+        {plan.name.toUpperCase()}
+      </p>
 
-      <div className="mb-6 mt-2">
-        <span className="text-4xl font-black">{price}</span>
-        <span className={`text-sm ml-1 ${popular ? 'text-indigo-200' : 'text-gray-400'}`}>{period}</span>
+      <div className="mb-5">
+        <span className="font-display text-4xl text-white">{plan.price}</span>
+        <span className="text-sm ml-1" style={{ color: 'var(--text-muted)' }}>
+          {plan.period}
+        </span>
       </div>
 
-      <ul className="flex flex-col gap-2 mb-8 flex-1">
-        {features.map(f => (
+      <ul className="flex flex-col gap-2 mb-6 flex-1">
+        {plan.features.map(f => (
           <li key={f} className="flex items-start gap-2 text-sm">
-            <span className={`mt-0.5 font-bold ${popular ? 'text-yellow-300' : 'text-green-400'}`}>✓</span>
-            <span className={popular ? 'text-indigo-100' : 'text-gray-300'}>{f}</span>
+            <span style={{ color: 'var(--accent)' }}>✓</span>
+            <span style={{ color: 'var(--text-muted)' }}>{f}</span>
           </li>
         ))}
       </ul>
 
-      {isFree ? (
-        <Link
-          href="/analyze"
-          className={`block text-center py-3 min-h-[48px] rounded-xl font-semibold transition-transform duration-150 active:scale-95
-            ${popular ? 'bg-white text-indigo-700 hover:bg-gray-100' : 'bg-gray-800 hover:bg-gray-700 text-white'}`}
-        >
-          Começar grátis
-        </Link>
-      ) : (
-        <button
-          onClick={() => planKey && userId && redirectToCheckout(planKey, userId)}
-          disabled={!userId || !planKey}
-          className={`py-3 min-h-[48px] rounded-xl font-semibold transition-transform duration-150 active:scale-95
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${popular ? 'bg-white text-indigo-700 hover:bg-gray-100' : 'bg-indigo-600 hover:bg-indigo-500 text-white'}`}
-        >
-          {userId ? 'Assinar agora' : 'Faça login para assinar'}
-        </button>
-      )}
+      <button
+        onClick={() => onSubscribe(plan.url)}
+        className="w-full h-12 rounded-xl font-display tracking-widest text-sm transition-all active:scale-95"
+        style={plan.highlight
+          ? { background: 'var(--accent)', color: 'var(--bg)' }
+          : { background: 'transparent', border: '1px solid var(--accent)', color: 'var(--accent)' }
+        }
+      >
+        {plan.highlight ? 'ASSINAR ANUAL — MELHOR OFERTA' : 'Assinar agora'}
+      </button>
     </div>
   );
 }
 
-// ── Página ────────────────────────────────────────────────────────────────────
-
 export default function PricingPage() {
   const { user } = useSession();
-  const uid      = user?.id;
+
+  const handleSubscribe = (url: string) => {
+    const emailParam = user?.email
+      ? `?email=${encodeURIComponent(user.email)}`
+      : '';
+    window.open(`${url}${emailParam}`, '_blank');
+  };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-        <Link href="/"><img src="/logo.png" alt="meMove" className="h-8" /></Link>
-        <Link href="/analyze" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
+    <div className="min-h-screen text-white" style={{ background: 'var(--bg)' }}>
+      <header
+        className="px-5 border-b flex items-center justify-between"
+        style={{ height: '56px', borderColor: 'var(--border)' }}
+      >
+        <Link href="/">
+          <img src="/logo.png" alt="meMove" className="h-8 w-auto object-contain" />
+        </Link>
+        <Link
+          href="/analyze"
+          className="text-sm transition-colors"
+          style={{ color: 'var(--text-muted)' }}
+        >
           ← Voltar ao treino
         </Link>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-black mb-3">Escolha seu plano</h1>
-          <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            Comece grátis e faça upgrade quando precisar de mais análises e recursos.
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <div className="text-center mb-10">
+          <h1
+            className="font-display text-5xl tracking-widest mb-2"
+            style={{ color: 'var(--accent)' }}
+          >
+            meMove PRO
+          </h1>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            Acesso ilimitado a todos os recursos. Cancele quando quiser.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 items-start">
-          {PLAN_LIST.map(plan => (
-            <PlanCard key={plan.title} {...plan} userId={uid} />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start">
+          {PLANS.map(plan => (
+            <PlanCard key={plan.name} plan={plan} onSubscribe={handleSubscribe} />
           ))}
         </div>
 
-        <p className="text-center text-gray-500 text-sm mt-10">
-          Pagamento seguro via PerfectPay · Cancele quando quiser · Sem multa
+        <p className="text-center text-sm mt-8" style={{ color: 'var(--text-muted)' }}>
+          Pagamento seguro via CartPanda · Cancele quando quiser · Sem multa
         </p>
       </div>
     </div>
