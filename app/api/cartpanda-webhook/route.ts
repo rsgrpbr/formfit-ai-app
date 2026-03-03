@@ -4,14 +4,32 @@ import { NextRequest } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('CartPanda webhook received:', JSON.stringify(body));
+
+    // Log completo para debug
+    console.log('WEBHOOK FULL PAYLOAD:', JSON.stringify(body, null, 2));
 
     // CartPanda envia status do pedido
     const status = body.status || body.order_status || body.financial_status;
-    const email = body.customer?.email || body.email || body.customer_email;
+
+    // Tentar extrair email de todos os campos possíveis
+    const email =
+      body.customer?.email ||
+      body.email ||
+      body.customer_email ||
+      body.billing_address?.email ||
+      body.contact_email ||
+      body.buyer?.email ||
+      body.order?.customer?.email ||
+      body.order?.email ||
+      body.data?.customer?.email ||
+      body.data?.email;
+
+    console.log('Email encontrado:', email);
+    console.log('Status:', status);
+    console.log('Todos os campos:', Object.keys(body));
 
     if (!email) {
-      console.log('No email found in webhook payload');
+      console.log('PAYLOAD COMPLETO para debug:', JSON.stringify(body));
       return Response.json({ error: 'No email' }, { status: 400 });
     }
 
