@@ -568,7 +568,7 @@ function AnalyzePageInner() {
         {/* Header */}
         <header className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="meMove" className="h-8 w-auto object-contain" />
+            <img src="/icons/icon-192.png" alt="meMove" className="h-8 w-auto" />
             {plan !== 'free' && (
               <span
                 className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-widest"

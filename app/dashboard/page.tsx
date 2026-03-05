@@ -171,7 +171,7 @@ export default function DashboardPage() {
 
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-        <Link href="/"><img src="/logo.png" alt="meMove" className="h-8" /></Link>
+        <Link href="/"><img src="/icons/icon-192.png" alt="meMove" className="h-8 w-auto" /></Link>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/analyze" className="min-h-[48px] flex items-center px-2 text-gray-400 hover:text-white transition-colors">
             {t('train')}
