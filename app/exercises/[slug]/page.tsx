@@ -18,6 +18,7 @@ import {
 } from '@/lib/supabase/queries';
 import type { Exercise, Session } from '@/lib/supabase/queries';
 import { Heart, Camera } from 'lucide-react';
+import { EXERCISES_DATA, type ExerciseSlug } from '@/lib/exercises-data';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
 
@@ -33,14 +34,7 @@ const DIFF_STYLE: Record<string, string> = {
 
 const ACCENT = '#C8F135';
 
-const EXERCISE_VIDEOS: Record<string, string> = {
-  superman:     'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/Superman_anyx24.mp4',
-  glute_bridge: 'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/Eleva%C3%A7%C3%A3o_de_quadril_tvjpdx.mp4',
-  lunge:        'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/Afundo_szybf4.mp4',
-  plank:        'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/prancha_h2uoth.mp4',
-  side_plank:   'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/Prancha_lateral_vsps2z.mp4',
-  squat:        'https://res.cloudinary.com/dp7xulqkf/video/upload/v1772419065/Agachamento_r2b9pi.mp4',
-};
+// Video URLs centralizadas em exercises-data.ts
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -95,7 +89,10 @@ export default function ExerciseDetailPage() {
 
   const instructions = useMemo(() => {
     const raw = locale === 'en' ? exercise?.instructions_en : exercise?.instructions_pt;
-    return raw ? raw.split('\n').filter(Boolean) : [];
+    if (raw) return raw.split('\n').filter(Boolean);
+    // Fallback to static data when DB field is null
+    const staticData = exercise ? EXERCISES_DATA[exercise.slug as ExerciseSlug] : null;
+    return staticData?.instructions_pt ?? [];
   }, [exercise, locale]);
 
   const tips = useMemo(() => {
@@ -164,10 +161,10 @@ export default function ExerciseDetailPage() {
       </div>
 
       {/* ── Video demo ───────────────────────────────────────────────────── */}
-      {EXERCISE_VIDEOS[exercise.slug] && (
+      {EXERCISES_DATA[exercise.slug as ExerciseSlug]?.video_url && (
         <div className="mx-4 mb-4 rounded-2xl overflow-hidden bg-black">
           <video
-            src={EXERCISE_VIDEOS[exercise.slug]}
+            src={EXERCISES_DATA[exercise.slug as ExerciseSlug]!.video_url!}
             autoPlay
             loop
             muted

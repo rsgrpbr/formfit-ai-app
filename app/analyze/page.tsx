@@ -12,6 +12,7 @@ import PoseOverlay from '@/components/camera/PoseOverlay';
 import SessionResultModal from '@/components/gamification/SessionResultModal';
 import MuscleAvatar from '@/components/MuscleAvatar';
 import type { ExerciseSlug as MuscleAvatarSlug } from '@/components/MuscleAvatar';
+import { type ExerciseSlug, EXERCISE_SLUGS, TIME_BASED_SLUGS } from '@/lib/exercises-data';
 import { usePoseDetection } from '@/hooks/usePoseDetection';
 import { useVoiceCoach } from '@/hooks/useVoiceCoach';
 import { useSession } from '@/hooks/useSession';
@@ -42,17 +43,6 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type ExerciseSlug =
-  | 'squat' | 'pushup' | 'plank' | 'lunge'
-  | 'glute_bridge' | 'side_plank' | 'superman'
-  | 'mountain_climber' | 'burpee'
-  | 'jump_squat' | 'sumo_squat' | 'donkey_kick' | 'fire_hydrant'
-  | 'hip_thrust' | 'wall_sit'
-  | 'crunch' | 'bicycle_crunch' | 'leg_raise' | 'russian_twist'
-  | 'dead_bug' | 'bird_dog' | 'flutter_kick'
-  | 'pike_pushup' | 'diamond_pushup' | 'wide_pushup' | 'tricep_dip'
-  | 'high_knees' | 'bear_crawl' | 'inchworm';
-
 type ExercisePhase = 'up' | 'down' | 'transition';
 
 interface SessionStats {
@@ -64,18 +54,8 @@ interface SessionStats {
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const EXERCISES: ExerciseSlug[] = [
-  'squat', 'pushup', 'plank', 'lunge', 'glute_bridge',
-  'side_plank', 'superman', 'mountain_climber', 'burpee',
-  'jump_squat', 'sumo_squat', 'donkey_kick', 'fire_hydrant',
-  'hip_thrust', 'wall_sit',
-  'crunch', 'bicycle_crunch', 'leg_raise', 'russian_twist',
-  'dead_bug', 'bird_dog', 'flutter_kick',
-  'pike_pushup', 'diamond_pushup', 'wide_pushup', 'tricep_dip',
-  'high_knees', 'bear_crawl', 'inchworm',
-];
-
-const TIME_BASED: ExerciseSlug[] = ['plank', 'side_plank', 'superman', 'wall_sit', 'dead_bug', 'bird_dog'];
+const EXERCISES = EXERCISE_SLUGS;
+const TIME_BASED = TIME_BASED_SLUGS;
 
 const VIDEO_W = 640;
 const VIDEO_H = 480;

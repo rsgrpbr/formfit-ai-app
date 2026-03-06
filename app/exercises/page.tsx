@@ -11,18 +11,28 @@ import {
   getUserFavorites,
   toggleFavorite,
 } from '@/lib/supabase/queries';
-import type { Exercise } from '@/lib/supabase/queries';
+import {
+  EXERCISE_SLUGS,
+  EXERCISES_DATA,
+  type ExerciseSlug,
+  type ExerciseData,
+} from '@/lib/exercises-data';
 import { Heart, Dumbbell, Search, ChevronLeft } from 'lucide-react';
 
 // ── Static maps ───────────────────────────────────────────────────────────────
 
 const DIFF_STYLE: Record<string, string> = {
-  beginner:     'bg-green-900/50  text-green-400',
-  intermediate: 'bg-yellow-900/50 text-yellow-400',
-  advanced:     'bg-red-900/50    text-red-400',
+  beginner:      'bg-green-900/50  text-green-400',
+  iniciante:     'bg-green-900/50  text-green-400',
+  intermediate:  'bg-yellow-900/50 text-yellow-400',
+  intermediario: 'bg-yellow-900/50 text-yellow-400',
+  advanced:      'bg-red-900/50    text-red-400',
 };
 
 type Tab = 'muscle' | 'objective' | 'favorites';
+
+// Lista ordenada de todos os exercícios (fonte única)
+const ALL_EXERCISES: ExerciseData[] = EXERCISE_SLUGS.map(s => EXERCISES_DATA[s]);
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -34,38 +44,48 @@ export default function ExercisesPage() {
 
   const MUSCLE_GROUPS = [
     { key: 'pernas',   label: t('group_legs'),
-      keywords: ['quadriceps', 'hamstrings', 'calves', 'Quadríceps', 'Isquiotibiais', 'Panturrilhas'] },
+      keywords: ['Quadríceps', 'Isquiotibiais', 'Panturrilhas', 'Adutores', 'quadriceps', 'hamstrings', 'calves'] },
     { key: 'peito',    label: t('group_chest'),
-      keywords: ['chest', 'triceps', 'pectoral', 'Peitoral', 'Tríceps'] },
+      keywords: ['Peitoral', 'Tríceps', 'chest', 'triceps', 'pectoral'] },
     { key: 'costas',   label: t('group_back'),
-      keywords: ['lower_back', 'back', 'Lombar', 'Rombóides', 'Dorsal'] },
+      keywords: ['Lombar', 'Rombóides', 'Dorsal', 'lower_back', 'back'] },
     { key: 'core',     label: t('group_core'),
-      keywords: ['core', 'obliques', 'Core', 'Abdômen', 'Oblíquos', 'full_body'] },
+      keywords: ['Core', 'Abdômen', 'Oblíquos', 'core', 'obliques'] },
     { key: 'ombros',   label: t('group_shoulders'),
-      keywords: ['shoulders', 'Deltóide', 'Ombros'] },
+      keywords: ['Ombros', 'Deltóide', 'shoulders'] },
     { key: 'gluteos',  label: t('group_glutes'),
-      keywords: ['glutes', 'Glúteos'] },
+      keywords: ['Glúteos', 'glutes'] },
   ];
 
   const OBJ_GROUPS = [
-    { key: 'forca',  label: t('obj_strength'), categories: ['lower', 'upper'] },
-    { key: 'cardio', label: t('obj_cardio'),   categories: ['cardio'] },
-    { key: 'core',   label: t('obj_core'),     categories: ['core'] },
+    { key: 'forca',  label: t('obj_strength'),
+      categories: ['pernas', 'peito', 'gluteos', 'costas', 'ombros', 'lower', 'upper'] },
+    { key: 'cardio', label: t('obj_cardio'),
+      categories: ['full_body', 'cardio'] },
+    { key: 'core',   label: t('obj_core'),
+      categories: ['core'] },
   ];
 
   const DIFF_LABEL: Record<string, string> = {
-    beginner: tDiff('beginner'), intermediate: tDiff('intermediate'), advanced: tDiff('advanced'),
+    beginner:      tDiff('beginner'),
+    iniciante:     tDiff('beginner'),
+    intermediate:  tDiff('intermediate'),
+    intermediario: tDiff('intermediate'),
+    advanced:      tDiff('advanced'),
   };
 
-  const [exercises,     setExercises]     = useState<Exercise[]>([]);
-  const [favorites,     setFavorites]     = useState<Set<string>>(new Set());
-  const [loading,       setLoading]       = useState(true);
+  // slug → DB exercise ID (needed for favorites)
+  const [slugToId, setSlugToId] = useState<Map<string, string>>(new Map());
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [tab,           setTab]           = useState<Tab>('muscle');
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [search,        setSearch]        = useState('');
 
+  // Fetch DB exercise IDs and user favorites
   useEffect(() => {
-    getExercises().then(exs => { setExercises(exs); setLoading(false); });
+    getExercises().then(exs => {
+      setSlugToId(new Map(exs.map(ex => [ex.slug, ex.id])));
+    });
   }, []);
 
   useEffect(() => {
@@ -73,34 +93,27 @@ export default function ExercisesPage() {
     getUserFavorites(user.id).then(ids => setFavorites(new Set(ids)));
   }, [user]);
 
-  const getName = (ex: Exercise) => {
+  const getName = (ex: ExerciseData) => {
     if (locale === 'en') return ex.name_en;
-    if (locale === 'es') return ex.name_es ?? ex.name_pt;
-    if (locale === 'fr') return ex.name_fr ?? ex.name_pt;
     return ex.name_pt;
   };
 
   const filteredAll = useMemo(() => {
-    if (!search) return exercises;
+    if (!search) return ALL_EXERCISES;
     const q = search.toLowerCase();
-    return exercises.filter(ex =>
+    return ALL_EXERCISES.filter(ex =>
       ex.name_pt.toLowerCase().includes(q) || ex.name_en.toLowerCase().includes(q)
     );
-  }, [exercises, search]);
+  }, [search]);
 
   const exercisesForMuscle = (groupKey: string) => {
     const group = MUSCLE_GROUPS.find(g => g.key === groupKey);
     if (!group) return filteredAll;
-    return filteredAll.filter(ex => {
-      const allMuscles = [
-        ...(ex.muscles ?? []),
-        ...(ex.muscles_primary ?? []),
-        ...(ex.muscles_secondary ?? []),
-      ];
-      return group.keywords.some(kw =>
-        allMuscles.some(m => m.toLowerCase().includes(kw.toLowerCase()))
-      );
-    });
+    return filteredAll.filter(ex =>
+      group.keywords.some(kw =>
+        ex.muscles_primary.some(m => m.toLowerCase().includes(kw.toLowerCase()))
+      )
+    );
   };
 
   const exercisesForObjective = (objKey: string) => {
@@ -109,19 +122,26 @@ export default function ExercisesPage() {
     return filteredAll.filter(ex => group.categories.includes(ex.category));
   };
 
-  const favoriteList = filteredAll.filter(ex => favorites.has(ex.id));
+  const isFav = (ex: ExerciseData) => {
+    const id = slugToId.get(ex.slug);
+    return id ? favorites.has(id) : false;
+  };
 
-  const handleToggleFav = async (e: React.MouseEvent, ex: Exercise) => {
+  const favoriteList = filteredAll.filter(isFav);
+
+  const handleToggleFav = async (e: React.MouseEvent, ex: ExerciseData) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) return;
-    const isFav = favorites.has(ex.id);
+    const exerciseId = slugToId.get(ex.slug);
+    if (!exerciseId) return;
+    const fav = isFav(ex);
     setFavorites(prev => {
       const next = new Set(prev);
-      if (isFav) next.delete(ex.id); else next.add(ex.id);
+      if (fav) next.delete(exerciseId); else next.add(exerciseId);
       return next;
     });
-    await toggleFavorite(user.id, ex.id, isFav);
+    await toggleFavorite(user.id, exerciseId, fav);
   };
 
   const handleTabChange = (newTab: Tab) => {
@@ -129,15 +149,15 @@ export default function ExercisesPage() {
     setSelectedGroup(null);
   };
 
-  // ── List view (shared for muscle + objective + favorites) ─────────────────
+  // ── List view ─────────────────────────────────────────────────────────────
 
-  const ExerciseList = ({ exs }: { exs: Exercise[] }) => (
+  const ExerciseList = ({ exs }: { exs: ExerciseData[] }) => (
     exs.length === 0 ? (
       <p className="text-center py-12 text-sm" style={{ color: 'var(--text-muted)' }}>{t('no_results')}</p>
     ) : (
       <div className="flex flex-col gap-3">
         {exs.map(ex => (
-          <Link key={ex.id} href={`/exercises/${ex.slug}`} className="block">
+          <Link key={ex.slug} href={`/exercises/${ex.slug}`} className="block">
             <div
               className="rounded-2xl p-5 flex items-center gap-4 transition-all active:scale-[0.98]"
               style={{ background: 'var(--surface)' }}
@@ -157,7 +177,7 @@ export default function ExercisesPage() {
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${DIFF_STYLE[ex.difficulty] ?? 'bg-gray-700 text-gray-400'}`}>
                     {DIFF_LABEL[ex.difficulty] ?? ex.difficulty}
                   </span>
-                  {ex.muscles_primary?.slice(0, 2).map(m => (
+                  {ex.muscles_primary.slice(0, 2).map(m => (
                     <span
                       key={m}
                       className="text-[10px] px-2 py-0.5 rounded-full"
@@ -173,10 +193,10 @@ export default function ExercisesPage() {
               <button
                 onClick={e => handleToggleFav(e, ex)}
                 className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full transition-colors"
-                style={{ color: favorites.has(ex.id) ? '#f43f5e' : 'var(--text-muted)' }}
-                aria-label={favorites.has(ex.id) ? 'Remover favorito' : 'Adicionar favorito'}
+                style={{ color: isFav(ex) ? '#f43f5e' : 'var(--text-muted)' }}
+                aria-label={isFav(ex) ? 'Remover favorito' : 'Adicionar favorito'}
               >
-                <Heart size={18} fill={favorites.has(ex.id) ? '#f43f5e' : 'none'} />
+                <Heart size={18} fill={isFav(ex) ? '#f43f5e' : 'none'} />
               </button>
             </div>
           </Link>
@@ -240,13 +260,7 @@ export default function ExercisesPage() {
 
       <main className="flex-1 px-4 py-4">
         <div className="max-w-2xl mx-auto">
-          {loading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-24 rounded-2xl animate-pulse" style={{ background: 'var(--surface)' }} />
-              ))}
-            </div>
-          ) : tab === 'muscle' ? (
+          {tab === 'muscle' ? (
             selectedGroup ? (
               <>
                 <BackButton onClick={() => setSelectedGroup(null)} label={t('back')} />
