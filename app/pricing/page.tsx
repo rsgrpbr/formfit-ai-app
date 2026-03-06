@@ -137,7 +137,7 @@ export default function PricingPage() {
         style={{ height: '56px', borderColor: 'var(--border)' }}
       >
         <Link href="/">
-          <img src="/icons/icon-192.png" alt="meMove" className="h-8 w-auto" />
+          <img src="/icons/icon-192.png?v=2" alt="meMove" className="h-8 w-auto" />
         </Link>
         <Link
           href="/analyze"

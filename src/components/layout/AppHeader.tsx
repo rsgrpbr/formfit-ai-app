@@ -13,7 +13,7 @@ export default function AppHeader() {
         borderColor: 'var(--border)',
       }}
     >
-      <img src="/icons/icon-192.png" alt="meMove" className="h-8 w-auto" />
+      <img src="/icons/icon-192.png?v=2" alt="meMove" className="h-8 w-auto" />
 
       <Link
         href="/profile"

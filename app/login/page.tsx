@@ -76,7 +76,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       {/* Header */}
       <header className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-        <Link href="/"><img src="/icons/icon-192.png" alt="meMove" className="h-8 w-auto" /></Link>
+        <Link href="/"><img src="/icons/icon-192.png?v=2" alt="meMove" className="h-8 w-auto" /></Link>
         <Link href="/analyze" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
           {t('train_no_account')}
         </Link>
